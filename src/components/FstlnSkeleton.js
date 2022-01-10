@@ -1,12 +1,12 @@
 /*
  * @Author: lijunwei
  * @Date: 2021-11-23 18:51:19
- * @LastEditTime: 2021-12-24 11:27:29
+ * @LastEditTime: 2022-01-10 17:34:08
  * @LastEditors: lijunwei
  * @Description: 
  */
 
-import { Card, Layout, SkeletonBodyText, SkeletonDisplayText, SkeletonPage, TextContainer } from "@shopify/polaris";
+import { Card, Layout, SkeletonBodyText, SkeletonDisplayText, TextContainer } from "@shopify/polaris";
 import { FstlnLoading } from "./FstlnLoading";
 
 function FstlnSkeleton(props) {

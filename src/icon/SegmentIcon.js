@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2021-12-31 18:31:58
- * @LastEditTime: 2021-12-31 18:55:44
+ * @LastEditTime: 2022-01-10 17:31:23
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -9,7 +9,7 @@
 function SegmentIcon(props) {
 
   const segment = (
-    <svg width="20" height="20" viewBox="0 0 20 20" class="Polaris-Icon__Svg" focusable="false" aria-hidden="true">
+    <svg width="20" height="20" viewBox="0 0 20 20" className="Polaris-Icon__Svg" focusable="false" aria-hidden="true">
       <path d="M9.86763 7.28158C9.86763 9.09395 8.35989 10.5632 6.5 10.5632C4.64011 10.5632 3.13237 9.09395 3.13237 7.28158C3.13237 5.46921 4.64011 4 6.5 4C8.35989 4 9.86763 5.46921 9.86763 7.28158Z" />
       <path d="M0.534408 14.4759C1.63998 13.6286 3.84022 12.2572 6.5 12.2572C9.15978 12.2572 11.36 13.6286 12.4656 14.4759C12.9591 14.8541 13.113 15.4934 12.9181 16.075L12.6522 16.8685C12.4261 17.5434 11.7802 18 11.0516 18H1.94841C1.21985 18 0.573921 17.5434 0.347772 16.8685L0.081858 16.075C-0.113018 15.4934 0.040922 14.8541 0.534408 14.4759Z" />
       <path d="M0.534408 14.4759C1.63998 13.6286 3.84022 12.2572 6.5 12.2572C9.15978 12.2572 11.36 13.6286 12.4656 14.4759C12.9591 14.8541 13.113 15.4934 12.9181 16.075L12.6522 16.8685C12.4261 17.5434 11.7802 18 11.0516 18H1.94841C1.21985 18 0.573921 17.5434 0.347772 16.8685L0.081858 16.075C-0.113018 15.4934 0.040922 14.8541 0.534408 14.4759Z" />
@@ -19,7 +19,7 @@ function SegmentIcon(props) {
   // console.log(segment);
   return (
     <span className="Polaris-Icon">
-    <span class="Polaris-VisuallyHidden"></span>
+    <span className="Polaris-VisuallyHidden"></span>
       {segment}
     </span>
   );

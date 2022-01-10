@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2021-11-15 17:24:19
- * @LastEditTime: 2022-01-04 14:59:08
+ * @LastEditTime: 2022-01-10 17:28:28
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -22,7 +22,7 @@ function App() {
       width: 120,
       topBarSource: logo,
       url: '/users',
-      accessibilityLabel: 'sCRM',
+      accessibilityLabel: 'PMS',
       contextualSaveBarSource: logo,
     },
   };

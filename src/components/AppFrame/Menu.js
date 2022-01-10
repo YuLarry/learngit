@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2021-11-16 14:53:36
- * @LastEditTime: 2022-01-04 14:47:12
+ * @LastEditTime: 2022-01-10 17:33:16
  * @LastEditors: lijunwei
  * @Description: AppFrame menu
  */
@@ -37,13 +37,7 @@ function Menu(props) {
             // exactMatch: true,
             // badge: '15',
           },
-          {
-            url: '/segment',
-            label: 'Segment',
-            icon: SegmentIcon,
-            // exactMatch: true,
-
-          },
+         
           
         ]}
       />

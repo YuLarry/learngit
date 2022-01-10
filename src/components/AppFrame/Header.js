@@ -45,7 +45,7 @@ function Header(props) {
       ]}
       name={ userName }
       // detail={ userName }
-      initials={ userName[0].toUpperCase() }
+      initials={ userName && userName[0].toUpperCase() || "A" }
       open={isUserMenuOpen}
       onToggle={toggleIsUserMenuOpen}
     />

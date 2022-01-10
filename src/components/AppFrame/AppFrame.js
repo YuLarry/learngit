@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2021-11-15 17:53:07
- * @LastEditTime: 2022-01-10 17:16:42
+ * @LastEditTime: 2022-01-10 17:27:42
  * @LastEditors: lijunwei
  * @Description: Fame component
  */
@@ -14,7 +14,7 @@ import { Menu } from "./Menu";
 
 import { NotFound } from "../../views/404/NotFound";
 
-import { User } from "../../views/User/User";
+import { User } from "../../views/User";
 // import { FstlnLoading } from "../FstlnLoading";
 import { RequireAuth } from "../RequireAuth";
 import { FstlnSkeleton } from "../FstlnSkeleton";
