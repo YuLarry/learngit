@@ -1,24 +1,43 @@
-import logo from './logo.svg';
-import './App.css';
+/*
+ * @Author: lijunwei
+ * @Date: 2021-11-15 17:24:19
+ * @LastEditTime: 2022-01-04 14:59:08
+ * @LastEditors: lijunwei
+ * @Description: 
+ */
+
+import { AppProvider, Frame } from "@shopify/polaris";
+import logo from "./asset/images/logo.svg"
+import { FstlnLink } from "./utils/FstlnLink";
+import { EntryRoute } from "./EntryRoute";
+import { AppContext } from "./components/AppContext";
+import en from '@shopify/polaris/locales/en.json';
+
+
 
 function App() {
+
+  const theme = {
+    logo: {
+      width: 120,
+      topBarSource: logo,
+      url: '/users',
+      accessibilityLabel: 'sCRM',
+      contextualSaveBarSource: logo,
+    },
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <AppProvider
+      i18n={en}
+      theme={theme}
+      linkComponent={FstlnLink}
+    >
+        <AppContext>
+          <EntryRoute />
+        </AppContext>
+    </AppProvider>
+
   );
 }
 

@@ -1,0 +1,16 @@
+
+
+.login-page{
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  background: linear-gradient(150deg,#008060, #008060 30%,#fbf7ed 30%, #fbf7ed 100%);
+
+  &>div{
+    min-width: 300px;
+  }
+  
+}
