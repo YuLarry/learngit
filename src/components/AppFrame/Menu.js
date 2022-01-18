@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2021-11-16 14:53:36
- * @LastEditTime: 2022-01-10 17:33:16
+ * @LastEditTime: 2022-01-18 11:24:15
  * @LastEditors: lijunwei
  * @Description: AppFrame menu
  */
@@ -31,8 +31,8 @@ function Menu(props) {
           // },
           
           {
-            url: '/users',
-            label: 'Users',
+            url: '/SourcingManage',
+            label: '采购实施',
             icon: CustomersMajor,
             // exactMatch: true,
             // badge: '15',
