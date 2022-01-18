@@ -8,7 +8,6 @@ html,body{
 }
 #root{
   height: 100%;
-  // border:1px solid;
   &>div{
     height: 100%;
   }
@@ -59,5 +58,5 @@ html,body{
   justify-content: center;
   align-items: center;
   padding: 1.5em;
-  border-top: .1em solid rgb(225,227,229);
+  // border-top: .1em solid rgb(225,227,229);
 }

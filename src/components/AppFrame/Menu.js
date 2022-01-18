@@ -1,15 +1,14 @@
 /*
  * @Author: lijunwei
  * @Date: 2021-11-16 14:53:36
- * @LastEditTime: 2022-01-18 11:24:15
+ * @LastEditTime: 2022-01-18 16:09:42
  * @LastEditors: lijunwei
  * @Description: AppFrame menu
  */
 
 import { Navigation } from "@shopify/polaris";
-import { CustomersMajor } from "@shopify/polaris-icons";
+import { CartDownMajor, ShipmentMajor,InventoryMajor } from "@shopify/polaris-icons";
 import { useLocation } from "react-router";
-import { SegmentIcon } from "../../icon/SegmentIcon";
 
 
 function Menu(props) {
@@ -31,9 +30,23 @@ function Menu(props) {
           // },
           
           {
-            url: '/SourcingManage',
+            url: '/sourcing',
             label: '采购实施',
-            icon: CustomersMajor,
+            icon: CartDownMajor,
+            // exactMatch: true,
+            // badge: '15',
+          },
+          {
+            url: '/delivery',
+            label: '采购发货',
+            icon: ShipmentMajor,
+            // exactMatch: true,
+            // badge: '15',
+          },
+          {
+            url: '/repository',
+            label: '采购入库',
+            icon: InventoryMajor,
             // exactMatch: true,
             // badge: '15',
           },

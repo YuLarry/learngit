@@ -1,17 +1,18 @@
 /*
  * @Author: lijunwei
  * @Date: 2021-11-15 17:24:19
- * @LastEditTime: 2022-01-10 17:28:28
+ * @LastEditTime: 2022-01-18 16:00:50
  * @LastEditors: lijunwei
  * @Description: 
  */
 
-import { AppProvider, Frame } from "@shopify/polaris";
+import { AppProvider } from "@shopify/polaris";
 import logo from "./asset/images/logo.svg"
 import { FstlnLink } from "./utils/FstlnLink";
 import { EntryRoute } from "./EntryRoute";
 import { AppContext } from "./components/AppContext";
-import en from '@shopify/polaris/locales/en.json';
+// import en from '@shopify/polaris/locales/en.json';
+import zhCN from '@shopify/polaris/locales/zh-CN.json';
 
 
 
@@ -29,7 +30,7 @@ function App() {
 
   return (
     <AppProvider
-      i18n={en}
+      i18n={zhCN}
       theme={theme}
       linkComponent={FstlnLink}
     >
