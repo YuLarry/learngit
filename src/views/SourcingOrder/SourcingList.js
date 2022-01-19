@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-01-18 16:13:13
+ * @LastEditTime: 2022-01-19 17:08:32
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -198,7 +198,7 @@ function SourcingList(props) {
     },
     {
       content: '申请付款',
-      onAction: () => console.log('Todo: implement bulk add tags'),
+      onAction: () => console.log(navigation("payRequest")),
     },
     {
       content: "取消采购单",
@@ -234,7 +234,7 @@ function SourcingList(props) {
     ({ id, po_no, subject_code, provider_id, warehouse_code, audit, payment_status, delivery_status, good_search }, index) => (
       <IndexTable.Row
         id={id}
-        key={id}
+        key={index}
         selected={selectedResources.includes(id)}
         position={index}
       >

@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-19 14:30:33
- * @LastEditTime: 2022-01-19 16:40:38
+ * @LastEditTime: 2022-01-19 16:43:13
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -35,8 +35,6 @@ function FstlnSelectTree(props) {
   );
   const rowChangeHandler = useCallback(
     (val, item) => {
-      console.log(val);
-      console.log(item);
       const _tempSelected = new Map(selectedItems);
       if (val) {
         _tempSelected.set(item.sku, item);

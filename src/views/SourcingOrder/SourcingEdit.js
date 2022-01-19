@@ -1,17 +1,20 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-01-19 15:51:58
+ * @LastEditTime: 2022-01-19 17:26:01
  * @LastEditors: lijunwei
  * @Description: 
  */
 
-import { Button, Card, Checkbox, Form, FormLayout, Icon, IndexTable, Layout, Modal, Page, Scrollable, Select, TextField, TextStyle, useIndexResourceState } from "@shopify/polaris";
+import { Button, Card, Form, FormLayout, Icon, IndexTable, Layout, Modal, Page, Select, TextField, TextStyle, useIndexResourceState } from "@shopify/polaris";
 import {
   SearchMinor
 } from '@shopify/polaris-icons';
 import { useCallback, useMemo, useState } from "react";
 import { FstlnSelectTree } from "../../components/FstlnSelectTree/FstlnSelectTree";
+import { SourcingCardSection } from "../../components/SecondaryCard/SourcingCardSection";
+import { SourcingProviCard } from "../../components/SecondaryCard/SourcingProviCard";
+import { SourcingRepoCard } from "../../components/SecondaryCard/SourcingRepoCard";
 import "./sourcingOrder.scss";
 
 
@@ -20,7 +23,7 @@ function SourcingEdit(props) {
 
 
   // = modal =
-  const [active, setActive] = useState(true);
+  const [active, setActive] = useState(false);
 
   const handleChange = useCallback(() => setActive(!active), [active]);
 
@@ -59,20 +62,6 @@ function SourcingEdit(props) {
       content: '移除',
       onAction: () => console.log('Todo: implement bulk edit'),
     },
-  ];
-  const bulkActions = [
-    // {
-    //   content: 'Add tags',
-    //   onAction: () => console.log('Todo: implement bulk add tags'),
-    // },
-    // {
-    //   content: 'Remove tags',
-    //   onAction: () => console.log('Todo: implement bulk remove tags'),
-    // },
-    // {
-    //   content: 'Delete customers',
-    //   onAction: () => console.log('Todo: implement bulk delete'),
-    // },
   ];
 
   const goodsFormChangeHandler = useCallback(
@@ -252,7 +241,6 @@ function SourcingEdit(props) {
                 allResourcesSelected ? 'All' : selectedResources.length
               }
               onSelectionChange={handleSelectionChange}
-              bulkActions={bulkActions}
               promotedBulkActions={promotedBulkActions}
               headings={[
                 { title: 'Name' },
@@ -271,92 +259,18 @@ function SourcingEdit(props) {
         </Layout.Section>
         <Layout.Section secondary>
           <Card title="采购信息">
-            <Card.Section title="金额">
-              <TextStyle variation="subdued">
-                text 文字
-              </TextStyle>
 
-            </Card.Section>
-            <Card.Section title="币制">
-              <TextStyle variation="subdued">
-                text 文字
-              </TextStyle>
+            <SourcingCardSection title="金额" text="text 文字" />
+            <SourcingCardSection title="币制" text="text 文字" />
+            <SourcingCardSection title="采购数量" text="text 文字" />
 
-            </Card.Section>
-            <Card.Section title="采购数量">
-              <TextStyle variation="subdued">
-                text 文字
-              </TextStyle>
 
-            </Card.Section>
           </Card>
-          <Card title="供应商">
-            <Card.Section title="名称">
-              <TextStyle variation="subdued">
-                text 文字
-              </TextStyle>
+          <SourcingProviCard />
+          <SourcingRepoCard />
 
-            </Card.Section>
-            <Card.Section title="地址">
-              <TextStyle variation="subdued">
-                text 文字
-              </TextStyle>
 
-            </Card.Section>
-            <Card.Section title="电话">
-              <TextStyle variation="subdued">
-                text 文字
-              </TextStyle>
 
-            </Card.Section>
-            <Card.Section title="联系人">
-              <TextStyle variation="subdued">
-                text 文字
-              </TextStyle>
-
-            </Card.Section>
-            <Card.Section title="收款账户">
-              <TextStyle variation="subdued">
-                text 文字
-              </TextStyle>
-
-            </Card.Section>
-          </Card>
-          <Card title="收货仓库">
-            <Card.Section title="名称">
-              <TextStyle variation="subdued">
-                text 文字
-              </TextStyle>
-
-            </Card.Section>
-            <Card.Section title="地址">
-              <TextStyle variation="subdued">
-                text 文字
-              </TextStyle>
-
-            </Card.Section>
-            <Card.Section title="电话">
-              <TextStyle variation="subdued">
-                text 文字
-              </TextStyle>
-
-            </Card.Section>
-            <Card.Section title="联系人">
-              <TextStyle variation="subdued">
-                text 文字
-              </TextStyle>
-
-            </Card.Section>
-          </Card>
-          <Card title="备注">
-            <Card.Section>
-              <TextField
-                value="123"
-                onChange={() => { }}
-              />
-
-            </Card.Section>
-          </Card>
         </Layout.Section>
       </Layout>
 
