@@ -1,16 +1,21 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-01-18 17:53:51
+ * @LastEditTime: 2022-01-19 15:51:58
  * @LastEditors: lijunwei
  * @Description: 
  */
 
-import { Button, Card, Form, FormLayout, Icon, IndexTable, Layout, Modal, Page, Select, TextField, TextStyle, useIndexResourceState } from "@shopify/polaris";
+import { Button, Card, Checkbox, Form, FormLayout, Icon, IndexTable, Layout, Modal, Page, Scrollable, Select, TextField, TextStyle, useIndexResourceState } from "@shopify/polaris";
 import {
   SearchMinor
 } from '@shopify/polaris-icons';
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
+import { FstlnSelectTree } from "../../components/FstlnSelectTree/FstlnSelectTree";
+import "./sourcingOrder.scss";
+
+
+
 function SourcingEdit(props) {
 
 
@@ -19,19 +24,18 @@ function SourcingEdit(props) {
 
   const handleChange = useCallback(() => setActive(!active), [active]);
 
-  const activator = <Button onClick={handleChange}>Open</Button>;
   // = modal =
 
   // =======
 
-  const customers = [
+  const [customers, setCustomers] = useState([
     {
       id: '3413',
       url: 'customers/341',
       name: 'Mae Jemison',
       location: 'Decatur, USA',
       orders: 20,
-      amountSpent: '$2,400',
+      amountSpent: 2400,
     },
     {
       id: '2563',
@@ -39,9 +43,9 @@ function SourcingEdit(props) {
       name: 'Ellen Ochoa',
       location: 'Los Angeles, USA',
       orders: 30,
-      amountSpent: '$140',
+      amountSpent: 140,
     },
-  ];
+  ]);
   const resourceName = {
     singular: 'customer',
     plural: 'customers',
@@ -71,24 +75,99 @@ function SourcingEdit(props) {
     // },
   ];
 
-  const rowMarkup = customers.map(
-    ({ id, name, location, orders, amountSpent }, index) => (
-      <IndexTable.Row
-        id={id}
-        key={id}
-        selected={selectedResources.includes(id)}
-        position={index}
-      >
-        <IndexTable.Cell>
-          <TextStyle variation="strong">{name}</TextStyle>
-        </IndexTable.Cell>
-        <IndexTable.Cell>{location}</IndexTable.Cell>
-        <IndexTable.Cell>{orders}</IndexTable.Cell>
-        <IndexTable.Cell>{amountSpent}</IndexTable.Cell>
-      </IndexTable.Row>
-    ),
+  const goodsFormChangeHandler = useCallback(
+    (idx, val, key) => {
+
+      const a = [...customers];
+
+      a[idx][key] = val
+      setCustomers(a);
+    },
+    [customers],
+  );
+
+
+  const rowMarkup = useMemo(() => {
+    return customers.map(
+      ({ id, name, location, orders, amountSpent }, index) => (
+        <IndexTable.Row
+          id={id}
+          key={id}
+          selected={selectedResources.includes(id)}
+          position={index}
+        >
+          <IndexTable.Cell>
+            <TextStyle variation="strong">{name}</TextStyle>
+          </IndexTable.Cell>
+          <IndexTable.Cell>{location}</IndexTable.Cell>
+          <IndexTable.Cell>
+            <TextField
+              type="number"
+              value={orders}
+              onChange={(v) => { goodsFormChangeHandler(index, v, "orders") }}
+            />
+          </IndexTable.Cell>
+          <IndexTable.Cell>
+            <TextField
+              type="number"
+              value={amountSpent}
+              prefix="$"
+              onChange={(v) => { goodsFormChangeHandler(index, v, "amountSpent") }}
+            />
+          </IndexTable.Cell>
+        </IndexTable.Row>
+      ),
+    )
+  },
+    [customers, goodsFormChangeHandler, selectedResources]
   );
   // ======
+
+
+  const tree = {
+    "zte": [
+      {
+        "sku": "6902176907197",
+        "cn_name": "红魔6/6Pro钢化玻璃屏幕保护膜",
+        "en_name": "RedMagic 6/6Pro tempered glass",
+        "qty": 111
+      },
+      {
+        "sku": "6902176903731",
+        "cn_name": "红魔战神手柄",
+        "en_name": "RedMagic 5G E-Sports Handle",
+        "qty": 111
+      }
+    ],
+    "relx": [
+      {
+        "sku": "69021769071971",
+        "cn_name": "红魔6/6Pro钢化玻璃屏幕保护膜1",
+        "en_name": "RedMagic 6/6Pro tempered glass1",
+        "qty": 111
+      },
+      {
+        "sku": "69021769037311",
+        "cn_name": "红魔战神手柄1",
+        "en_name": "RedMagic 5G E-Sports Handle1",
+        "qty": 111
+      }
+    ]
+  }
+
+  const treeHeadRender = (rowItem) => {
+
+    return (
+      <div>{rowItem}</div>
+    )
+  }
+
+  const treeRowRender = (rowItem) => {
+
+    return (
+      <div>{rowItem}</div>
+    )
+  }
 
 
   return (
@@ -149,12 +228,12 @@ function SourcingEdit(props) {
 
           </Card>
           <Card title="商品明细"
-          // actions={[
-          //   {
-          //     content: "添加",
-          //     onAction: () => console.log('Todo: implement bulk add tags'),
-          //   }
-          // ]}
+            actions={[
+              {
+                content: "添加商品",
+                onAction: () => setActive(true),
+              }
+            ]}
           >
             {/* <Card.Section>
               <TextField
@@ -185,7 +264,7 @@ function SourcingEdit(props) {
               {rowMarkup}
             </IndexTable>
             <div style={{ textAlign: "center" }}>
-              <Button>添加商品</Button>
+              <Button onClick={() => { setActive(true) }}>添加商品</Button>
             </div>
             <br />
           </Card>
@@ -271,7 +350,10 @@ function SourcingEdit(props) {
           </Card>
           <Card title="备注">
             <Card.Section>
-              <TextField />
+              <TextField
+                value="123"
+                onChange={() => { }}
+              />
 
             </Card.Section>
           </Card>
@@ -281,7 +363,6 @@ function SourcingEdit(props) {
 
       <Modal
         large={false}
-        activator={activator}
         open={active}
         onClose={handleChange}
         title="选择采购商品"
@@ -299,22 +380,34 @@ function SourcingEdit(props) {
         <div>
           <div style={{ padding: "1em" }}>
 
-          <TextField
-            prefix={<Icon
-              source={SearchMinor}
-              color="subdued" />
-            }
-            connectedLeft={
-              <Select 
-                options={[
-                  {label: "商品SKU ", value: "1"},
-                  {label: "品牌", value: "2"},
-                ]}
+            <TextField
+              type="text"
+              placeholder="搜索商品"
+              onChange={() => { }}
+
+              prefix={<Icon
+                source={SearchMinor}
+                color="subdued"
               />
-            }
-          />
+              }
+              connectedLeft={
+                <Select
+                  onChange={() => { }}
+
+                  options={[
+                    { label: "商品SKU ", value: "1" },
+                    { label: "品牌", value: "2" },
+                  ]}
+                />
+              }
+            />
           </div>
 
+          <FstlnSelectTree
+            treeData={tree}
+            headRender={treeHeadRender}
+            itemRowRender={treeRowRender}
+          />
 
         </div>
       </Modal>

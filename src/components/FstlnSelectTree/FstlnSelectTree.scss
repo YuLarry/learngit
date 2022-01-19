@@ -1,0 +1,44 @@
+.f-collapsed-select-list{
+  overflow-x: hidden;
+
+  .fcsl-ul{
+    margin: 0;
+    list-style: none;
+    .fcsl-ul{
+      padding-left: 2.4em;
+    }
+    padding-left: 1em;
+  }
+  .fcsl-li{
+    list-style: none;
+    padding-left: 0em;
+  }
+  .fcsl-item{
+    display: flex;
+    align-items: center;
+    // border-bottom: 1px solid #ddd;
+    width: 100%;
+    &:hover{
+      &::after{
+        background-color: #efefef;
+      }
+    }
+    position: relative;
+    z-index: 1;
+    &::after{
+      content: "";
+      width: 200000px;
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: -100000px;
+      border-top: 1px solid #ddd;
+      background: none;
+      z-index: -1;
+    }
+  }
+  .fcsl-head,.fcsl-row{
+    flex: 1;
+    line-height: 3em;
+  }
+}
