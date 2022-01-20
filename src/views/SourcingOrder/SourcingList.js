@@ -1,14 +1,14 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-01-19 17:08:32
+ * @LastEditTime: 2022-01-20 16:52:39
  * @LastEditors: lijunwei
  * @Description: 
  */
 
-import { Card, IndexTable, Page, Pagination, Tabs, TextStyle, useIndexResourceState } from "@shopify/polaris";
+import { Button, Card, IndexTable, Page, Pagination, Tabs, TextStyle, useIndexResourceState } from "@shopify/polaris";
 import { useCallback, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { SourcingListFilter } from "./piece/SourcingListFilter";
 
 
@@ -239,7 +239,14 @@ function SourcingList(props) {
         position={index}
       >
         <IndexTable.Cell>
-          <TextStyle variation="strong">{po_no}</TextStyle>
+          <Button 
+            plain
+            monochrome
+            url={`detail`}
+          >
+            <TextStyle variation="strong">{po_no}</TextStyle>
+          </Button>
+          {/* <Link to={`detail/${id}`}>{po_no}</Link> */}
         </IndexTable.Cell>
         <IndexTable.Cell>{subject_code}</IndexTable.Cell>
         <IndexTable.Cell>{provider_id}</IndexTable.Cell>

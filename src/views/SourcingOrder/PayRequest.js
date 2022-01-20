@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-19 17:05:46
- * @LastEditTime: 2022-01-20 15:57:57
+ * @LastEditTime: 2022-01-20 16:28:05
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -11,6 +11,7 @@ import { useMemo, useState } from "react";
 import { DatePopover } from "../../components/DatePopover/DatePopover";
 import { ProductInfoPopover } from "../../components/ProductInfoPopover/ProductInfoPopover";
 import { SourcingCardSection } from "../../components/SecondaryCard/SourcingCardSection";
+import { SourcingInfoCard } from "../../components/SecondaryCard/SourcingInfoCard";
 
 function PayRequest(props) {
 
@@ -238,17 +239,7 @@ function PayRequest(props) {
         </Layout.Section>
         <Layout.Section secondary>
           <Card title="采购信息">
-            <SourcingCardSection title="项目" text="text 文字" />
-            <SourcingCardSection title="采购方" text="text 文字" />
-            <SourcingCardSection title="供应商" text="text 文字" />
-            <SourcingCardSection title="收款账户" text="text 文字" />
-            <SourcingCardSection title="收货仓库" text="text 文字" />
-            <SourcingCardSection title="金额" text="text 文字" />
-            <SourcingCardSection title="币制" text="text 文字" />
-            <SourcingCardSection title="采购数量" text="text 文字" />
-            <SourcingCardSection title="事业部" text="text 文字" />
-            <SourcingCardSection title="业务类型" text="text 文字" />
-            <SourcingCardSection title="平台" text="text 文字" />
+            <SourcingInfoCard />
           </Card>
 
         </Layout.Section>
