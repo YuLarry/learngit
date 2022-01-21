@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-01-20 16:52:39
+ * @LastEditTime: 2022-01-21 15:40:52
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -14,7 +14,7 @@ import { SourcingListFilter } from "./piece/SourcingListFilter";
 
 function SourcingList(props) {
 
-  const navigation = useNavigate();
+  const navigate = useNavigate();
 
 
   const [selected, setSelected] = useState(0);
@@ -198,7 +198,7 @@ function SourcingList(props) {
     },
     {
       content: '申请付款',
-      onAction: () => console.log(navigation("payRequest")),
+      onAction: () => console.log(navigate("payRequest")),
     },
     {
       content: "取消采购单",
@@ -264,7 +264,7 @@ function SourcingList(props) {
     <Page
       title="采购单列表"
       fullWidth
-      primaryAction={{ content: '新建采购单', onAction: () => { navigation("add") } }}
+      primaryAction={{ content: '新建采购单', onAction: () => { navigate("add") } }}
       secondaryActions={[
         { content: '导出', onAction: () => { } },
       ]}
@@ -289,7 +289,6 @@ function SourcingList(props) {
               allResourcesSelected ? 'All' : selectedResources.length
             }
             onSelectionChange={handleSelectionChange}
-            hasMoreItems
             bulkActions={bulkActions}
             promotedBulkActions={promotedBulkActions}
             lastColumnSticky

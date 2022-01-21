@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-20 16:16:03
- * @LastEditTime: 2022-01-20 17:39:05
+ * @LastEditTime: 2022-01-20 19:21:27
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -11,6 +11,9 @@ import { useMemo } from "react";
 import { FstlnTimeline } from "../../components/FstlnTimeline/FstlnTimeline";
 import { ProductInfoPopover } from "../../components/ProductInfoPopover/ProductInfoPopover";
 import { SourcingInfoCard } from "../../components/SecondaryCard/SourcingInfoCard";
+import { SourcingNoteCard } from "../../components/SecondaryCard/SourcingNoteCard";
+import { SourcingProviCard } from "../../components/SecondaryCard/SourcingProviCard";
+import { SourcingRepoCard } from "../../components/SecondaryCard/SourcingRepoCard";
 
 function SourcingDetail(props) {
 
@@ -81,7 +84,7 @@ function SourcingDetail(props) {
   return (
     <Page
       breadcrumbs={[{ content: '采购实施列表', url: '/sourcing' }]}
-      title="申请付款"
+      title="order id"
       titleMetadata={<div><Badge status="attention">Verified</Badge> <Badge status="attention">Verified</Badge> <Badge status="attention">Verified</Badge></div>}
       subtitle="2021-12-25 10:05:00 由xxxxxxxxx创建"
     >
@@ -122,6 +125,9 @@ function SourcingDetail(props) {
         </Layout.Section>
         <Layout.Section secondary>
           <SourcingInfoCard />
+          <SourcingProviCard />
+          <SourcingRepoCard />
+          <SourcingNoteCard />
         </Layout.Section>
       </Layout>
 

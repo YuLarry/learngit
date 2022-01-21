@@ -1,3 +1,8 @@
+
+.Polaris-IndexTable__TableCell{
+  position: relative;
+}
+
 .prod-activator{
   position: absolute;
   top: 0;
@@ -5,6 +10,9 @@
   bottom: 0;
   left: 0;
   cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   &:hover{
     background-color: #eee;
     .text+*{
@@ -20,6 +28,7 @@
   padding: 0.8rem 1.6rem;
   .text{
     display: inline-block;
+    flex: 1;
   }
 
 }

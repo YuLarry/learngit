@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 15:00:29
- * @LastEditTime: 2022-01-21 14:38:24
+ * @LastEditTime: 2022-01-21 14:45:26
  * @LastEditors: lijunwei
  * @Description: s
  */
@@ -9,7 +9,7 @@
 import { Checkbox, Filters, RadioButton, Stack, TextField } from "@shopify/polaris";
 import { useCallback, useState } from "react";
 
-function SourcingListFilter(props) {
+function DeliveryListFilter(props) {
 
 
 
@@ -89,33 +89,7 @@ function SourcingListFilter(props) {
       onClearAll: () => { console.log("cleared"); },
       shortcut: true,
     },
-
-    {
-      key: "subject",
-      label: "采购方",
-      filter: (
-        <Stack vertical>
-          <RadioButton
-            label="Accounts are disabled"
-            checked={true}
-            id="1"
-            name="accounts"
-            onChange={() => { }}
-          />
-          <RadioButton
-            label="Accounts are disabled"
-            checked={false}
-            id="2"
-            name="accounts2"
-            onChange={() => { }}
-          />
-
-        </Stack>
-      ),
-      onClearAll: () => { console.log("cleared"); },
-      shortcut: true,
-    },
-
+    
     {
       key: "warehouse",
       label: "收货仓库",
@@ -143,7 +117,7 @@ function SourcingListFilter(props) {
     },
     {
       key: "sourcingCode",
-      label: "采购单号",
+      label: "创建时间",
       filter: (
         <TextField
           label="Tagged with"
@@ -155,24 +129,60 @@ function SourcingListFilter(props) {
       ),
       shortcut: true,
     },
+   
     {
-      key: "goodsInfo",
-      label: "商品信息",
+      key: "owner",
+      label: "货主",
       filter: (
-        <TextField
-          label="Tagged with"
-          value={taggedWith}
-          onChange={handleTaggedWithChange}
-          autoComplete="off"
-          labelHidden
-        />
+        <Stack vertical>
+          <RadioButton
+            label="Accounts are disabled"
+            checked={true}
+            id="1"
+            name="accounts"
+            onChange={() => { }}
+          />
+          <RadioButton
+            label="Accounts are disabled"
+            checked={false}
+            id="2"
+            name="accounts2"
+            onChange={() => { }}
+          />
+
+        </Stack>
       ),
+      onClearAll: () => { console.log("cleared"); },
       shortcut: true,
     },
+    {
+      key: "area",
+      label: "货区",
+      filter: (
+        <Stack vertical>
+          <RadioButton
+            label="Accounts are disabled"
+            checked={true}
+            id="1"
+            name="accounts"
+            onChange={() => { }}
+          />
+          <RadioButton
+            label="Accounts are disabled"
+            checked={false}
+            id="2"
+            name="accounts2"
+            onChange={() => { }}
+          />
 
+        </Stack>
+      ),
+      onClearAll: () => { console.log("cleared"); },
+      shortcut: true,
+    },
     {
       key: "dealStatus",
-      label: "审批状态",
+      label: "状态",
       filter: (
         <Stack vertical>
           <Checkbox
@@ -195,59 +205,6 @@ function SourcingListFilter(props) {
       onClearAll: () => { console.log("cleared"); },
       shortcut: true,
     },
-
-    {
-      key: "payStatus",
-      label: "付款状态",
-      filter: (
-        <Stack vertical>
-          <Checkbox
-            label="Accounts are disabled"
-            checked={true}
-            id="1"
-            name="accounts"
-            onChange={() => { }}
-          />
-          <Checkbox
-            label="Accounts are disabled"
-            checked={false}
-            id="2"
-            name="accounts2"
-            onChange={() => { }}
-          />
-
-        </Stack>
-      ),
-      onClearAll: () => { console.log("cleared"); },
-      shortcut: true,
-    },
-    {
-      key: "deliveryStatus",
-      label: "发货状态",
-      filter: (
-        <Stack vertical>
-          <Checkbox
-            label="Accounts are disabled"
-            checked={true}
-            id="1"
-            name="accounts"
-            onChange={() => { }}
-          />
-          <Checkbox
-            label="Accounts are disabled"
-            checked={false}
-            id="2"
-            name="accounts2"
-            onChange={() => { }}
-          />
-
-        </Stack>
-      ),
-      onClearAll: () => { console.log("cleared"); },
-      shortcut: true,
-    },
-
-
   ];
 
 
@@ -264,5 +221,5 @@ function SourcingListFilter(props) {
     />
   );
 }
-export { SourcingListFilter }
+export { DeliveryListFilter }
 
