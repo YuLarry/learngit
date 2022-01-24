@@ -1,16 +1,37 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 15:00:29
- * @LastEditTime: 2022-01-21 14:38:24
+ * @LastEditTime: 2022-01-24 19:31:02
  * @LastEditors: lijunwei
  * @Description: s
  */
 
 import { Checkbox, Filters, RadioButton, Stack, TextField } from "@shopify/polaris";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
+import { AUDIT_STATUS, DELIVERY_STATUS, PAYMENT_STATUS } from "../../../utils/StaticData";
 
 function SourcingListFilter(props) {
 
+  const [filterData, setFilterData] = useState({
+    
+    provider_id: "",
+    subject_code: "",
+    warehouse_code: "",
+    po: "",
+    good_search: "",
+    audit: [],
+    payment_status: [],
+    delivery_status:[],
+  });
+
+  
+  const filterChangeHandler = useCallback(
+    (v, name) => {
+      console.log(v);
+      console.log(name);
+    },
+    [],
+  );
 
 
   function disambiguateLabel(key, value) {
@@ -37,10 +58,7 @@ function SourcingListFilter(props) {
   const [taggedWith, setTaggedWith] = useState('VIP');
   const [queryValue, setQueryValue] = useState(null);
 
-  const handleTaggedWithChange = useCallback(
-    (value) => setTaggedWith(value),
-    [],
-  );
+
   const handleTaggedWithRemove = useCallback(() => setTaggedWith(null), []);
   const handleQueryValueRemove = useCallback(() => setQueryValue(null), []);
 
@@ -61,6 +79,58 @@ function SourcingListFilter(props) {
     handleTaggedWithRemove();
     handleQueryValueRemove();
   }, [handleQueryValueRemove, handleTaggedWithRemove]);
+
+
+  const auditStatusCheckboxMarkup = useMemo(() => {
+    const checkBoxes = [];
+    AUDIT_STATUS.forEach((val, enty)=>{
+      checkBoxes.push(
+        (<Checkbox
+          key={enty}
+          label={val}
+          checked={false}
+          id={enty}
+          name="paymentStatus"
+          onChange={(v,name) => { filterChangeHandler(v,name) }}
+        />)
+      )
+    })
+    return checkBoxes
+  }, []);
+
+  const paymentStatusCheckboxMarkup = useMemo(() => {
+    const checkBoxes = [];
+    PAYMENT_STATUS.forEach((val, enty)=>{
+      checkBoxes.push(
+        (<Checkbox
+          key={enty}
+          label={val}
+          checked={false}
+          id={enty}
+          name="paymentStatus"
+          onChange={(v,name) => { filterChangeHandler(v,name) }}
+        />)
+      )
+    })
+    return checkBoxes
+  }, []);
+
+  const deliveryStatusCheckboxMarkup = useMemo(() => {
+    const checkBoxes = [];
+    DELIVERY_STATUS.forEach((val, enty)=>{
+      checkBoxes.push(
+        (<Checkbox
+          key={enty}
+          label={val}
+          checked={false}
+          id={enty}
+          name="deliveryStatus"
+          onChange={(v,name) => { filterChangeHandler(v,name) }}
+        />)
+      )
+    })
+    return checkBoxes
+  }, []);
 
 
   const filters = [
@@ -146,11 +216,12 @@ function SourcingListFilter(props) {
       label: "采购单号",
       filter: (
         <TextField
-          label="Tagged with"
-          value={val}
-          onChange={handleTaggedWithChange}
+          label="采购单号"
+          value={filterData.po}
+          onChange={filterChangeHandler}
           autoComplete="off"
           labelHidden
+          id="po"
         />
       ),
       shortcut: true,
@@ -161,10 +232,11 @@ function SourcingListFilter(props) {
       filter: (
         <TextField
           label="Tagged with"
-          value={taggedWith}
-          onChange={handleTaggedWithChange}
+          value={ filterData.good_search }
+          onChange={filterChangeHandler}
           autoComplete="off"
           labelHidden
+          id="good_search"
         />
       ),
       shortcut: true,
@@ -175,21 +247,7 @@ function SourcingListFilter(props) {
       label: "审批状态",
       filter: (
         <Stack vertical>
-          <Checkbox
-            label="Accounts are disabled"
-            checked={true}
-            id="1"
-            name="accounts"
-            onChange={() => { }}
-          />
-          <Checkbox
-            label="Accounts are disabled"
-            checked={false}
-            id="2"
-            name="accounts2"
-            onChange={() => { }}
-          />
-
+          {auditStatusCheckboxMarkup}
         </Stack>
       ),
       onClearAll: () => { console.log("cleared"); },
@@ -201,21 +259,7 @@ function SourcingListFilter(props) {
       label: "付款状态",
       filter: (
         <Stack vertical>
-          <Checkbox
-            label="Accounts are disabled"
-            checked={true}
-            id="1"
-            name="accounts"
-            onChange={() => { }}
-          />
-          <Checkbox
-            label="Accounts are disabled"
-            checked={false}
-            id="2"
-            name="accounts2"
-            onChange={() => { }}
-          />
-
+          {paymentStatusCheckboxMarkup}
         </Stack>
       ),
       onClearAll: () => { console.log("cleared"); },
@@ -226,21 +270,7 @@ function SourcingListFilter(props) {
       label: "发货状态",
       filter: (
         <Stack vertical>
-          <Checkbox
-            label="Accounts are disabled"
-            checked={true}
-            id="1"
-            name="accounts"
-            onChange={() => { }}
-          />
-          <Checkbox
-            label="Accounts are disabled"
-            checked={false}
-            id="2"
-            name="accounts2"
-            onChange={() => { }}
-          />
-
+          {deliveryStatusCheckboxMarkup}
         </Stack>
       ),
       onClearAll: () => { console.log("cleared"); },

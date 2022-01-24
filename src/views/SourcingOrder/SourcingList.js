@@ -1,13 +1,13 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-01-21 15:40:52
+ * @LastEditTime: 2022-01-24 17:22:16
  * @LastEditors: lijunwei
  * @Description: 
  */
 
 import { Button, Card, IndexTable, Page, Pagination, Tabs, TextStyle, useIndexResourceState } from "@shopify/polaris";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { SourcingListFilter } from "./piece/SourcingListFilter";
 
@@ -16,15 +16,13 @@ function SourcingList(props) {
 
   const navigate = useNavigate();
 
-
   const [selected, setSelected] = useState(0);
   const handleTabChange = useCallback(
     (selectedTabIndex) => setSelected(selectedTabIndex),
     [],
   );
 
-
-  const tabs = [
+  const [tabs] = useState([
     {
       id: 'all-list',
       content: '全部',
@@ -46,7 +44,7 @@ function SourcingList(props) {
       content: '已取消',
       panelID: 'prospects-content-1',
     },
-  ];
+  ]);
 
   const [pageIndex, setPageIndex] = useState(1);
   const pageSize = 20;
@@ -70,13 +68,8 @@ function SourcingList(props) {
   }, [pageIndex, total]);
 
 
-  
-  // =========================
 
-
-
-
-  const sourcingList = [
+  const [sourcingList, setSourcingList] = useState([
     {
       "id": 1,
       "po_no": " PO#NUBIA2112172",
@@ -182,11 +175,8 @@ function SourcingList(props) {
         }
       ]
     }
-  ];
-  const resourceName = {
-    singular: 'customer',
-    plural: 'customers',
-  };
+  ]);
+  
 
   const { selectedResources, allResourcesSelected, handleSelectionChange } = useIndexResourceState(sourcingList);
 
@@ -213,24 +203,9 @@ function SourcingList(props) {
       onAction: () => console.log('Todo: implement bulk delete'),
     },
   ];
-  const bulkActions = [
-    // {
-    //   content: 'Add tags',
-    //   onAction: () => console.log('Todo: implement bulk add tags'),
-    // },
-    // {
-    //   content: 'Remove tags',
-    //   onAction: () => console.log('Todo: implement bulk remove tags'),
-    // },
-    // {
-    //   content: 'Delete customers',
-    //   onAction: () => console.log('Todo: implement bulk delete'),
-    // },
-  ];
 
 
-
-  const rowMarkup = sourcingList.map(
+  const rowMarkup = useMemo(()=>sourcingList.map(
     ({ id, po_no, subject_code, provider_id, warehouse_code, audit, payment_status, delivery_status, good_search }, index) => (
       <IndexTable.Row
         id={id}
@@ -246,7 +221,6 @@ function SourcingList(props) {
           >
             <TextStyle variation="strong">{po_no}</TextStyle>
           </Button>
-          {/* <Link to={`detail/${id}`}>{po_no}</Link> */}
         </IndexTable.Cell>
         <IndexTable.Cell>{subject_code}</IndexTable.Cell>
         <IndexTable.Cell>{provider_id}</IndexTable.Cell>
@@ -257,7 +231,14 @@ function SourcingList(props) {
         <IndexTable.Cell>{good_search}</IndexTable.Cell>
       </IndexTable.Row>
     ),
-  );
+  )
+  ,[selectedResources, sourcingList]);
+
+
+  useEffect(()=>{
+    
+  },
+  [])
 
 
   return (
@@ -274,8 +255,6 @@ function SourcingList(props) {
         <Tabs
           tabs={tabs} selected={selected} onSelect={handleTabChange}
         >
-          {/* <p>Tab {selected} selected</p> */}
-
           <div style={{ padding: '16px', display: 'flex' }}>
             <div style={{ flex: 1 }}>
               <SourcingListFilter />
@@ -283,13 +262,11 @@ function SourcingList(props) {
 
           </div>
           <IndexTable
-            resourceName={resourceName}
             itemCount={sourcingList.length}
             selectedItemsCount={
               allResourcesSelected ? 'All' : selectedResources.length
             }
             onSelectionChange={handleSelectionChange}
-            bulkActions={bulkActions}
             promotedBulkActions={promotedBulkActions}
             lastColumnSticky
             headings={[

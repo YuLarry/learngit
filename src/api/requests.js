@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2021-11-24 11:29:42
- * @LastEditTime: 2022-01-18 11:03:32
+ * @LastEditTime: 2022-01-24 18:42:59
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -17,4 +17,7 @@ export const loginRequest = (data)=>{
   // console.log(REACT_APP_AUTH_ORIGIN);
   return axios.post(`${REACT_APP_AUTH_ORIGIN}${REQUEST_URLS.LOGIN}`, data)
 };
+
+
+
 
