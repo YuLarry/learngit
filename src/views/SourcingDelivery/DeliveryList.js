@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-01-21 15:43:56
+ * @LastEditTime: 2022-01-24 15:45:32
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -32,18 +32,18 @@ function DeliveryList(props) {
       panelID: 'all-customers-content-1',
     },
     {
-      id: 'created-list',
-      content: '已创建',
+      id: 'no-delivered-list',
+      content: '未预报',
       panelID: 'accepts-marketing-content-1',
     },
     {
-      id: 'done-list',
-      content: '已完结',
+      id: 'part-delivered-list',
+      content: '部分预报',
       panelID: 'repeat-customers-content-1',
     },
     {
-      id: 'canceled-list',
-      content: '已取消',
+      id: 'delivered-list',
+      content: '已预报',
       panelID: 'prospects-content-1',
     },
   ];

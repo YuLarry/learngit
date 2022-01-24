@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-01-19 17:26:01
+ * @LastEditTime: 2022-01-24 15:43:36
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -263,7 +263,6 @@ function SourcingEdit(props) {
             <SourcingCardSection title="金额" text="text 文字" />
             <SourcingCardSection title="币制" text="text 文字" />
             <SourcingCardSection title="采购数量" text="text 文字" />
-
 
           </Card>
           <SourcingProviCard />

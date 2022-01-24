@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-20 14:31:27
- * @LastEditTime: 2022-01-20 15:35:06
+ * @LastEditTime: 2022-01-24 14:15:21
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -27,8 +27,9 @@ function ProductInfoPopover(props) {
   const activator = useMemo(() => (
     <div
       className="prod-activator"
-      onClick={()=>{
-        togglePopoverActive()
+      onClick={(e)=>{
+        togglePopoverActive();
+        e.stopPropagation()
       }}
     >
       <div className="text">

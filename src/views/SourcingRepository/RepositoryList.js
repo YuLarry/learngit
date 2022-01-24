@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-01-21 15:19:27
+ * @LastEditTime: 2022-01-24 16:15:22
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -9,6 +9,7 @@
 import { Button, Card, IndexTable, Page, Pagination, Tabs, TextStyle, useIndexResourceState } from "@shopify/polaris";
 import { useCallback, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { InRepositoryManualModal } from "./piece/InRepositoryManualModal";
 import { DeliveryListFilter } from "./piece/RepositoryListFilter";
 
 
@@ -32,18 +33,18 @@ function RepositoryList(props) {
       panelID: 'all-customers-content-1',
     },
     {
-      id: 'created-list',
-      content: '已创建',
+      id: 'unbound-list',
+      content: '待入库',
       panelID: 'accepts-marketing-content-1',
     },
     {
-      id: 'done-list',
-      content: '已完结',
+      id: 'part-bound-list',
+      content: '部分入库',
       panelID: 'repeat-customers-content-1',
     },
     {
-      id: 'canceled-list',
-      content: '已取消',
+      id: 'bound-list',
+      content: '已入库',
       panelID: 'prospects-content-1',
     },
   ];
@@ -193,25 +194,10 @@ function RepositoryList(props) {
 
   const promotedBulkActions = [
     {
-      content: '提交审批',
+      content: '手动确定入库',
       onAction: () => console.log('Todo: implement bulk edit'),
     },
-    {
-      content: '申请付款',
-      onAction: () => console.log(navigation("payRequest")),
-    },
-    {
-      content: "取消采购单",
-      onAction: () => console.log('Todo: implement bulk remove tags'),
-    },
-    {
-      content: "导出采购单",
-      onAction: () => console.log('Todo: implement bulk delete'),
-    },
-    {
-      content: "删除采购单",
-      onAction: () => console.log('Todo: implement bulk delete'),
-    },
+    
   ];
   const bulkActions = [
     // {
@@ -322,6 +308,9 @@ function RepositoryList(props) {
 
         </Tabs>
       </Card>
+
+
+      <InRepositoryManualModal />
 
     </Page>
   );
