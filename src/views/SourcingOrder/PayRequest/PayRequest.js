@@ -1,17 +1,21 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-19 17:05:46
- * @LastEditTime: 2022-01-20 16:28:05
+ * @LastEditTime: 2022-01-25 16:20:45
  * @LastEditors: lijunwei
  * @Description: 
  */
 
 import { Badge, Button, Card, DropZone, IndexTable, Layout, Page, ResourceItem, ResourceList, TextField, TextStyle, Thumbnail, useIndexResourceState } from "@shopify/polaris";
 import { useMemo, useState } from "react";
-import { DatePopover } from "../../components/DatePopover/DatePopover";
-import { ProductInfoPopover } from "../../components/ProductInfoPopover/ProductInfoPopover";
-import { SourcingCardSection } from "../../components/SecondaryCard/SourcingCardSection";
-import { SourcingInfoCard } from "../../components/SecondaryCard/SourcingInfoCard";
+import { DatePopover } from "../../../components/DatePopover/DatePopover";
+import { ProductInfoPopover } from "../../../components/ProductInfoPopover/ProductInfoPopover";
+import { SourcingCardSection } from "../../../components/SecondaryCard/SourcingCardSection";
+import { SourcingInfoCard } from "../../../components/SecondaryCard/SourcingInfoCard";
+import {
+  DeleteMinor
+} from '@shopify/polaris-icons';
+import "./payRequest.scss";
 
 function PayRequest(props) {
 
@@ -118,38 +122,6 @@ function PayRequest(props) {
 
 
 
-  const invoiceRowMarkup = useMemo(() => {
-    return customers.map(
-      ({ id, name, location, orders, amountSpent }, index) => (
-        <IndexTable.Row
-          id={id}
-          key={id}
-          selected={selectedResources.includes(id)}
-          position={index}
-        >
-          <IndexTable.Cell>
-            {index}
-          </IndexTable.Cell>
-          <IndexTable.Cell>{location}</IndexTable.Cell>
-          <IndexTable.Cell>
-            <DatePopover />
-          </IndexTable.Cell>
-          <IndexTable.Cell>
-            <div style={{ width: "50px", height: "50px" }}>
-              <DropZone
-                id={`file-${index}`}
-                style={{ height: "50px", width: "50px" }}
-              >
-                <DropZone.FileUpload />
-              </DropZone>
-            </div>
-          </IndexTable.Cell>
-        </IndexTable.Row>
-      ),
-    )
-  },
-    [customers, selectedResources],
-  );
 
 
   const rowMarkup = useMemo(() => {
@@ -174,7 +146,55 @@ function PayRequest(props) {
     [customers, selectedResources]
   );
 
+
+
   // ===
+
+
+  const invoiceItem = useMemo(() => {
+    return customers.map(
+      ({ id, name, location, orders, amountSpent }, index) => (
+        <Card.Section>
+          
+          <div className="invoice-item">
+            <div className="invoice-col">
+              <p>发票金额</p>
+              <div style={{ maxWidth: "15rem" }}>
+                <TextField
+                  type="number"
+                />
+              </div>
+              
+            </div>
+            <div className="invoice-col">
+              <p>发票日期</p>
+              <DatePopover />
+
+            </div>
+            <div className="invoice-col">
+              <p>发票文件</p>
+              <div style={{ width: "50px", height: "50px" }}>
+                <DropZone
+                  id={`file-${index}`}
+                >
+                  <DropZone.FileUpload />
+                </DropZone>
+              </div>
+            </div>
+            <div className="invoice-col invoice-del">
+              <span>
+                <Button
+                  icon={DeleteMinor}
+                ></Button>
+              </span>
+            </div>
+          </div>
+        </Card.Section>
+      ),
+    )
+  },
+    [customers, selectedResources]
+  );
 
 
 
@@ -187,30 +207,12 @@ function PayRequest(props) {
     >
       <Layout>
         <Layout.Section>
-          <Card title="发票信息" sectioned>
-            <IndexTable
-              resourceName={resourceName}
-              itemCount={customers.length}
-              headings={[
-                { title: 'ID' },
-                { title: '发票金额' },
-                { title: '发票日期' },
-                { title: '发票文件' },
-              ]}
-              onSelectionChange={(v) => { console.log(v) }}
-            >
-              {invoiceRowMarkup}
-            </IndexTable>
-            {/* <ResourceList
-              resourceName={resourceName}
-              items={items}
-              renderItem={renderItem}
-              selectedItems={selectedItems}
-              onSelectionChange={setSelectedItems}
-              selectable
-            /> */}
+          <Card title="发票信息"
+          >
 
-            <div style={{ textAlign: "center" }}>
+            {invoiceItem}
+
+            <div style={{ textAlign: "center", padding: "1em" }}>
               <Button onClick={() => { }}>添加发票</Button>
             </div>
           </Card>
@@ -238,10 +240,7 @@ function PayRequest(props) {
           </Card>
         </Layout.Section>
         <Layout.Section secondary>
-          <Card title="采购信息">
-            <SourcingInfoCard />
-          </Card>
-
+          <SourcingInfoCard />
         </Layout.Section>
       </Layout>
 

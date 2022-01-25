@@ -1,0 +1,21 @@
+.invoice-item{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  .invoice-col{
+    margin-right: 2rem;
+    vertical-align: middle;
+    height: 8rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    
+    
+  }
+  .invoice-del{
+    justify-content: flex-end;
+  }
+
+
+}

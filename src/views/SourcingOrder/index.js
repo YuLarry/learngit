@@ -1,14 +1,14 @@
 /*
  * @Author: lijunwei
  * @Date: 2021-11-23 12:18:22
- * @LastEditTime: 2022-01-20 16:53:16
+ * @LastEditTime: 2022-01-25 15:52:28
  * @LastEditors: lijunwei
  * @Description: 
  */
 
 import { Fragment } from "react";
 import { Route } from "react-router";
-import { PayRequest } from "./PayRequest";
+import { PayRequest } from "./PayRequest/PayRequest";
 import { SourcingDetail } from "./SourcingDetail";
 import { SourcingEdit } from "./SourcingEdit";
 
