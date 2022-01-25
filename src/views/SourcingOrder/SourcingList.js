@@ -1,14 +1,14 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-01-25 12:12:39
+ * @LastEditTime: 2022-01-25 16:56:30
  * @LastEditors: lijunwei
  * @Description: 
  */
 
 import { Button, Card, IndexTable, Page, Pagination, Tabs, TextStyle, useIndexResourceState } from "@shopify/polaris";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { getProviderList, getSubjectList, getWarehouseList } from "../../api/requests";
 import { SourcingListFilter } from "./piece/SourcingListFilter";
 
@@ -236,20 +236,18 @@ function SourcingList(props) {
   ,[selectedResources, sourcingList]);
 
 
-  useEffect(()=>{
+  const exportHandler = useCallback(
+    () => {
+      console.log("export");
+    },
+    [],
+  );
 
-    Promise.all([
-      getProviderList(),
-      getWarehouseList(),
-      getSubjectList(),
-    ])
-    .then(([res1,res2,res3])=>{
-      console.log(res1.data.data);
-      console.log(res2.data.data);
-      console.log(res3.data.data);
-    })
-  },
-  [])
+  
+
+  useEffect(()=>{
+    
+  },[])
 
 
   return (
@@ -258,7 +256,7 @@ function SourcingList(props) {
       fullWidth
       primaryAction={{ content: '新建采购单', onAction: () => { navigate("add") } }}
       secondaryActions={[
-        { content: '导出', onAction: () => { } },
+        { content: '导出', onAction: () => { exportHandler() } },
       ]}
 
     >

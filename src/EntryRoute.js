@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2021-12-20 16:40:04
- * @LastEditTime: 2022-01-10 17:11:20
+ * @LastEditTime: 2022-01-25 16:44:20
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -23,21 +23,22 @@ function EntryRoute() {
   const toastContext = useContext(ToastContext);
 
   // init srcm axios response interceptor
-  useEffect(() => {
-    ax.interceptors.response.use(
-      (res) => {
-        return Promise.resolve(res);
-      },
-      (err) => {
-        // console.dir(err);
-        const { data: { message } } = err.response;
-        const _msg = message ? message : err.message;
 
-        toastContext.toast({ active: true, message: _msg, error: true });
-        return Promise.reject(err)
 
-      })
-  })
+  !ax['_INTERCEPTOR_SETTED_'] && ax.interceptors.response.use(
+    (res) => {
+      return Promise.resolve(res.data);
+    },
+    (err) => {
+      // console.dir(err);
+      const { data: { message } } = err.response;
+      const _msg = message ? message : err.message;
+
+      toastContext.toast({ active: true, message: _msg, error: true });
+      return Promise.reject(err)
+
+    })
+  ax['_INTERCEPTOR_SETTED_'] = true;
 
   return (
     <BrowserRouter>
