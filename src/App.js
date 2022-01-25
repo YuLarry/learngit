@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2021-11-15 17:24:19
- * @LastEditTime: 2022-01-18 16:00:50
+ * @LastEditTime: 2022-01-25 11:25:23
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -13,10 +13,27 @@ import { EntryRoute } from "./EntryRoute";
 import { AppContext } from "./components/AppContext";
 // import en from '@shopify/polaris/locales/en.json';
 import zhCN from '@shopify/polaris/locales/zh-CN.json';
+import { fstlnTool } from "./utils/Tools";
+import { loginRequest } from "./api/requests";
 
 
 
 function App() {
+
+  const token = fstlnTool.getToken();
+
+  if( !token ){
+
+    loginRequest()
+    .then(res=>{
+      console.log(res);
+      const { data:{data} } = res;
+      const token = data[0];
+      fstlnTool.saveToken(token);
+      
+    })
+    
+  }
 
   const theme = {
     logo: {

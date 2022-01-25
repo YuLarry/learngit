@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2021-11-15 17:51:39
- * @LastEditTime: 2022-01-04 14:47:17
+ * @LastEditTime: 2022-01-25 11:15:40
  * @LastEditors: lijunwei
  * @Description: Login page
  */
@@ -13,7 +13,7 @@ import { useNavigate } from "react-router";
 import { loginRequest } from "../../api/requests";
 import { AppContext } from "../../components/AppContext";
 import { ToastContext } from "../../context/ToastContext";
-import { EMAIL_REG, getToken } from "../../utils/Tools";
+import { fstlnTool } from "../../utils/Tools";
 import "./login.scss";
 
 
@@ -28,7 +28,7 @@ function Login(props) {
 
   // has userId redirect to Frame page
   useEffect(() => {
-    if (getToken()) {
+    if (fstlnTool.getToken()) {
       navigate("/users");
       return;
     }
@@ -60,7 +60,7 @@ function Login(props) {
 
   const formValid = useMemo(() => {
     const { account, password } = loginFrom;
-    return EMAIL_REG.test(account) && password.trim().length > 0
+    return fstlnTool.EMAIL_REG.test(account) && password.trim().length > 0
   }, [loginFrom]);
 
   

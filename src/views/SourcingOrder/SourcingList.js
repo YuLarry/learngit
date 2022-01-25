@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-01-24 17:22:16
+ * @LastEditTime: 2022-01-25 12:12:39
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -9,6 +9,7 @@
 import { Button, Card, IndexTable, Page, Pagination, Tabs, TextStyle, useIndexResourceState } from "@shopify/polaris";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { getProviderList, getSubjectList, getWarehouseList } from "../../api/requests";
 import { SourcingListFilter } from "./piece/SourcingListFilter";
 
 
@@ -236,7 +237,17 @@ function SourcingList(props) {
 
 
   useEffect(()=>{
-    
+
+    Promise.all([
+      getProviderList(),
+      getWarehouseList(),
+      getSubjectList(),
+    ])
+    .then(([res1,res2,res3])=>{
+      console.log(res1.data.data);
+      console.log(res2.data.data);
+      console.log(res3.data.data);
+    })
   },
   [])
 

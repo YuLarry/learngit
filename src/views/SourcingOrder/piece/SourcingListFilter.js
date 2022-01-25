@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 15:00:29
- * @LastEditTime: 2022-01-24 19:31:02
+ * @LastEditTime: 2022-01-25 12:27:59
  * @LastEditors: lijunwei
  * @Description: s
  */
@@ -34,60 +34,28 @@ function SourcingListFilter(props) {
   );
 
 
-  function disambiguateLabel(key, value) {
-    switch (key) {
-      case 'taggedWith':
-        return `Tagged with ${value}`;
-      default:
-        return value;
-    }
-  }
 
-  function isEmpty(value) {
-    if (Array.isArray(value)) {
-      return value.length === 0;
-    } else {
-      return value === '' || value == null;
-    }
-  }
+  const [searchText, setSearchText] = useState("");
+  const handleSearchTextRemove = useCallback(() => setSearchText(""), []);
 
+  
+  const [appliedFilters, setAppliedFilters] = useState([]);
 
-  const [val, setVal] = useState("");
-
-
-  const [taggedWith, setTaggedWith] = useState('VIP');
-  const [queryValue, setQueryValue] = useState(null);
-
-
-  const handleTaggedWithRemove = useCallback(() => setTaggedWith(null), []);
-  const handleQueryValueRemove = useCallback(() => setQueryValue(null), []);
-
-
-
-  const appliedFilters = !isEmpty(taggedWith)
-    ? [
-      {
-        key: 'taggedWith',
-        label: disambiguateLabel('taggedWith', taggedWith),
-        onRemove: handleTaggedWithRemove,
-      },
-    ]
-    : [];
-
+  
 
   const handleClearAll = useCallback(() => {
-    handleTaggedWithRemove();
-    handleQueryValueRemove();
-  }, [handleQueryValueRemove, handleTaggedWithRemove]);
+    console.log('clear all');
+  }, []);
+  
 
-
+  // audit status checkbox
   const auditStatusCheckboxMarkup = useMemo(() => {
     const checkBoxes = [];
-    AUDIT_STATUS.forEach((val, enty)=>{
+    AUDIT_STATUS.forEach((statusVal, enty)=>{
       checkBoxes.push(
         (<Checkbox
           key={enty}
-          label={val}
+          label={statusVal}
           checked={false}
           id={enty}
           name="paymentStatus"
@@ -96,15 +64,16 @@ function SourcingListFilter(props) {
       )
     })
     return checkBoxes
-  }, []);
+  }, [filterChangeHandler]);
 
+  // payment status
   const paymentStatusCheckboxMarkup = useMemo(() => {
     const checkBoxes = [];
-    PAYMENT_STATUS.forEach((val, enty)=>{
+    PAYMENT_STATUS.forEach((statusVal, enty)=>{
       checkBoxes.push(
         (<Checkbox
           key={enty}
-          label={val}
+          label={statusVal}
           checked={false}
           id={enty}
           name="paymentStatus"
@@ -113,15 +82,16 @@ function SourcingListFilter(props) {
       )
     })
     return checkBoxes
-  }, []);
+  }, [filterChangeHandler]);
 
+  // delivery status
   const deliveryStatusCheckboxMarkup = useMemo(() => {
     const checkBoxes = [];
-    DELIVERY_STATUS.forEach((val, enty)=>{
+    DELIVERY_STATUS.forEach((statusVal, enty)=>{
       checkBoxes.push(
         (<Checkbox
           key={enty}
-          label={val}
+          label={statusVal}
           checked={false}
           id={enty}
           name="deliveryStatus"
@@ -130,7 +100,7 @@ function SourcingListFilter(props) {
       )
     })
     return checkBoxes
-  }, []);
+  }, [filterChangeHandler]);
 
 
   const filters = [
@@ -247,7 +217,7 @@ function SourcingListFilter(props) {
       label: "审批状态",
       filter: (
         <Stack vertical>
-          {auditStatusCheckboxMarkup}
+          { auditStatusCheckboxMarkup }
         </Stack>
       ),
       onClearAll: () => { console.log("cleared"); },
@@ -259,7 +229,7 @@ function SourcingListFilter(props) {
       label: "付款状态",
       filter: (
         <Stack vertical>
-          {paymentStatusCheckboxMarkup}
+          { paymentStatusCheckboxMarkup }
         </Stack>
       ),
       onClearAll: () => { console.log("cleared"); },
@@ -270,7 +240,7 @@ function SourcingListFilter(props) {
       label: "发货状态",
       filter: (
         <Stack vertical>
-          {deliveryStatusCheckboxMarkup}
+          { deliveryStatusCheckboxMarkup }
         </Stack>
       ),
       onClearAll: () => { console.log("cleared"); },
@@ -281,15 +251,13 @@ function SourcingListFilter(props) {
   ];
 
 
-
-
   return (
     <Filters
-      queryValue={val}
+      queryValue={searchText}
       filters={filters}
       appliedFilters={appliedFilters}
-      onQueryChange={setQueryValue}
-      onQueryClear={handleQueryValueRemove}
+      onQueryChange={setSearchText}
+      onQueryClear={handleSearchTextRemove}
       onClearAll={handleClearAll}
     />
   );

@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2021-11-15 17:53:07
- * @LastEditTime: 2022-01-18 16:09:02
+ * @LastEditTime: 2022-01-25 11:23:04
  * @LastEditors: lijunwei
  * @Description: Fame component
  */
@@ -20,10 +20,10 @@ import { FstlnSkeleton } from "../FstlnSkeleton";
 // import { config, useTransition } from "@react-spring/core";
 // import { animated } from "@react-spring/web";
 import { ax } from "../../utils/FstlnAxios";
-import { getToken } from "../../utils/Tools";
 import { SourcingOrder } from "../../views/SourcingOrder";
 import { SourcingDelivery } from "../../views/SourcingDelivery";
 import { SourcingRepository } from "../../views/SourcingRepository";
+import { fstlnTool } from "../../utils/Tools";
 
 function AppFrame(props) {
 
@@ -49,7 +49,7 @@ function AppFrame(props) {
   //   }
   // })
 
-  ax.defaults.headers.common["x-fstln-token"] = getToken()
+  ax.defaults.headers.common["Authorization"] = `Bearer ${fstlnTool.getToken()}`
 
   return (
     // <RequireAuth>

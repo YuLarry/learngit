@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2021-11-16 14:52:47
- * @LastEditTime: 2022-01-04 14:39:35
+ * @LastEditTime: 2022-01-25 11:26:31
  * @LastEditors: lijunwei
  * @Description: AppFrame Header
  */
@@ -10,7 +10,7 @@ import { TopBar } from "@shopify/polaris";
 import { ArrowLeftMinor } from "@shopify/polaris-icons";
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
-import { getToken } from "../../utils/Tools";
+import { fstlnTool } from "../../utils/Tools";
 
 function Header(props) {
 
@@ -29,10 +29,10 @@ function Header(props) {
   )
 
   useEffect(() => {
-    const token = getToken();
-    const { aud } =  token && JSON.parse( atob( token.split(".")[1] ) );
-    const username = aud && aud.split("@")[0];
-    setUserName(username);
+    const token = fstlnTool.getToken();
+    // const { aud } =  token && JSON.parse( atob( token.split(".")[1] ) );
+    // const username = aud && aud.split("@")[0];
+    // setUserName(username);
   }, []);
 
   const userMarkup = (
