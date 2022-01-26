@@ -1,18 +1,20 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 15:00:29
- * @LastEditTime: 2022-01-26 14:29:53
+ * @LastEditTime: 2022-01-26 16:18:23
  * @LastEditors: lijunwei
  * @Description: 
  */
 
 import { Checkbox, Filters, RadioButton, Stack, TextField } from "@shopify/polaris";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { getProviderList, getSubjectList, getWarehouseList } from "../../../api/requests";
+import { ToastContext } from "../../../context/ToastContext";
 import { AUDIT_STATUS, DELIVERY_STATUS, PAYMENT_STATUS } from "../../../utils/StaticData";
 
 function SourcingListFilter(props) {
 
+  const toastContext = useContext(ToastContext);
   const [providerList, setProviderList] = useState([]);
   const [subjectList, setSubjectList] = useState([]);
   const [wareHouseList, setWareHouseList] = useState([]);
@@ -27,11 +29,10 @@ function SourcingListFilter(props) {
     warehouse_code: "",
     po: "",
     good_search: "",
-    audit: new Set(),
+    audit_status: new Set(),
     payment_status: new Set(),
     delivery_status: new Set(),
   });
-
 
 
   const filterChangeHandler = useCallback(
@@ -115,7 +116,7 @@ function SourcingListFilter(props) {
         (<Checkbox
           key={entry}
           label={statusLabel}
-          checked={filterData.audit.has(entry)}
+          checked={filterData.audit_status.has(entry)}
           id={entry}
           name="paymentStatus"
           onChange={(checked) => { filterChangeHandler("audit", entry, checked) }}
@@ -123,7 +124,7 @@ function SourcingListFilter(props) {
       )
     })
     return checkBoxes
-  }, [filterChangeHandler, filterData.audit]);
+  }, [filterChangeHandler, filterData.audit_status]);
 
   // payment status
   const paymentStatusCheckboxMarkup = useMemo(() => {
@@ -198,36 +199,6 @@ function SourcingListFilter(props) {
       onClearAll: () => { console.log("cleared"); },
       shortcut: true,
     },
-    // {
-    //   key: "sourcingCode",
-    //   label: "采购单号",
-    //   filter: (
-    //     <TextField
-    //       label="采购单号"
-    //       value={filterData.po}
-    //       onChange={(val) => { filterChangeHandler("po", val) }}
-    //       autoComplete="off"
-    //       labelHidden
-    //       id="po"
-    //     />
-    //   ),
-    //   shortcut: true,
-    // },
-    // {
-    //   key: "goodsInfo",
-    //   label: "商品信息",
-    //   filter: (
-    //     <TextField
-    //       label="Tagged with"
-    //       value={filterData.good_search}
-    //       onChange={(val) => { filterChangeHandler("good_search", val) }}
-    //       autoComplete="off"
-    //       labelHidden
-    //       id="good_search"
-    //     />
-    //   ),
-    //   shortcut: true,
-    // },
 
     {
       key: "dealStatus",
@@ -272,7 +243,7 @@ function SourcingListFilter(props) {
   filterConfig.set("subject_code"   , {label: "采购方", type:"radio", dataPool: subjectListMap, textKey: null });
   filterConfig.set("warehouse_code" , {label: "收货仓库", type:"radio", dataPool: wareHouseListMap, textKey: "name" });
   filterConfig.set("po"             , {label: "采购单号", type:"textfield"});
-  filterConfig.set("audit"          , {label: "审批状态", type:"checkbox", dataPool: AUDIT_STATUS });
+  filterConfig.set("audit_status"   , {label: "审批状态", type:"checkbox", dataPool: AUDIT_STATUS });
   filterConfig.set("payment_status" , {label: "付款状态", type:"checkbox", dataPool: PAYMENT_STATUS });
   filterConfig.set("delivery_status", {label: "发货状态", type:"checkbox", dataPool: DELIVERY_STATUS });
   
@@ -329,11 +300,10 @@ function SourcingListFilter(props) {
       getSubjectList(),
     ])
       .then(([provListRes, wareHouseRes, subjectRes]) => {
-
-
         const subjMap = new Map();
         const provMap = new Map();
         const warehMap = new Map();
+
         const formatedSubjectList = Object.keys(subjectRes.data).map((key) => {
           subjMap.set(key, subjectRes.data[key])
           return {
@@ -358,6 +328,9 @@ function SourcingListFilter(props) {
         setProviderListMap(provMap);
         setWareHouseListMap(warehMap);
 
+      })
+      .catch(e=>{
+        toastContext.toast({message: e.message})
       })
   },
   [])
