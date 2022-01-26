@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-20 16:16:03
- * @LastEditTime: 2022-01-20 19:21:27
+ * @LastEditTime: 2022-01-26 10:56:41
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -117,9 +117,11 @@ function SourcingDetail(props) {
           <Card
             title="操作记录"
           >
-  
-            <FstlnTimeline />
-            
+            <Card.Section>
+              <FstlnTimeline />
+
+            </Card.Section>
+
           </Card>
 
         </Layout.Section>

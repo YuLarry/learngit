@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-01-25 16:56:30
+ * @LastEditTime: 2022-01-25 19:12:16
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -9,11 +9,15 @@
 import { Button, Card, IndexTable, Page, Pagination, Tabs, TextStyle, useIndexResourceState } from "@shopify/polaris";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getProviderList, getSubjectList, getWarehouseList } from "../../api/requests";
 import { SourcingListFilter } from "./piece/SourcingListFilter";
 
 
 function SourcingList(props) {
+  
+  const resourceName = {
+    singular: '采购单',
+    plural: '采购单',
+  }
 
   const navigate = useNavigate();
 
@@ -243,6 +247,8 @@ function SourcingList(props) {
     [],
   );
 
+
+  
   
 
   useEffect(()=>{
@@ -271,13 +277,14 @@ function SourcingList(props) {
 
           </div>
           <IndexTable
+            // loading
+            resourceName={resourceName}
             itemCount={sourcingList.length}
             selectedItemsCount={
               allResourcesSelected ? 'All' : selectedResources.length
             }
-            onSelectionChange={handleSelectionChange}
+            onSelectionChange={ handleSelectionChange }
             promotedBulkActions={promotedBulkActions}
-            lastColumnSticky
             headings={[
               { title: "采购单号" },
               { title: "采购方" },

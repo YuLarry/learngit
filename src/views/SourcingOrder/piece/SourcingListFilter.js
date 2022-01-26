@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 15:00:29
- * @LastEditTime: 2022-01-25 17:55:46
+ * @LastEditTime: 2022-01-26 14:29:53
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -16,6 +16,9 @@ function SourcingListFilter(props) {
   const [providerList, setProviderList] = useState([]);
   const [subjectList, setSubjectList] = useState([]);
   const [wareHouseList, setWareHouseList] = useState([]);
+  const [providerListMap, setProviderListMap] = useState(new Map());
+  const [subjectListMap, setSubjectListMap] = useState(new Map());
+  const [wareHouseListMap, setWareHouseListMap] = useState(new Map());
 
   const [filterData, setFilterData] = useState({
 
@@ -30,14 +33,15 @@ function SourcingListFilter(props) {
   });
 
 
+
   const filterChangeHandler = useCallback(
     (key, value, checked) => {
       let _value;
-      
+
       if (checked !== undefined) {
         _value = filterData[key];
         checked ? _value.add(value) : _value.delete(value)
-      }else{
+      } else {
         _value = value;
       }
 
@@ -47,9 +51,6 @@ function SourcingListFilter(props) {
     },
     [filterData],
   );
-
-
-  const [appliedFilters, setAppliedFilters] = useState([]);
 
 
 
@@ -197,36 +198,36 @@ function SourcingListFilter(props) {
       onClearAll: () => { console.log("cleared"); },
       shortcut: true,
     },
-    {
-      key: "sourcingCode",
-      label: "采购单号",
-      filter: (
-        <TextField
-          label="采购单号"
-          value={filterData.po}
-          onChange={(val) => { filterChangeHandler("po", val) }}
-          autoComplete="off"
-          labelHidden
-          id="po"
-        />
-      ),
-      shortcut: true,
-    },
-    {
-      key: "goodsInfo",
-      label: "商品信息",
-      filter: (
-        <TextField
-          label="Tagged with"
-          value={filterData.good_search}
-          onChange={(val) => { filterChangeHandler("good_search", val) }}
-          autoComplete="off"
-          labelHidden
-          id="good_search"
-        />
-      ),
-      shortcut: true,
-    },
+    // {
+    //   key: "sourcingCode",
+    //   label: "采购单号",
+    //   filter: (
+    //     <TextField
+    //       label="采购单号"
+    //       value={filterData.po}
+    //       onChange={(val) => { filterChangeHandler("po", val) }}
+    //       autoComplete="off"
+    //       labelHidden
+    //       id="po"
+    //     />
+    //   ),
+    //   shortcut: true,
+    // },
+    // {
+    //   key: "goodsInfo",
+    //   label: "商品信息",
+    //   filter: (
+    //     <TextField
+    //       label="Tagged with"
+    //       value={filterData.good_search}
+    //       onChange={(val) => { filterChangeHandler("good_search", val) }}
+    //       autoComplete="off"
+    //       labelHidden
+    //       id="good_search"
+    //     />
+    //   ),
+    //   shortcut: true,
+    // },
 
     {
       key: "dealStatus",
@@ -266,37 +267,107 @@ function SourcingListFilter(props) {
 
   ];
 
-  useEffect(() => {
+  const filterConfig = new Map();
+  filterConfig.set("provider_id"    , {label: "供应商", type:"radio", dataPool: providerListMap, textKey: "business_name" });
+  filterConfig.set("subject_code"   , {label: "采购方", type:"radio", dataPool: subjectListMap, textKey: null });
+  filterConfig.set("warehouse_code" , {label: "收货仓库", type:"radio", dataPool: wareHouseListMap, textKey: "name" });
+  filterConfig.set("po"             , {label: "采购单号", type:"textfield"});
+  filterConfig.set("audit"          , {label: "审批状态", type:"checkbox", dataPool: AUDIT_STATUS });
+  filterConfig.set("payment_status" , {label: "付款状态", type:"checkbox", dataPool: PAYMENT_STATUS });
+  filterConfig.set("delivery_status", {label: "发货状态", type:"checkbox", dataPool: DELIVERY_STATUS });
+  
+  const clearAppliedFilter = useCallback(
+    (filterKey) => {
+      const { type } = filterConfig.get(filterKey);
+      let clearObject;
+      if( type === "radio" ){
+        clearObject = {
+          [filterKey]: null
+        }
+      }else if( type === "checkbox"){
+        clearObject = {
+          [filterKey]: new Set()
+        }
+      }
+      setFilterData(Object.assign({},filterData,clearObject))
+    },
+    [filterConfig, filterData],
+  );
+  const appliedFilters = ()=>{
+    const filters = [];
+    for(const key of filterConfig.keys()){
+      const { type, label, dataPool } = filterConfig.get(key);
+      if( type === "radio" && filterData[key] ){
+        const { textKey } = filterConfig.get(key);
 
+        const _temObj = dataPool.get( filterData[key] );
+
+        const text = textKey === null ? _temObj : _temObj[textKey];
+        filters.push({
+          key: key,
+          label: `${label}: ${text}`,
+          onRemove: ()=>{ clearAppliedFilter(key) }
+        })
+      }else if( type === "checkbox" && filterData[key].size > 0 ){
+        const text = [...filterData[key]].map((item)=>dataPool.get(item)).join(",")
+        filters.push({
+          key: key,
+          label: `${label}: ${text}`,
+          onRemove: ()=>{ clearAppliedFilter(key) }
+        })
+      }
+
+    }
+    return filters;
+  }
+
+
+  useEffect(() => {
     Promise.all([
       getProviderList(),
       getWarehouseList(),
       getSubjectList(),
     ])
       .then(([provListRes, wareHouseRes, subjectRes]) => {
-        setProviderList(provListRes.data);
-        // setSubjectList(subjectRes.data);
-        setWareHouseList(wareHouseRes.data);
 
 
+        const subjMap = new Map();
+        const provMap = new Map();
+        const warehMap = new Map();
         const formatedSubjectList = Object.keys(subjectRes.data).map((key) => {
+          subjMap.set(key, subjectRes.data[key])
           return {
             key,
             name: subjectRes.data[key]
           }
         })
 
+        provListRes.data.map((val) => {
+           provMap.set(val.id, val)
+        })
+
+        wareHouseRes.data.map((val) => {
+          warehMap.set(val.code,val)
+       })
+        
         setSubjectList(formatedSubjectList);
+        setProviderList(provListRes.data);
+        setWareHouseList(wareHouseRes.data);
+
+        setSubjectListMap(subjMap);
+        setProviderListMap(provMap);
+        setWareHouseListMap(warehMap);
 
       })
   },
-    [])
+  [])
 
   return (
     <Filters
+      queryPlaceholder="采购单号/系统SKU/商品中英文名称搜索"
       queryValue={filterData.good_search}
       filters={filters}
-      appliedFilters={appliedFilters}
+      appliedFilters={ appliedFilters() }
       onQueryChange={(val) => { filterChangeHandler("good_search", val) }}
       onQueryClear={() => { filterChangeHandler("good_search", "") }}
       onClearAll={handleClearAll}

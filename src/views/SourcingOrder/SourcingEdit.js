@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-01-24 15:43:36
+ * @LastEditTime: 2022-01-26 11:09:19
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -217,12 +217,12 @@ function SourcingEdit(props) {
 
           </Card>
           <Card title="商品明细"
-            actions={[
-              {
-                content: "添加商品",
-                onAction: () => setActive(true),
-              }
-            ]}
+            // actions={[
+            //   {
+            //     content: "添加商品",
+            //     onAction: () => setActive(true),
+            //   }
+            // ]}
           >
             {/* <Card.Section>
               <TextField
