@@ -4,7 +4,7 @@ import { AUDIT_AUDITING, AUDIT_FAILURE, AUDIT_PASS, AUDIT_REVOKED, AUDIT_REVOKIN
 /*
  * @Author: lijunwei
  * @Date: 2022-01-26 14:49:36
- * @LastEditTime: 2022-01-27 12:33:36
+ * @LastEditTime: 2022-01-27 15:42:37
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -23,10 +23,6 @@ function BadgeAuditStatus(props) {
     case AUDIT_FAILURE:
       progress = "partiallyComplete";
       status = "critical"
-      break;
-    case AUDIT_REVOKING:
-      progress = "complete";
-      status = "success"
       break;
     case AUDIT_REVOKED:
       progress = "incomplete";

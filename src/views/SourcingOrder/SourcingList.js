@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-01-27 15:31:22
+ * @LastEditTime: 2022-01-27 16:17:55
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -542,6 +542,28 @@ function SourcingList(props) {
             {rowMarkup}
           </IndexTable>
 
+            {/* <div>
+              <BadgeAuditStatus status="audit_unaudited" />
+              <BadgeAuditStatus status="audit_auditing" />
+              <BadgeAuditStatus status="audit_pass" />
+              <BadgeAuditStatus status="audit_failure" />
+              <BadgeAuditStatus status="audit_revoked" />
+            </div>
+            <div>
+              <BadgePaymentStatus status="payment_pending" />
+              <BadgePaymentStatus status="payment_applying" />
+              <BadgePaymentStatus status="payment_pass" />
+              <BadgePaymentStatus status="payment_paid" />
+              <BadgePaymentStatus status="payment_failure" />
+            </div>
+            <div>
+              <BadgeDeliveryStatus status="delivery_pending" />
+              <BadgeDeliveryStatus status="delivery_transport" />
+              <BadgeDeliveryStatus status="delivery_partial_transport" />
+              <BadgeDeliveryStatus status="delivery_already_transport" />
+              <BadgeDeliveryStatus status="delivery_partial_finish" />
+              <BadgeDeliveryStatus status="delivery_finish" />
+            </div> */}
           <div className="f-list-footer">
             <Pagination
               // label="This is Results"

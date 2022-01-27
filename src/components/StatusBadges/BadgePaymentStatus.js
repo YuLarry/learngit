@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-26 14:50:33
- * @LastEditTime: 2022-01-27 15:19:34
+ * @LastEditTime: 2022-01-27 15:48:57
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -24,15 +24,15 @@ function BadgePaymentStatus(props) {
       break;
     case PAYMENT_STATUS_PASS:
       progress = "partiallyComplete";
-      status = "warning"
+      status = "success"
       break;
     case PAYMENT_STATUS_PAID:
       progress = "complete";
       status = "success"
       break;
     case PAYMENT_STATUS_FAILURE:
-      progress = "complete";
-      status = "success"
+      progress = "partiallyComplete";
+      status = "critical"
       break;
     default:
       break;

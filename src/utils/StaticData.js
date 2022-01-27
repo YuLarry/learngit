@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-24 17:49:30
- * @LastEditTime: 2022-01-27 15:16:19
+ * @LastEditTime: 2022-01-27 15:47:44
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -11,7 +11,7 @@ export const AUDIT_UNAUDITED            = "audit_unaudited"
 export const AUDIT_AUDITING             = "audit_auditing"
 export const AUDIT_PASS                 = "audit_pass"
 export const AUDIT_FAILURE              = "audit_failure"
-export const AUDIT_REVOKING             = "audit_revoking"
+// export const AUDIT_REVOKING             = "audit_revoking"
 export const AUDIT_REVOKED              = "audit_revoked"
 
 export const PAYMENT_STATUS_PENDING            = 'payment_pending';   // 未支付
@@ -40,7 +40,7 @@ export const AUDIT_STATUS = new Map([
 
 export const PAYMENT_STATUS = new Map([
   [ PAYMENT_STATUS_PENDING  , "未支付" ],
-  [ PAYMENT_STATUS_APPLYING , "支付中" ],
+  [ PAYMENT_STATUS_APPLYING , "审批中" ],
   [ PAYMENT_STATUS_PASS     , "已通过" ],
   [ PAYMENT_STATUS_PAID     , "已支付" ],
   [ PAYMENT_STATUS_FAILURE  , "已驳回" ],

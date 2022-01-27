@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-26 14:50:48
- * @LastEditTime: 2022-01-27 12:34:48
+ * @LastEditTime: 2022-01-27 15:50:16
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -28,11 +28,11 @@ function BadgeDeliveryStatus(props) {
       break;
     case DELIVERY_ALREADY_TRANSPORT:
       progress = "complete";
-      status = "success"
+      status = "warning"
       break;
     case DELIVERY_PARTIAL_FINISH:
       progress = "partiallyComplete";
-      status = "warning"
+      status = "success"
       break;
     case DELIVERY_FINISH:
       progress = "complete";
