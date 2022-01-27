@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-20 14:31:27
- * @LastEditTime: 2022-01-24 14:15:21
+ * @LastEditTime: 2022-01-27 17:02:47
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -44,14 +44,14 @@ function ProductInfoPopover(props) {
     </div>
     
   ),
-  [togglePopoverActive]
+  [tableCellText, togglePopoverActive]
   );
 
 
 
   return (
     <Popover
-      active={popoverActive}
+      active={  popoverNode ? popoverActive : false }
       activator={activator}
       onClose={togglePopoverActive}
       ariaHaspopup={false}

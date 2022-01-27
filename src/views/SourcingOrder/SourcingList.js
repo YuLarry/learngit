@@ -1,18 +1,19 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-01-27 16:17:55
+ * @LastEditTime: 2022-01-27 17:01:23
  * @LastEditors: lijunwei
  * @Description: 
  */
 
-import { Button, Card, IndexTable, Page, Pagination, Tabs, TextStyle, useIndexResourceState } from "@shopify/polaris";
+import { Button, Card, IndexTable, Page, Pagination, Tabs, TextStyle, Thumbnail, useIndexResourceState } from "@shopify/polaris";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { ProductInfoPopover } from "../../components/ProductInfoPopover/ProductInfoPopover";
 import { BadgeAuditStatus } from "../../components/StatusBadges/BadgeAuditStatus";
 import { BadgeDeliveryStatus } from "../../components/StatusBadges/BadgeDeliveryStatus";
 import { BadgePaymentStatus } from "../../components/StatusBadges/BadgePaymentStatus";
-import { AUDIT_FAILURE, AUDIT_PASS, AUDIT_REVOKED, AUDIT_UNAUDITED, PAYMENT_STATUS_FAILURE } from "../../utils/StaticData";
+import { AUDIT_AUDITING, AUDIT_FAILURE, AUDIT_PASS, AUDIT_REVOKED, AUDIT_UNAUDITED, PAYMENT_STATUS_FAILURE } from "../../utils/StaticData";
 import { SourcingListFilter } from "./piece/SourcingListFilter";
 
 
@@ -411,6 +412,15 @@ function SourcingList(props) {
 
   }, [selectedResources, sourcingListMap])
 
+  // export enable control
+  const exportEnable = useMemo(() => {
+    const enableArr = [AUDIT_AUDITING, AUDIT_PASS];
+    const index = selectedResources.findIndex((item) => ( enableArr.indexOf(sourcingListMap.get(item).audit_status) === -1  ))
+
+    return index === -1
+
+  }, [selectedResources, sourcingListMap])
+
 
   const promotedBulkActions = useMemo(() => {
     return [
@@ -434,7 +444,7 @@ function SourcingList(props) {
       {
         content: "导出采购单",
         onAction: () => console.log('Todo: implement bulk delete'),
-        disabled: true,
+        disabled: !exportEnable,
 
       },
       {
@@ -444,12 +454,33 @@ function SourcingList(props) {
 
       },
     ];
-  }, [applyPayEnable, auditEnable])
+  }, [applyPayEnable, auditEnable, cancelEnable, deleteEnable, exportEnable])
 
+  const goodsItemNode = useCallback((item, idx)=>{
+    if( !item ) return null;
+    const { sku, purchase_num, goods: {image_url, en_name} } = item;
+    return (
+      <div className="product-container" key={idx} style={{ maxWidth: "400px", display: "flex", alignItems: "flex-start" }}>
+
+        <Thumbnail
+          source={image_url || ""}
+          alt={en_name}
+          size="small"
+        />
+        <div style={{ flex: 1, marginLeft: "1em" }}>
+          <Button plain>{sku}</Button>
+          <p>{purchase_num}</p>
+        </div>
+      </div>
+    )
+  },[])
 
   const rowMarkup = useMemo(() => sourcingList.map(
-    ({ id, po_no, subject_title, provider_name, warehouse_name, audit_status, payment_status, delivery_status, good_search }, index) => (
-      <IndexTable.Row
+    ({ id, po_no, subject_title, provider_name, warehouse_name, audit_status, payment_status, delivery_status, item }, index) => {
+      
+      const prodNod = item.map((goodsItem, idx)=>(goodsItemNode(goodsItem, idx)))
+      
+      return (<IndexTable.Row
         id={id}
         key={index}
         selected={selectedResources.includes(id)}
@@ -476,11 +507,13 @@ function SourcingList(props) {
         <IndexTable.Cell>
           {<BadgeDeliveryStatus status={delivery_status} />}
         </IndexTable.Cell>
-        <IndexTable.Cell>{good_search}</IndexTable.Cell>
-      </IndexTable.Row>
-    ),
+        <IndexTable.Cell>
+          <ProductInfoPopover popoverNode={ item.length > 0 ? prodNod :null } tableCellText={`${item.length}商品`} />
+        </IndexTable.Cell>
+      </IndexTable.Row>)
+    }
   )
-    , [selectedResources, sourcingList]);
+    , [goodsItemNode, selectedResources, sourcingList]);
 
 
   const exportHandler = useCallback(
@@ -542,7 +575,7 @@ function SourcingList(props) {
             {rowMarkup}
           </IndexTable>
 
-            {/* <div>
+          {/* <div>
               <BadgeAuditStatus status="audit_unaudited" />
               <BadgeAuditStatus status="audit_auditing" />
               <BadgeAuditStatus status="audit_pass" />
