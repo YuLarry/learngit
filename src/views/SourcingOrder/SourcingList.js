@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-01-27 12:04:03
+ * @LastEditTime: 2022-01-27 15:31:22
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -12,6 +12,7 @@ import { useNavigate } from "react-router-dom";
 import { BadgeAuditStatus } from "../../components/StatusBadges/BadgeAuditStatus";
 import { BadgeDeliveryStatus } from "../../components/StatusBadges/BadgeDeliveryStatus";
 import { BadgePaymentStatus } from "../../components/StatusBadges/BadgePaymentStatus";
+import { AUDIT_FAILURE, AUDIT_PASS, AUDIT_REVOKED, AUDIT_UNAUDITED, PAYMENT_STATUS_FAILURE } from "../../utils/StaticData";
 import { SourcingListFilter } from "./piece/SourcingListFilter";
 
 
@@ -361,8 +362,54 @@ function SourcingList(props) {
     }
   ]);
 
+  const [sourcingListMap, setSourcingListMap] = useState(new Map());
+
+  useEffect(() => {
+    const tempMap = new Map();
+    sourcingList.map((item) => {
+      const { id } = item;
+      tempMap.set(id, item);
+    })
+    setSourcingListMap(tempMap);
+  }
+    , [sourcingList])
+
 
   const { selectedResources, allResourcesSelected, handleSelectionChange } = useIndexResourceState(sourcingList);
+
+  // audit enable control
+  const auditEnable = useMemo(() => {
+    const enableArr = [AUDIT_UNAUDITED, AUDIT_FAILURE, AUDIT_REVOKED];
+    const index = selectedResources.findIndex((item) => (enableArr.indexOf(sourcingListMap.get(item).audit_status) === -1))
+    return index === -1
+
+  }, [selectedResources, sourcingListMap])
+
+  // apply payment control
+  const applyPayEnable = useMemo(() => {
+    console.log(1);
+    if (selectedResources.length > 1) { return false };
+
+    const index = selectedResources.findIndex((item) => (sourcingListMap.get(item).audit_status === AUDIT_PASS && sourcingListMap.get(item).payment_status === PAYMENT_STATUS_FAILURE))
+    // const index = selectedResources.findIndex((item)=>() )
+    return index === -1
+  }, [selectedResources, sourcingListMap])
+
+  // cancel enable control
+  const cancelEnable = useMemo(() => {
+    const enableArr = [AUDIT_UNAUDITED, AUDIT_FAILURE, AUDIT_REVOKED];
+    const index = selectedResources.findIndex((item) => (enableArr.indexOf(sourcingListMap.get(item).audit_status) === -1))
+    return index === -1
+
+  }, [selectedResources, sourcingListMap])
+
+  // delete enable control
+  const deleteEnable = useMemo(() => {
+    const enableArr = [AUDIT_UNAUDITED];
+    const index = selectedResources.findIndex((item) => (enableArr.indexOf(sourcingListMap.get(item).audit_status) === -1))
+    return index === -1
+
+  }, [selectedResources, sourcingListMap])
 
 
   const promotedBulkActions = useMemo(() => {
@@ -370,25 +417,34 @@ function SourcingList(props) {
       {
         content: '提交审批',
         onAction: () => console.log('Todo: implement bulk edit'),
+        disabled: !auditEnable,
       },
       {
         content: '申请付款',
         onAction: () => console.log(navigate("payRequest")),
+        disabled: !applyPayEnable,
+
       },
       {
         content: "取消采购单",
         onAction: () => console.log('Todo: implement bulk remove tags'),
+        disabled: !cancelEnable,
+
       },
       {
         content: "导出采购单",
         onAction: () => console.log('Todo: implement bulk delete'),
+        disabled: true,
+
       },
       {
         content: "删除采购单",
         onAction: () => console.log('Todo: implement bulk delete'),
+        disabled: !deleteEnable,
+
       },
     ];
-  },[])
+  }, [applyPayEnable, auditEnable])
 
 
   const rowMarkup = useMemo(() => sourcingList.map(

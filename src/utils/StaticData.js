@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-24 17:49:30
- * @LastEditTime: 2022-01-27 12:28:28
+ * @LastEditTime: 2022-01-27 15:16:19
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -14,12 +14,11 @@ export const AUDIT_FAILURE              = "audit_failure"
 export const AUDIT_REVOKING             = "audit_revoking"
 export const AUDIT_REVOKED              = "audit_revoked"
 
-export const PAYMENT_PENDING            = "payment_pending"
-export const PAYMENT_APPLYING           = "payment_applying"
-export const PAYMENT_PREPAID            = "payment_prepaid"
-export const PAYMENT_PASS               = "payment_pass"
-// export const PAYMENT_REVOKED            = "payment_revoked"
-// export const PAYMENT_FAILURE            = "payment_failure"
+export const PAYMENT_STATUS_PENDING            = 'payment_pending';   // 未支付
+export const PAYMENT_STATUS_APPLYING           = 'payment_applying';  // 审批中
+export const PAYMENT_STATUS_PASS               = 'payment_pass';      // 已通过
+export const PAYMENT_STATUS_PAID               = 'payment_paid';      // 已支付
+export const PAYMENT_STATUS_FAILURE            = 'payment_failure';   // 已驳回
 
 export const DELIVERY_PENDING           = "delivery_pending"
 export const DELIVERY_TRANSPORT         = "delivery_transport"
@@ -34,17 +33,17 @@ export const AUDIT_STATUS = new Map([
   [ AUDIT_AUDITING , "审批中"],
   [ AUDIT_PASS     , "已通过"],
   [ AUDIT_FAILURE  , "已驳回"],
-  [ AUDIT_REVOKING , "撤销中"],
+  // [ AUDIT_REVOKING , "撤销中"],
   [ AUDIT_REVOKED  , "已撤销"],
 ])
 
+
 export const PAYMENT_STATUS = new Map([
-  [ PAYMENT_PENDING , "未支付"],
-  [ PAYMENT_APPLYING, "支付中"],
-  [ PAYMENT_PREPAID , "部分支付"],
-  [ PAYMENT_PASS    , "已支付"],
-  // [ PAYMENT_REVOKED , "被撤销"],
-  // [ PAYMENT_FAILURE , "已驳回"],
+  [ PAYMENT_STATUS_PENDING  , "未支付" ],
+  [ PAYMENT_STATUS_APPLYING , "支付中" ],
+  [ PAYMENT_STATUS_PASS     , "已通过" ],
+  [ PAYMENT_STATUS_PAID     , "已支付" ],
+  [ PAYMENT_STATUS_FAILURE  , "已驳回" ],
 ])
 
 export const DELIVERY_STATUS = new Map([
