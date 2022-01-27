@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-01-26 16:44:57
+ * @LastEditTime: 2022-01-27 12:04:03
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -16,7 +16,7 @@ import { SourcingListFilter } from "./piece/SourcingListFilter";
 
 
 function SourcingList(props) {
-  
+
   const resourceName = {
     singular: '采购单',
     plural: '采购单',
@@ -24,39 +24,43 @@ function SourcingList(props) {
 
   const navigate = useNavigate();
 
-  const [selected, setSelected] = useState(0);
-  const handleTabChange = useCallback(
-    (selectedTabIndex) => setSelected(selectedTabIndex),
-    [],
-  );
-
-  const [tabs] = useState([
-    {
-      id: 'all-list',
-      content: '全部',
-      accessibilityLabel: '',
-      panelID: 'all-customers-content-1',
-    },
-    {
-      id: 'created-list',
-      content: '已创建',
-      panelID: 'accepts-marketing-content-1',
-    },
-    {
-      id: 'done-list',
-      content: '已完结',
-      panelID: 'repeat-customers-content-1',
-    },
-    {
-      id: 'canceled-list',
-      content: '已取消',
-      panelID: 'prospects-content-1',
-    },
-  ]);
-
   const [pageIndex, setPageIndex] = useState(1);
   const pageSize = 20;
   const [total, setTotal] = useState(0);
+
+  const [selectedTab, setSelectedTab] = useState(0);
+  const handleTabChange = useCallback(
+    (selectedTabIndex) => setSelectedTab(selectedTabIndex),
+    [],
+  );
+
+  const tabs = useMemo(() => {
+    return [
+      {
+        id: 'all-list',
+        content: '全部',
+        accessibilityLabel: '',
+        panelID: 'all-customers-content-1',
+      },
+      {
+        id: 'created-list',
+        content: '已创建',
+        panelID: 'accepts-marketing-content-1',
+      },
+      {
+        id: 'done-list',
+        content: '已完结',
+        panelID: 'repeat-customers-content-1',
+      },
+      {
+        id: 'canceled-list',
+        content: '已取消',
+        panelID: 'prospects-content-1',
+      },
+    ]
+  }, []);
+
+
 
   // const [exporting, setExporting] = useState(false);
 
@@ -356,36 +360,38 @@ function SourcingList(props) {
       }
     }
   ]);
-  
+
 
   const { selectedResources, allResourcesSelected, handleSelectionChange } = useIndexResourceState(sourcingList);
 
 
-  const promotedBulkActions = [
-    {
-      content: '提交审批',
-      onAction: () => console.log('Todo: implement bulk edit'),
-    },
-    {
-      content: '申请付款',
-      onAction: () => console.log(navigate("payRequest")),
-    },
-    {
-      content: "取消采购单",
-      onAction: () => console.log('Todo: implement bulk remove tags'),
-    },
-    {
-      content: "导出采购单",
-      onAction: () => console.log('Todo: implement bulk delete'),
-    },
-    {
-      content: "删除采购单",
-      onAction: () => console.log('Todo: implement bulk delete'),
-    },
-  ];
+  const promotedBulkActions = useMemo(() => {
+    return [
+      {
+        content: '提交审批',
+        onAction: () => console.log('Todo: implement bulk edit'),
+      },
+      {
+        content: '申请付款',
+        onAction: () => console.log(navigate("payRequest")),
+      },
+      {
+        content: "取消采购单",
+        onAction: () => console.log('Todo: implement bulk remove tags'),
+      },
+      {
+        content: "导出采购单",
+        onAction: () => console.log('Todo: implement bulk delete'),
+      },
+      {
+        content: "删除采购单",
+        onAction: () => console.log('Todo: implement bulk delete'),
+      },
+    ];
+  },[])
 
 
-  const rowMarkup = useMemo(()=>sourcingList.map(
+  const rowMarkup = useMemo(() => sourcingList.map(
     ({ id, po_no, subject_title, provider_name, warehouse_name, audit_status, payment_status, delivery_status, good_search }, index) => (
       <IndexTable.Row
         id={id}
@@ -394,7 +400,7 @@ function SourcingList(props) {
         position={index}
       >
         <IndexTable.Cell>
-          <Button 
+          <Button
             plain
             monochrome
             url={`detail`}
@@ -418,7 +424,7 @@ function SourcingList(props) {
       </IndexTable.Row>
     ),
   )
-  ,[selectedResources, sourcingList]);
+    , [selectedResources, sourcingList]);
 
 
   const exportHandler = useCallback(
@@ -429,12 +435,12 @@ function SourcingList(props) {
   );
 
 
-  
-  
 
-  useEffect(()=>{
-    
-  },[])
+
+
+  useEffect(() => {
+
+  }, [])
 
 
   return (
@@ -449,7 +455,7 @@ function SourcingList(props) {
     >
       <Card>
         <Tabs
-          tabs={tabs} selected={selected} onSelect={handleTabChange}
+          tabs={tabs} selected={selectedTab} onSelect={handleTabChange}
         >
           <div style={{ padding: '16px', display: 'flex' }}>
             <div style={{ flex: 1 }}>
@@ -464,7 +470,7 @@ function SourcingList(props) {
             selectedItemsCount={
               allResourcesSelected ? 'All' : selectedResources.length
             }
-            onSelectionChange={ handleSelectionChange }
+            onSelectionChange={handleSelectionChange}
             promotedBulkActions={promotedBulkActions}
             headings={[
               { title: "采购单号" },

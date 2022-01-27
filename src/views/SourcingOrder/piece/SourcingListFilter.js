@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 15:00:29
- * @LastEditTime: 2022-01-26 16:18:23
+ * @LastEditTime: 2022-01-27 12:30:12
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -23,7 +23,6 @@ function SourcingListFilter(props) {
   const [wareHouseListMap, setWareHouseListMap] = useState(new Map());
 
   const [filterData, setFilterData] = useState({
-
     provider_id: "",
     subject_code: "",
     warehouse_code: "",
@@ -52,12 +51,6 @@ function SourcingListFilter(props) {
     },
     [filterData],
   );
-
-
-
-  const handleClearAll = useCallback(() => {
-    console.log('clear all');
-  }, []);
 
   // provider radio
   const providerRadios = useMemo(() =>
@@ -119,7 +112,7 @@ function SourcingListFilter(props) {
           checked={filterData.audit_status.has(entry)}
           id={entry}
           name="paymentStatus"
-          onChange={(checked) => { filterChangeHandler("audit", entry, checked) }}
+          onChange={(checked) => { filterChangeHandler("audit_status", entry, checked) }}
         />)
       )
     })
@@ -163,136 +156,161 @@ function SourcingListFilter(props) {
   }, [filterChangeHandler, filterData.delivery_status]);
 
 
-  const filters = [
-    {
-      key: "provider",
-      label: "供应商",
-      filter: (
-        <Stack vertical>
-          {providerRadios}
-        </Stack>
-      ),
-      onClearAll: () => { console.log("cleared"); },
-      shortcut: true,
-    },
-
-    {
-      key: "subject",
-      label: "采购方",
-      filter: (
-        <Stack vertical>
-          {sourcingCompanyRadios}
-        </Stack>
-      ),
-      onClearAll: () => { console.log("cleared"); },
-      shortcut: true,
-    },
-
-    {
-      key: "warehouse",
-      label: "收货仓库",
-      filter: (
-        <Stack vertical>
-          {warehouseRadios}
-        </Stack>
-      ),
-      onClearAll: () => { console.log("cleared"); },
-      shortcut: true,
-    },
-
-    {
-      key: "dealStatus",
-      label: "审批状态",
-      filter: (
-        <Stack vertical>
-          {auditStatusCheckboxMarkup}
-        </Stack>
-      ),
-      onClearAll: () => { console.log("cleared"); },
-      shortcut: true,
-    },
-
-    {
-      key: "payStatus",
-      label: "付款状态",
-      filter: (
-        <Stack vertical>
-          {paymentStatusCheckboxMarkup}
-        </Stack>
-      ),
-      onClearAll: () => { console.log("cleared"); },
-      shortcut: true,
-    },
-    {
-      key: "deliveryStatus",
-      label: "发货状态",
-      filter: (
-        <Stack vertical>
-          {deliveryStatusCheckboxMarkup}
-        </Stack>
-      ),
-      onClearAll: () => { console.log("cleared"); },
-      shortcut: true,
-    },
+  const filterConfig = useMemo(() => {
+    const config = new Map();
+    config.set("provider_id", { label: "供应商", type: "radio", dataPool: providerListMap, textKey: "business_name" });
+    config.set("subject_code", { label: "采购方", type: "radio", dataPool: subjectListMap, textKey: null });
+    config.set("warehouse_code", { label: "收货仓库", type: "radio", dataPool: wareHouseListMap, textKey: "name" });
+    // config.set("po"             , {label: "采购单号", type:"textfield"});
+    config.set("audit_status", { label: "审批状态", type: "checkbox", dataPool: AUDIT_STATUS });
+    config.set("payment_status", { label: "付款状态", type: "checkbox", dataPool: PAYMENT_STATUS });
+    config.set("delivery_status", { label: "发货状态", type: "checkbox", dataPool: DELIVERY_STATUS });
+    return config;
+  }, [providerListMap, subjectListMap, wareHouseListMap]);
 
 
-  ];
-
-  const filterConfig = new Map();
-  filterConfig.set("provider_id"    , {label: "供应商", type:"radio", dataPool: providerListMap, textKey: "business_name" });
-  filterConfig.set("subject_code"   , {label: "采购方", type:"radio", dataPool: subjectListMap, textKey: null });
-  filterConfig.set("warehouse_code" , {label: "收货仓库", type:"radio", dataPool: wareHouseListMap, textKey: "name" });
-  filterConfig.set("po"             , {label: "采购单号", type:"textfield"});
-  filterConfig.set("audit_status"   , {label: "审批状态", type:"checkbox", dataPool: AUDIT_STATUS });
-  filterConfig.set("payment_status" , {label: "付款状态", type:"checkbox", dataPool: PAYMENT_STATUS });
-  filterConfig.set("delivery_status", {label: "发货状态", type:"checkbox", dataPool: DELIVERY_STATUS });
-  
   const clearAppliedFilter = useCallback(
     (filterKey) => {
       const { type } = filterConfig.get(filterKey);
       let clearObject;
-      if( type === "radio" ){
+      if (type === "radio") {
         clearObject = {
           [filterKey]: null
         }
-      }else if( type === "checkbox"){
+      } else if (type === "checkbox") {
         clearObject = {
           [filterKey]: new Set()
         }
       }
-      setFilterData(Object.assign({},filterData,clearObject))
+      setFilterData(Object.assign({}, filterData, clearObject))
     },
     [filterConfig, filterData],
   );
-  const appliedFilters = ()=>{
+
+  const appliedFilters = useMemo(() => {
     const filters = [];
-    for(const key of filterConfig.keys()){
+    for (const key of filterConfig.keys()) {
       const { type, label, dataPool } = filterConfig.get(key);
-      if( type === "radio" && filterData[key] ){
+      if (type === "radio" && filterData[key]) {
         const { textKey } = filterConfig.get(key);
 
-        const _temObj = dataPool.get( filterData[key] );
+        const _temObj = dataPool.get(filterData[key]);
 
         const text = textKey === null ? _temObj : _temObj[textKey];
         filters.push({
           key: key,
           label: `${label}: ${text}`,
-          onRemove: ()=>{ clearAppliedFilter(key) }
+          onRemove: () => { clearAppliedFilter(key) }
         })
-      }else if( type === "checkbox" && filterData[key].size > 0 ){
-        const text = [...filterData[key]].map((item)=>dataPool.get(item)).join(",")
+      } else if (type === "checkbox" && filterData[key].size > 0) {
+        const text = [...filterData[key]].map((item) => dataPool.get(item)).join(",")
         filters.push({
           key: key,
           label: `${label}: ${text}`,
-          onRemove: ()=>{ clearAppliedFilter(key) }
+          onRemove: () => { clearAppliedFilter(key) }
         })
       }
 
     }
     return filters;
-  }
+  }, [clearAppliedFilter, filterConfig, filterData])
 
 
+  const clearFilterItem = useCallback((key) => {
+    setFilterData({ ...filterData, [key]: filterConfig.get(key).type === "radio" ? null : new Set() })
+  },
+    [filterConfig, filterData])
+
+
+  const handleClearAll = useCallback(() => {
+    setFilterData({
+      provider_id: "",
+      subject_code: "",
+      warehouse_code: "",
+      audit_status: new Set(),
+      payment_status: new Set(),
+      delivery_status: new Set(),
+    })
+  }, []);
+
+  const filters = useMemo(() =>
+    [
+      {
+        key: "provider_id",
+        label: "供应商",
+        filter: (
+          <Stack vertical>
+            {providerRadios}
+          </Stack>
+        ),
+        onClearAll: () => { clearFilterItem("provider_id") },
+        shortcut: true,
+      },
+
+      {
+        key: "subject_code",
+        label: "采购方",
+        filter: (
+          <Stack vertical>
+            {sourcingCompanyRadios}
+          </Stack>
+        ),
+        onClearAll: () => { clearFilterItem("subject_code") },
+        shortcut: true,
+      },
+
+      {
+        key: "warehouse_code",
+        label: "收货仓库",
+        filter: (
+          <Stack vertical>
+            {warehouseRadios}
+          </Stack>
+        ),
+        onClearAll: () => { clearFilterItem("warehouse_code") },
+        shortcut: true,
+      },
+
+      {
+        key: "audit_status",
+        label: "审批状态",
+        filter: (
+          <Stack vertical>
+            {auditStatusCheckboxMarkup}
+          </Stack>
+        ),
+        onClearAll: () => { clearFilterItem("audit_status") },
+        shortcut: true,
+      },
+
+      {
+        key: "payment_status",
+        label: "付款状态",
+        filter: (
+          <Stack vertical>
+            {paymentStatusCheckboxMarkup}
+          </Stack>
+        ),
+        onClearAll: () => { clearFilterItem("payment_status") },
+        shortcut: true,
+      },
+      {
+        key: "delivery_status",
+        label: "发货状态",
+        filter: (
+          <Stack vertical>
+            {deliveryStatusCheckboxMarkup}
+          </Stack>
+        ),
+        onClearAll: () => { clearAppliedFilter("delivery_status") },
+        shortcut: true,
+      },
+
+
+    ]
+    , [auditStatusCheckboxMarkup, clearAppliedFilter, clearFilterItem, deliveryStatusCheckboxMarkup, paymentStatusCheckboxMarkup, providerRadios, sourcingCompanyRadios, warehouseRadios]);
+
+    
   useEffect(() => {
     Promise.all([
       getProviderList(),
@@ -313,13 +331,13 @@ function SourcingListFilter(props) {
         })
 
         provListRes.data.map((val) => {
-           provMap.set(val.id, val)
+          provMap.set(val.id, val)
         })
 
         wareHouseRes.data.map((val) => {
-          warehMap.set(val.code,val)
-       })
-        
+          warehMap.set(val.code, val)
+        })
+
         setSubjectList(formatedSubjectList);
         setProviderList(provListRes.data);
         setWareHouseList(wareHouseRes.data);
@@ -329,18 +347,18 @@ function SourcingListFilter(props) {
         setWareHouseListMap(warehMap);
 
       })
-      .catch(e=>{
-        toastContext.toast({message: e.message})
+      .catch(e => {
+        toastContext.toast({ message: e.message })
       })
   },
-  [])
+    [])
 
   return (
     <Filters
       queryPlaceholder="采购单号/系统SKU/商品中英文名称搜索"
       queryValue={filterData.good_search}
       filters={filters}
-      appliedFilters={ appliedFilters() }
+      appliedFilters={appliedFilters}
       onQueryChange={(val) => { filterChangeHandler("good_search", val) }}
       onQueryClear={() => { filterChangeHandler("good_search", "") }}
       onClearAll={handleClearAll}

@@ -1,13 +1,13 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-26 14:50:48
- * @LastEditTime: 2022-01-26 16:25:15
+ * @LastEditTime: 2022-01-27 12:34:48
  * @LastEditors: lijunwei
  * @Description: 
  */
 
 import { Badge } from "@shopify/polaris";
-import { DELIVERY_STATUS } from "../../utils/StaticData";
+import { DELIVERY_ALREADY_TRANSPORT, DELIVERY_FINISH, DELIVERY_PARTIAL_FINISH, DELIVERY_PARTIAL_TRANSPORT, DELIVERY_PENDING, DELIVERY_STATUS, DELIVERY_TRANSPORT } from "../../utils/StaticData";
 
 function BadgeDeliveryStatus(props) {
 
@@ -15,26 +15,26 @@ function BadgeDeliveryStatus(props) {
   let status;
 
   switch (props.status) {
-    case "delivery_pending":
+    case DELIVERY_PENDING:
       progress = "incomplete";
       break;
-    case "delivery_transport":
+    case DELIVERY_TRANSPORT:
       progress = "incomplete";
       status = "attention"
       break;
-    case "delivery_partial_transport":
+    case DELIVERY_PARTIAL_TRANSPORT:
       progress = "partiallyComplete";
       status = "warning"
       break;
-    case "delivery_already_transport":
+    case DELIVERY_ALREADY_TRANSPORT:
       progress = "complete";
       status = "success"
       break;
-    case "delivery_partial_finish":
+    case DELIVERY_PARTIAL_FINISH:
       progress = "partiallyComplete";
       status = "warning"
       break;
-    case "delivery_finish":
+    case DELIVERY_FINISH:
       progress = "complete";
       status = "success"
       break;

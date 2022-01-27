@@ -1,10 +1,10 @@
 import { Badge } from "@shopify/polaris";
-import { AUDIT_STATUS } from "../../utils/StaticData";
+import { AUDIT_AUDITING, AUDIT_FAILURE, AUDIT_PASS, AUDIT_REVOKED, AUDIT_REVOKING, AUDIT_STATUS, AUDIT_UNAUDITED } from "../../utils/StaticData";
 
 /*
  * @Author: lijunwei
  * @Date: 2022-01-26 14:49:36
- * @LastEditTime: 2022-01-26 16:24:54
+ * @LastEditTime: 2022-01-27 12:33:36
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -13,26 +13,26 @@ function BadgeAuditStatus(props) {
   let status;
 
   switch (props.status) {
-    case "audit_unaudited":
+    case AUDIT_UNAUDITED:
       progress = "incomplete";
       break;
-    case "audit_auditing":
+    case AUDIT_AUDITING:
       progress = "incomplete";
       status = "attention"
       break;
-    case "audit_failure":
+    case AUDIT_FAILURE:
       progress = "partiallyComplete";
       status = "critical"
       break;
-    case "audit_revoking":
+    case AUDIT_REVOKING:
       progress = "complete";
       status = "success"
       break;
-    case "audit_revoked":
+    case AUDIT_REVOKED:
       progress = "incomplete";
       status = "attention"
       break;
-    case "audit_pass":
+    case AUDIT_PASS:
       progress = "complete";
       status = "success"
       break;
