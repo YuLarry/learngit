@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-01-26 11:09:19
+ * @LastEditTime: 2022-01-27 19:34:52
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -10,17 +10,53 @@ import { Button, Card, Form, FormLayout, Icon, IndexTable, Layout, Modal, Page, 
 import {
   SearchMinor
 } from '@shopify/polaris-icons';
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { getBrandList, getProviderList, getSubjectList, getWarehouseList } from "../../api/requests";
 import { FstlnSelectTree } from "../../components/FstlnSelectTree/FstlnSelectTree";
 import { SourcingCardSection } from "../../components/SecondaryCard/SourcingCardSection";
 import { SourcingProviCard } from "../../components/SecondaryCard/SourcingProviCard";
 import { SourcingRepoCard } from "../../components/SecondaryCard/SourcingRepoCard";
+import { BUSINESS_TYPE, DEPARTMENT_LIST, PLATFORM_LIST } from "../../utils/StaticData";
 import "./sourcingOrder.scss";
 
 
 
 function SourcingEdit(props) {
 
+  const [brandList, setBrandList] = useState([]);
+  const [provList, setProvList] = useState([]);
+  const [subjList, setSubjList] = useState([]);
+  const [wareList, setWareList] = useState([]);
+
+  useEffect(()=>{
+    Promise.all([
+      getBrandList(),
+      getProviderList(),
+      getSubjectList(),
+      getWarehouseList(),
+
+    ])
+    .then(([resBrand, resProv, resSubj, resWare])=>{
+      const { data } = resBrand;
+      const brandListArr = Object.keys(data).map((key)=>({label: data[key], value: key}))
+      setBrandList(brandListArr);
+
+      const { data: subjData } = resSubj; 
+      const subjListArr = Object.keys(subjData).map((key)=>({label: subjData[key], value: key}))
+      setSubjList(subjListArr);
+
+      const { data: provData } = resProv; 
+      const provListArr = provData.map((item)=>({label: item.business_name, value: item.id}))
+      setProvList(provListArr)
+      
+      
+      const { data: wareData } = resWare; 
+      const wareListArr = wareData.map((item)=>({label: item.name, value: item.code}))
+      setWareList(wareListArr)
+      
+    }) 
+  },
+  [])
 
   // = modal =
   const [active, setActive] = useState(false);
@@ -173,16 +209,19 @@ function SourcingEdit(props) {
                 <FormLayout.Group>
                   <Select
                     label="项目"
+                    options={ brandList }
                     onChange={() => { }}
                   />
                   <Select
                     label="采购方"
+                    options={ subjList }
                     onChange={() => { }}
                   />
                 </FormLayout.Group>
                 <FormLayout.Group>
                   <Select
                     label="供应商"
+                    options={ provList }
                     onChange={() => { }}
                   />
                   <Select
@@ -193,21 +232,25 @@ function SourcingEdit(props) {
                 <FormLayout.Group>
                   <Select
                     label="收货仓库"
+                    options={ wareList }
                     onChange={() => { }}
                   />
                   <Select
                     label="事业部"
-                    onChange={() => { }}
+                    options={ DEPARTMENT_LIST }
+                    onChange={() => {  }}
                   />
                 </FormLayout.Group>
                 <FormLayout.Group>
                   <Select
                     label="业务类型"
-                    onChange={() => { }}
+                    options={ BUSINESS_TYPE }
+                    onChange={() => {  }}
                   />
                   <Select
                     label="平台"
-                    onChange={() => { }}
+                    options={ PLATFORM_LIST }
+                    onChange={() => {  }}
                   />
                 </FormLayout.Group>
 

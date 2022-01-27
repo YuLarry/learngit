@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-24 17:49:30
- * @LastEditTime: 2022-01-27 15:47:44
+ * @LastEditTime: 2022-01-27 19:16:02
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -54,3 +54,24 @@ export const DELIVERY_STATUS = new Map([
   [ DELIVERY_PARTIAL_FINISH   , "部分收货"],
   [ DELIVERY_FINISH           , "已收货"],
 ])
+
+
+
+export const BUSINESS_TYPE = [
+ {label: "电商B2C", value: "电商B2C"},
+ {label: "分销B2B", value: "分销B2B"},
+]
+
+export const PLATFORM_LIST = [
+  {label: "", value: ""},
+  {label: "亚马逊", value: "亚马逊"},
+  {label: "Shopify", value: "Shopify"},
+]
+  
+
+export const DEPARTMENT_LIST = [
+  {label: "总部", value: "总部"},
+  {label: "日本", value: "日本"},
+  {label: "韩国", value: "韩国"},
+
+]
