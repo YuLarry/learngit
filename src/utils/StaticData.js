@@ -1,10 +1,17 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-24 17:49:30
- * @LastEditTime: 2022-01-27 19:16:02
+ * @LastEditTime: 2022-01-28 15:29:31
  * @LastEditors: lijunwei
  * @Description: 
  */
+
+export const PO_STATUS = {
+  ALL:      "",
+  PENDING : "po_pending",   // 已创建/待完成
+  FINISH  : "po_finish",    // 已完结
+  CANCEL  : "po_cancel",    // 已取消
+}
 
 
 export const AUDIT_UNAUDITED            = "audit_unaudited"

@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 15:00:29
- * @LastEditTime: 2022-01-27 12:30:12
+ * @LastEditTime: 2022-01-28 16:33:06
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -14,15 +14,7 @@ import { AUDIT_STATUS, DELIVERY_STATUS, PAYMENT_STATUS } from "../../../utils/St
 
 function SourcingListFilter(props) {
 
-  const toastContext = useContext(ToastContext);
-  const [providerList, setProviderList] = useState([]);
-  const [subjectList, setSubjectList] = useState([]);
-  const [wareHouseList, setWareHouseList] = useState([]);
-  const [providerListMap, setProviderListMap] = useState(new Map());
-  const [subjectListMap, setSubjectListMap] = useState(new Map());
-  const [wareHouseListMap, setWareHouseListMap] = useState(new Map());
-
-  const [filterData, setFilterData] = useState({
+  const { filter = {
     provider_id: "",
     subject_code: "",
     warehouse_code: "",
@@ -31,8 +23,21 @@ function SourcingListFilter(props) {
     audit_status: new Set(),
     payment_status: new Set(),
     delivery_status: new Set(),
-  });
+  }, onChange = ()=>{} } = props
 
+  const toastContext = useContext(ToastContext);
+  const [providerList, setProviderList] = useState([]);
+  const [subjectList, setSubjectList] = useState([]);
+  const [wareHouseList, setWareHouseList] = useState([]);
+  const [providerListMap, setProviderListMap] = useState(new Map());
+  const [subjectListMap, setSubjectListMap] = useState(new Map());
+  const [wareHouseListMap, setWareHouseListMap] = useState(new Map());
+
+  const [filterData, setFilterData] = useState(filter);
+
+  useEffect(() => {
+    onChange(filterData)
+  }, [filterData]);
 
   const filterChangeHandler = useCallback(
     (key, value, checked) => {

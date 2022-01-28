@@ -1,13 +1,15 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-20 16:16:03
- * @LastEditTime: 2022-01-26 10:56:41
+ * @LastEditTime: 2022-01-28 18:10:44
  * @LastEditors: lijunwei
  * @Description: 
  */
 
 import { Badge, Card, IndexTable, Layout, Page, Thumbnail } from "@shopify/polaris";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useParams } from "react-router-dom";
+import { getSourcingOrderDetail } from "../../api/requests";
 import { FstlnTimeline } from "../../components/FstlnTimeline/FstlnTimeline";
 import { ProductInfoPopover } from "../../components/ProductInfoPopover/ProductInfoPopover";
 import { SourcingInfoCard } from "../../components/SecondaryCard/SourcingInfoCard";
@@ -17,6 +19,9 @@ import { SourcingRepoCard } from "../../components/SecondaryCard/SourcingRepoCar
 
 function SourcingDetail(props) {
 
+  const { id } = useParams();
+
+  const [order, setOrder] = useState(null);
 
   const orderList = [
     {
@@ -81,6 +86,15 @@ function SourcingDetail(props) {
     []
   );
 
+  useEffect(() => {
+    getSourcingOrderDetail(id)
+    .then(res=>{
+      console.log(res);
+      setOrder(res.data)
+    })
+    
+  }, []);
+
   return (
     <Page
       breadcrumbs={[{ content: '采购实施列表', url: '/sourcing' }]}
@@ -126,9 +140,9 @@ function SourcingDetail(props) {
 
         </Layout.Section>
         <Layout.Section secondary>
-          <SourcingInfoCard />
-          <SourcingProviCard />
-          <SourcingRepoCard />
+          <SourcingInfoCard poInfo={ order || {} } />
+          <SourcingProviCard provInfo={ order ? order.provider : {} } />
+          <SourcingRepoCard wareInfo={ order ? order.warehouse : {} } />
           <SourcingNoteCard />
         </Layout.Section>
       </Layout>

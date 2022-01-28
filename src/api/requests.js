@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2021-11-24 11:29:42
- * @LastEditTime: 2022-01-28 11:42:28
+ * @LastEditTime: 2022-01-28 15:42:49
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -27,5 +27,5 @@ export const getSubjectList = () => ax.get(REQUEST_URLS.GET_SUBJECT_LIST);
 export const getBrandList = () => ax.get(REQUEST_URLS.GET_PROJECT_LIST);
 export const getProviderDetail = (id) => ax.get(`${REQUEST_URLS.GET_PROVIDER_DETAIL}/${id}`);
 
-
-
+export const querySourcingList = (params) => ax.get(REQUEST_URLS.QUERY_SOURCING_ORDER_LIST, { params })
+export const getSourcingOrderDetail = (id) => ax.get(`${REQUEST_URLS.GET_SOURCING_ORDER_DETAIL}/${id}`)

@@ -4,10 +4,10 @@
   &::after{
     content: "";
     position: absolute;
-    left: 1rem;
-    top: 1rem;
-    bottom: 2rem;
-    width: 0.3rem;
+    left: 10px;
+    top: 10px;
+    bottom: 10px;
+    width: 3px;
     background-color: #ccc;
   }
   
@@ -15,38 +15,38 @@
 
   .f-timeline-ul{
     margin: 0;
-    margin-left: 0rem;
-    padding-left: 1rem;
+    margin-left: 00px;
+    padding-left: 10px;
   }
  
   .f-timeline-li{
     list-style: none;
     position: relative;
     z-index: 1;
-    padding: .8rem 1.5rem;
+    padding: 8px 15px;
     &::before{
       content: "";
       position: absolute;
-      left: calc( (1.9rem)/-2 + 0.15rem );
+      left: calc( (19px)/-2 + 1.5px );
       // top:0;
       // bottom: 0;
-      height: 1.9rem;
-      width: 1.9rem;
+      height: 19px;
+      width: 19px;
       background-color: #888;
       border: 3px solid #fff;
       border-radius: 50%;
       top: 50%;
-      margin-top: -0.95rem;
+      margin-top: -0.950px;
     }
     &:first-child{
       &::before{
-        left: calc( (2.5rem)/-2 + 0.15rem );
+        left: calc( (25px)/-2 + 1.5px );
         // top:0;
         // bottom: 0;
-        height: 2.5rem;
-        width: 2.5rem;
+        height: 24px;
+        width: 24px;
         background-color: #008060;
-        margin-top: -1.25rem;
+        margin-top: -12.5px;
         
       }
     }
