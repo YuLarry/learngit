@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2021-11-23 19:45:00
- * @LastEditTime: 2022-01-27 18:46:28
+ * @LastEditTime: 2022-01-28 11:42:11
  * @LastEditors: lijunwei
  * @Description: request urls config
  */
@@ -15,6 +15,7 @@ export const GET_PROVIDER_LIST  = "/select-provider";   //  供应商
 export const GET_WAREHOUSE_LIST = "/select-warehouse";  //  仓库
 export const GET_SUBJECT_LIST   = "/select-subject";    //  采购方
 export const GET_PROJECT_LIST   = "/select-brand"  //  项目列表
+export const GET_PROVIDER_DETAIL = "/provider-account"   // 供应商详情
 
 
 // export const apply_payment        = ""

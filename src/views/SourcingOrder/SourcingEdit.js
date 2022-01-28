@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-01-27 19:34:52
+ * @LastEditTime: 2022-01-28 13:16:36
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -11,7 +11,7 @@ import {
   SearchMinor
 } from '@shopify/polaris-icons';
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { getBrandList, getProviderList, getSubjectList, getWarehouseList } from "../../api/requests";
+import { getBrandList, getProviderDetail, getProviderList, getSubjectList, getWarehouseList } from "../../api/requests";
 import { FstlnSelectTree } from "../../components/FstlnSelectTree/FstlnSelectTree";
 import { SourcingCardSection } from "../../components/SecondaryCard/SourcingCardSection";
 import { SourcingProviCard } from "../../components/SecondaryCard/SourcingProviCard";
@@ -28,7 +28,9 @@ function SourcingEdit(props) {
   const [subjList, setSubjList] = useState([]);
   const [wareList, setWareList] = useState([]);
 
-  useEffect(()=>{
+  const [accountList, setAccountList] = useState([]);
+
+  useEffect(() => {
     Promise.all([
       getBrandList(),
       getProviderList(),
@@ -36,27 +38,100 @@ function SourcingEdit(props) {
       getWarehouseList(),
 
     ])
-    .then(([resBrand, resProv, resSubj, resWare])=>{
-      const { data } = resBrand;
-      const brandListArr = Object.keys(data).map((key)=>({label: data[key], value: key}))
-      setBrandList(brandListArr);
+      .then(([resBrand, resProv, resSubj, resWare]) => {
+        const { data } = resBrand;
+        const brandListArr = Object.keys(data).map((key) => ({ label: data[key], value: key }))
+        setBrandList(brandListArr);
 
-      const { data: subjData } = resSubj; 
-      const subjListArr = Object.keys(subjData).map((key)=>({label: subjData[key], value: key}))
-      setSubjList(subjListArr);
+        const { data: subjData } = resSubj;
+        const subjListArr = Object.keys(subjData).map((key) => ({ label: subjData[key], value: key }))
+        setSubjList(subjListArr);
 
-      const { data: provData } = resProv; 
-      const provListArr = provData.map((item)=>({label: item.business_name, value: item.id}))
-      setProvList(provListArr)
-      
-      
-      const { data: wareData } = resWare; 
-      const wareListArr = wareData.map((item)=>({label: item.name, value: item.code}))
-      setWareList(wareListArr)
-      
-    }) 
+        const { data: provData } = resProv;
+        const provListArr = provData.map((item) => ({ label: item.business_name, value: item.id.toString() }))
+        setProvList(provListArr)
+
+
+        const { data: wareData } = resWare;
+        const wareListArr = wareData.map((item) => ({ label: item.name, value: item.code }))
+        setWareList(wareListArr)
+
+
+        // set initial form value
+        setSourcingOrderForm({
+          ...sourcingOrderForm,
+          brand_code: brandListArr[0].value,
+          // provider_id: provListArr[0].value,
+          warehouse_code: wareListArr[0].value,
+          subject_code: subjListArr[0].value,
+          cause_team: DEPARTMENT_LIST[0].value,
+          business_type: BUSINESS_TYPE[0].value,
+          platform: PLATFORM_LIST[0].value,
+
+        })
+        setProvider_id(provListArr[0].value)
+        
+      })
   },
-  [])
+    [])
+
+
+
+  const [sourcingOrderForm, setSourcingOrderForm] = useState({
+    remark: "",
+    // provider_id: "",
+    warehouse_code: "",
+    account_id: "",
+    brand_code: "",
+    subject_code: "",
+    cause_team: "",
+    business_type: "",
+    platform: "",
+    po_no: "",
+    po_item: [],
+
+  });
+
+  const [provider_id, setProvider_id] = useState("");
+
+  const formChangeHandler = useCallback(
+    (value, id) => {
+
+      console.log(id, value);
+      const newForm = { ...sourcingOrderForm, [id]: value };
+      setSourcingOrderForm(newForm);
+    },
+    [sourcingOrderForm],
+  );
+
+
+  const [providerDetailMap, setproviderDetailMap] = useState(new Map());
+
+  useEffect(() => {
+    if( !provider_id ) return;
+    const opt = providerDetailMap.get(provider_id);
+    if ( opt ) {
+      setAccountList( opt )
+      // set initial account
+      setSourcingOrderForm({...sourcingOrderForm, account_id: opt[0].value})
+
+    } else {
+      getProviderDetail(provider_id)
+        .then(res => {
+          const { data } = res;
+          const options = data.map(account=>({id: account.bank_card_number, label: account.bank_card_number, value: account.bank_card_number}));
+          const newMap = new Map(providerDetailMap);
+          newMap.set( provider_id,  options)
+          setproviderDetailMap( newMap )
+          setAccountList( options )
+           // set initial account
+          setSourcingOrderForm({...sourcingOrderForm, account_id: options[0].value})
+          
+        })
+    }
+    
+  }, [provider_id])
+
 
   // = modal =
   const [active, setActive] = useState(false);
@@ -209,48 +284,65 @@ function SourcingEdit(props) {
                 <FormLayout.Group>
                   <Select
                     label="项目"
-                    options={ brandList }
-                    onChange={() => { }}
+                    options={brandList}
+                    value={sourcingOrderForm.brand_code}
+                    id="brand_code"
+                    onChange={formChangeHandler}
                   />
                   <Select
                     label="采购方"
-                    options={ subjList }
-                    onChange={() => { }}
+                    options={subjList}
+                    value={sourcingOrderForm.subject_code}
+                    id="subject_code"
+                    onChange={formChangeHandler}
                   />
                 </FormLayout.Group>
                 <FormLayout.Group>
                   <Select
                     label="供应商"
-                    options={ provList }
-                    onChange={() => { }}
+                    options={provList}
+                    value={ provider_id }
+                    id="provider_id"
+                    onChange={(value)=>{setProvider_id(value)}}
                   />
                   <Select
                     label="收款账户"
-                    onChange={() => { }}
+                    options={ accountList }
+                    value={sourcingOrderForm.account_id}
+                    id="account_id"
+                    onChange={formChangeHandler}
                   />
                 </FormLayout.Group>
                 <FormLayout.Group>
                   <Select
                     label="收货仓库"
-                    options={ wareList }
-                    onChange={() => { }}
+                    options={wareList}
+                    value={sourcingOrderForm.warehouse_code}
+                    id="warehouse_code"
+                    onChange={formChangeHandler}
                   />
                   <Select
                     label="事业部"
-                    options={ DEPARTMENT_LIST }
-                    onChange={() => {  }}
+                    options={DEPARTMENT_LIST}
+                    value={sourcingOrderForm.cause_team}
+                    id="cause_team"
+                    onChange={formChangeHandler}
                   />
                 </FormLayout.Group>
                 <FormLayout.Group>
                   <Select
                     label="业务类型"
-                    options={ BUSINESS_TYPE }
-                    onChange={() => {  }}
+                    options={BUSINESS_TYPE}
+                    value={sourcingOrderForm.business_type}
+                    id="business_type"
+                    onChange={formChangeHandler}
                   />
                   <Select
                     label="平台"
-                    options={ PLATFORM_LIST }
-                    onChange={() => {  }}
+                    options={PLATFORM_LIST}
+                    value={sourcingOrderForm.platform}
+                    id="platform"
+                    onChange={formChangeHandler}
                   />
                 </FormLayout.Group>
 
@@ -260,12 +352,12 @@ function SourcingEdit(props) {
 
           </Card>
           <Card title="商品明细"
-            // actions={[
-            //   {
-            //     content: "添加商品",
-            //     onAction: () => setActive(true),
-            //   }
-            // ]}
+          // actions={[
+          //   {
+          //     content: "添加商品",
+          //     onAction: () => setActive(true),
+          //   }
+          // ]}
           >
             {/* <Card.Section>
               <TextField
@@ -339,7 +431,7 @@ function SourcingEdit(props) {
             <TextField
               type="text"
               placeholder="搜索商品"
-              onChange={() => { }}
+              onChange={formChangeHandler}
 
               prefix={<Icon
                 source={SearchMinor}
@@ -348,7 +440,7 @@ function SourcingEdit(props) {
               }
               connectedLeft={
                 <Select
-                  onChange={() => { }}
+                  onChange={formChangeHandler}
 
                   options={[
                     { label: "商品SKU ", value: "1" },
