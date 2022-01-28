@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-01-28 13:16:36
+ * @LastEditTime: 2022-01-28 15:06:50
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -28,6 +28,11 @@ function SourcingEdit(props) {
   const [subjList, setSubjList] = useState([]);
   const [wareList, setWareList] = useState([]);
 
+  // const [brandMap, setBrandMap] = useState(new Map());
+  // const [subjMap, setSubjMap] = useState(new Map());
+  const [provMap, setProvMap] = useState(new Map());
+  const [wareMap, setWareMap] = useState(new Map());
+
   const [accountList, setAccountList] = useState([]);
 
   useEffect(() => {
@@ -48,13 +53,24 @@ function SourcingEdit(props) {
         setSubjList(subjListArr);
 
         const { data: provData } = resProv;
-        const provListArr = provData.map((item) => ({ label: item.business_name, value: item.id.toString() }))
+        const provDataMap = new Map();
+        const provListArr = provData.map((item) => {
+          provDataMap.set(item.id.toString(), item);
+          return ({ label: item.business_name, value: item.id.toString()})
+        })
         setProvList(provListArr)
+        setProvMap(provDataMap);
+        
 
 
         const { data: wareData } = resWare;
-        const wareListArr = wareData.map((item) => ({ label: item.name, value: item.code }))
+        const wareDataMap = new Map();
+        const wareListArr = wareData.map((item) => {
+          wareDataMap.set(item.code, item);
+          return ({ label: item.name, value: item.code })
+        })
         setWareList(wareListArr)
+        setWareMap(wareDataMap);
 
 
         // set initial form value
@@ -96,8 +112,7 @@ function SourcingEdit(props) {
 
   const formChangeHandler = useCallback(
     (value, id) => {
-
-      console.log(id, value);
+      // console.log(id, value);
       const newForm = { ...sourcingOrderForm, [id]: value };
       setSourcingOrderForm(newForm);
     },
@@ -127,10 +142,20 @@ function SourcingEdit(props) {
            // set initial account
           setSourcingOrderForm({...sourcingOrderForm, account_id: options[0].value})
           
+          
         })
     }
     
   }, [provider_id])
+
+  useEffect(()=>{
+    // set provMap account info
+    const provInfo = provMap.get(provider_id);
+    const _map = new Map(provMap);
+    _map.set( provider_id, {...provInfo, account_id: sourcingOrderForm.account_id} )
+    setProvMap(_map)
+  },
+  [sourcingOrderForm])
 
 
   // = modal =
@@ -400,8 +425,8 @@ function SourcingEdit(props) {
             <SourcingCardSection title="采购数量" text="text 文字" />
 
           </Card>
-          <SourcingProviCard />
-          <SourcingRepoCard />
+          <SourcingProviCard provInfo={ provMap.get(provider_id) } />
+          <SourcingRepoCard wareInfo={ wareMap.get(sourcingOrderForm.warehouse_code) } />
 
 
 
