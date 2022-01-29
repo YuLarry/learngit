@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-01-28 15:06:50
+ * @LastEditTime: 2022-01-28 19:28:30
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -11,7 +11,7 @@ import {
   SearchMinor
 } from '@shopify/polaris-icons';
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { getBrandList, getProviderDetail, getProviderList, getSubjectList, getWarehouseList } from "../../api/requests";
+import { getBrandList, getGoodsQuery, getProviderDetail, getProviderList, getSubjectList, getWarehouseList } from "../../api/requests";
 import { FstlnSelectTree } from "../../components/FstlnSelectTree/FstlnSelectTree";
 import { SourcingCardSection } from "../../components/SecondaryCard/SourcingCardSection";
 import { SourcingProviCard } from "../../components/SecondaryCard/SourcingProviCard";
@@ -294,6 +294,19 @@ function SourcingEdit(props) {
     )
   }
 
+  useEffect(() => {
+    getGoodsQuery({
+      provider: 6,
+      currency: "USD",
+      type: "2",
+      search: "",
+    })
+    .then(res=>{
+      console.log(res);
+
+
+    })
+  }, []);
 
   return (
     <Page

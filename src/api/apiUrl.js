@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2021-11-23 19:45:00
- * @LastEditTime: 2022-01-28 17:34:57
+ * @LastEditTime: 2022-01-28 19:18:00
  * @LastEditors: lijunwei
  * @Description: request urls config
  */
@@ -27,3 +27,4 @@ export const DELETE_SOURING_ORDER = "/po/delete";          //删除采购单
 
 
 export const GET_SOURCING_ORDER_DETAIL = "/po/detali"      // 采购单详情
+export const GET_GOODS_QUERY = "/get-goods-quote"

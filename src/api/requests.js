@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2021-11-24 11:29:42
- * @LastEditTime: 2022-01-28 15:42:49
+ * @LastEditTime: 2022-01-28 19:22:00
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -29,3 +29,6 @@ export const getProviderDetail = (id) => ax.get(`${REQUEST_URLS.GET_PROVIDER_DET
 
 export const querySourcingList = (params) => ax.get(REQUEST_URLS.QUERY_SOURCING_ORDER_LIST, { params })
 export const getSourcingOrderDetail = (id) => ax.get(`${REQUEST_URLS.GET_SOURCING_ORDER_DETAIL}/${id}`)
+
+export const getGoodsQuery = (params) => ax.get(REQUEST_URLS.GET_GOODS_QUERY, { params });
+

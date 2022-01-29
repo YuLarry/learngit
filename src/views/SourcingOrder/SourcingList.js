@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-01-28 16:54:07
+ * @LastEditTime: 2022-01-28 19:03:40
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -30,6 +30,8 @@ function SourcingList(props) {
   const [pageIndex, setPageIndex] = useState(1);
   const pageSize = 20;
   const [total, setTotal] = useState(0);
+
+  const [listLoading, setListLoading] = useState(false);
 
   const [filter, setFilter] = useState({
     provider_id: "",
@@ -267,6 +269,7 @@ function SourcingList(props) {
 
 
   useEffect(() => {
+    setListLoading(true);
     const {
       provider_id = "",
       subject_code = "",
@@ -278,21 +281,24 @@ function SourcingList(props) {
       delivery_status = new Set(),
     } = filter;
     querySourcingList(
-    //   {
-    //   provider_id,
-    //   subject_code,
-    //   warehouse_code,
-    //   po,
-    //   good_search,
-    //   audit: [...audit_status],
-    //   payment_status: [...payment_status],
-    //   delivery_status: [...delivery_status],
-    //   po_status: queryListStatus,
-    // }
+      {
+      // provider_id,
+      // subject_code,
+      // warehouse_code,
+      // po,
+      // good_search,
+      // audit: [...audit_status],
+      // payment_status: [...payment_status],
+      // delivery_status: [...delivery_status],
+      // po_status: queryListStatus,
+    }
     )
     .then(res=>{
       const { data: {data, meta} } =res;
       setSourcingList(data);
+    })
+    .finally(()=>{
+      setListLoading(false)
     })
   }, [filter, queryListStatus])
 
@@ -323,7 +329,7 @@ function SourcingList(props) {
 
           </div>
           <IndexTable
-            // loading
+            loading={ listLoading }
             resourceName={resourceName}
             itemCount={sourcingList.length}
             selectedItemsCount={

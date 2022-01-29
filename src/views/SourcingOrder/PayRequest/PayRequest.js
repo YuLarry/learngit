@@ -1,13 +1,13 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-19 17:05:46
- * @LastEditTime: 2022-01-25 16:20:45
+ * @LastEditTime: 2022-01-29 15:09:22
  * @LastEditors: lijunwei
  * @Description: 
  */
 
 import { Badge, Button, Card, DropZone, IndexTable, Layout, Page, ResourceItem, ResourceList, TextField, TextStyle, Thumbnail, useIndexResourceState } from "@shopify/polaris";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { DatePopover } from "../../../components/DatePopover/DatePopover";
 import { ProductInfoPopover } from "../../../components/ProductInfoPopover/ProductInfoPopover";
 import { SourcingCardSection } from "../../../components/SecondaryCard/SourcingCardSection";
@@ -19,131 +19,103 @@ import "./payRequest.scss";
 
 function PayRequest(props) {
 
-  const [selectedItems, setSelectedItems] = useState([]);
+  const [invoice, setInvoice] = useState([{
+    price: "",
+    date: new Date(),
+    file: null
+  }]);
+
+  const addHandler = useCallback(
+    () => {
+      const _invoice = [...invoice];
+      _invoice.push({
+        price: "",
+        date: new Date(),
+        file: null
+      })
+      setInvoice(_invoice);
+    },
+    [invoice]
+  );
+
+  const deleteHandler = useCallback(
+    (index) => {
+      const _invoice = [...invoice];
+      _invoice.splice(index, 1);
+      setInvoice(_invoice);
+    },
+    [invoice]
+  );
 
 
-  const productInfo = (product) => {
-    return (
-      <div className="product-container" style={{ maxWidth: "400px", display: "flex", alignItems: "flex-start" }}>
+  const [items, setItems] = useState([
+    {
+      sku: "6902176906084",
+      purchase_num: 50,
+      goods: [
+        {
+          cn_name: "NX659J/12G+128G/黑色/亚欧/亚欧",
+          en_name: "RedMagic 5G Gaming Phone 12G+128G EU Black",
+          image_url: "https://cdn.shopify.com/s/files/1/0570/8726/2882/products/1_eed05654-f77a-4d06-aed3-8fb83e567ba2.png?v=1624248656",
+          price: "599.00",
+          sku: "6902176906084",
+        },
+        {
+          cn_name: "NX659J/12G+128G/黑色/亚欧/亚欧",
+          en_name: "RedMagic 5G Gaming Phone 12G+128G EU Black",
+          image_url: "https://cdn.shopify.com/s/files/1/0570/8726/2882/products/1_eed05654-f77a-4d06-aed3-8fb83e567ba2.png?v=1624248656",
+          price: "599.00",
+          sku: "690217690608123",
+        }
+      ]
+    }
+  ]);
 
+
+  const productInfo = (products = []) => {
+    return products.map(({ cn_name, en_name, image_url, price, sku }, index) => (
+      <div key={sku} className="product-container" style={{ maxWidth: "400px", display: "flex", alignItems: "flex-start" }}>
         <Thumbnail
-          source="https://burst.shopifycdn.com/photos/black-leather-choker-necklace_373x@2x.jpg"
-          alt="Black choker necklace"
+          source={image_url}
+          alt={en_name}
           size="small"
         />
         <div style={{ flex: 1, marginLeft: "1em" }}>
-          <h4>ZTE Watch Live Black</h4>
-          <h4>ZTE 手表 黑</h4>
-          <span>$100</span>
+          <h4>{en_name}</h4>
+          <h4>{cn_name}</h4>
+          <span>{price}</span>
         </div>
       </div>
-    )
+    ))
   }
 
 
   // ====
 
-  const customers = [
-    {
-      id: '3411',
-      url: 'customers/341',
-      name: 'Mae Jemison',
-      location: 'Decatur, USA',
-      orders: 20,
-      amountSpent: '$2,400',
-    },
-    {
-      id: '2561',
-      url: 'customers/256',
-      name: 'Ellen Ochoa',
-      location: 'Los Angeles, USA',
-      orders: 30,
-      amountSpent: '$140',
-    },
-  ];
 
 
-  const items = [
-    {
-      id: 101,
-      url: 'customers/341',
-      name: 'Mae Jemison',
-      location: 'Decatur, USA',
-    },
-    {
-      id: 201,
-      url: 'customers/256',
-      name: 'Ellen Ochoa',
-      location: 'Los Angeles, USA',
-    },
-  ];
-
-  function renderItem(item, index) {
-    const { id, url, name, location } = item;
-
-    return (
-      <ResourceItem
-        id={id}
-        // url={url}
-        accessibilityLabel={`View details for ${name}`}
-      >
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div>
-            {index}
-          </div>
-          <div>
-            <TextField />
-          </div>
-          <div>
-            <DatePopover />
-          </div>
-          <div>
-            <div style={{ width: "50px", height: "50px" }}>
-              <DropZone
-                id={`file-${id}`}
-                style={{ height: "50px", width: "50px" }}
-              >
-                <DropZone.FileUpload />
-              </DropZone>
-            </div>
-          </div>
-        </div>
-      </ResourceItem>
-    );
-  }
-
-
-  const resourceName = {
-    singular: 'customer',
-    plural: 'customers',
-  };
-
-  const { selectedResources } = useIndexResourceState(customers);
-
-
+  const { selectedResources } = useIndexResourceState(items);
 
 
 
   const rowMarkup = useMemo(() => {
-    return customers.map(
-      ({ id, name, location, orders, amountSpent }, index) => (
+    return items.map(
+      ({ sku, purchase_num, goods }, index) => (
         <IndexTable.Row
-          id={id}
-          key={id}
-          selected={selectedResources.includes(id)}
-          position={index}
+          id={sku}
+          key={sku}
         >
           <IndexTable.Cell>
-            <ProductInfoPopover popoverNode={productInfo()} tableCellText="custom text" />
+            <ProductInfoPopover popoverNode={productInfo(goods)} tableCellText="custom text" />
           </IndexTable.Cell>
           {/* <IndexTable.Cell>{location}</IndexTable.Cell> */}
-          <IndexTable.Cell>{orders}</IndexTable.Cell>
-          <IndexTable.Cell>{amountSpent}</IndexTable.Cell>
+          <IndexTable.Cell>{purchase_num}</IndexTable.Cell>
+          <IndexTable.Cell>{null}</IndexTable.Cell>
         </IndexTable.Row>
       ),
     )
   },
-    [customers, selectedResources]
+    [items]
   );
 
 
@@ -152,19 +124,18 @@ function PayRequest(props) {
 
 
   const invoiceItem = useMemo(() => {
-    return customers.map(
-      ({ id, name, location, orders, amountSpent }, index) => (
-        <Card.Section>
-          
+    return invoice.map(
+      ({ }, index) => (
+        <Card.Section key={index}>
           <div className="invoice-item">
             <div className="invoice-col">
               <p>发票金额</p>
-              <div style={{ maxWidth: "15rem" }}>
+              <div style={{ maxWidth: "8rem" }}>
                 <TextField
                   type="number"
                 />
               </div>
-              
+
             </div>
             <div className="invoice-col">
               <p>发票日期</p>
@@ -183,9 +154,16 @@ function PayRequest(props) {
             </div>
             <div className="invoice-col invoice-del">
               <span>
-                <Button
-                  icon={DeleteMinor}
-                ></Button>
+                {
+                  invoice.length > 1
+                    ?
+                    <Button
+                      icon={DeleteMinor}
+                      onClick={() => { deleteHandler(index) }}
+                    ></Button>
+                    :
+                    null
+                }
               </span>
             </div>
           </div>
@@ -193,7 +171,7 @@ function PayRequest(props) {
       ),
     )
   },
-    [customers, selectedResources]
+    [invoice]
   );
 
 
@@ -213,7 +191,7 @@ function PayRequest(props) {
             {invoiceItem}
 
             <div style={{ textAlign: "center", padding: "1em" }}>
-              <Button onClick={() => { }}>添加发票</Button>
+              <Button onClick={addHandler}>添加发票</Button>
             </div>
           </Card>
 
@@ -222,8 +200,7 @@ function PayRequest(props) {
           >
             <div>
               <IndexTable
-                resourceName={resourceName}
-                itemCount={customers.length}
+                itemCount={items.length}
                 selectable={false}
                 headings={[
                   { title: '系统SKU' },
