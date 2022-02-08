@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2021-11-23 19:45:00
- * @LastEditTime: 2022-01-28 19:18:00
+ * @LastEditTime: 2022-02-08 11:25:35
  * @LastEditors: lijunwei
  * @Description: request urls config
  */
@@ -26,5 +26,9 @@ export const EXPORT_SOURING_ORDER = "/po-download-pdf/4";  // 导出
 export const DELETE_SOURING_ORDER = "/po/delete";          //删除采购单
 
 
-export const GET_SOURCING_ORDER_DETAIL = "/po/detali"      // 采购单详情
-export const GET_GOODS_QUERY = "/get-goods-quote"
+export const GET_SOURCING_ORDER_DETAIL = "/po/detail"      // 采购单详情
+
+export const GET_GOODS_QUERY = "/po/get-goods-quote" // 商品列表查询
+
+
+

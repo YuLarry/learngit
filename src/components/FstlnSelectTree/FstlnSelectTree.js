@@ -1,18 +1,18 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-19 14:30:33
- * @LastEditTime: 2022-01-19 16:43:13
+ * @LastEditTime: 2022-02-08 12:17:03
  * @LastEditors: lijunwei
  * @Description: 
  */
 
 import { Checkbox, Scrollable } from "@shopify/polaris";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import "./FstlnSelectTree.scss";
 
 function FstlnSelectTree(props) {
 
-  const { treeData, headRender, itemRowRender } = props;
+  const { treeData, headRender, itemRowRender, onTreeSelectChange } = props;
 
   const [selectedItems, setSelectedItems] = useState(new Map());
 
@@ -112,6 +112,10 @@ function FstlnSelectTree(props) {
     ,
     [computeHeadsCheckedStatus, headChangeHandler, headRender, itemRowRender, rowChangeHandler, selectedItems, treeData]
   )
+
+  useEffect(() => {
+    onTreeSelectChange( selectedItems )
+  }, [onTreeSelectChange, selectedItems]);
 
   return (
     <div className="f-collapsed-select-list">

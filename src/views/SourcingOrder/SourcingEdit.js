@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-01-28 19:28:30
+ * @LastEditTime: 2022-02-08 15:13:13
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -35,6 +35,12 @@ function SourcingEdit(props) {
 
   const [accountList, setAccountList] = useState([]);
 
+  const [tree, setTree] = useState({});
+  const [selectGoodsMapTemp, setSelectGoodsMapTemp] = useState(new Map());
+  
+  // const [goodsTableData, setGoodsTableData] = useState(new Map());
+
+
   useEffect(() => {
     Promise.all([
       getBrandList(),
@@ -56,11 +62,11 @@ function SourcingEdit(props) {
         const provDataMap = new Map();
         const provListArr = provData.map((item) => {
           provDataMap.set(item.id.toString(), item);
-          return ({ label: item.business_name, value: item.id.toString()})
+          return ({ label: item.business_name, value: item.id.toString() })
         })
         setProvList(provListArr)
         setProvMap(provDataMap);
-        
+
 
 
         const { data: wareData } = resWare;
@@ -86,11 +92,10 @@ function SourcingEdit(props) {
 
         })
         setProvider_id(provListArr[0].value)
-        
+
       })
   },
     [])
-
 
 
   const [sourcingOrderForm, setSourcingOrderForm] = useState({
@@ -123,39 +128,39 @@ function SourcingEdit(props) {
   const [providerDetailMap, setproviderDetailMap] = useState(new Map());
 
   useEffect(() => {
-    if( !provider_id ) return;
+    if (!provider_id) return;
     const opt = providerDetailMap.get(provider_id);
-    if ( opt ) {
-      setAccountList( opt )
+    if (opt) {
+      setAccountList(opt)
       // set initial account
-      setSourcingOrderForm({...sourcingOrderForm, account_id: opt[0].value})
+      setSourcingOrderForm({ ...sourcingOrderForm, account_id: opt[0].value })
 
     } else {
       getProviderDetail(provider_id)
         .then(res => {
           const { data } = res;
-          const options = data.map(account=>({id: account.bank_card_number, label: account.bank_card_number, value: account.bank_card_number}));
+          const options = data.map(account => ({ id: account.bank_card_number, label: account.bank_card_number, value: account.bank_card_number }));
           const newMap = new Map(providerDetailMap);
-          newMap.set( provider_id,  options)
-          setproviderDetailMap( newMap )
-          setAccountList( options )
-           // set initial account
-          setSourcingOrderForm({...sourcingOrderForm, account_id: options[0].value})
-          
-          
+          newMap.set(provider_id, options)
+          setproviderDetailMap(newMap)
+          setAccountList(options)
+          // set initial account
+          setSourcingOrderForm({ ...sourcingOrderForm, account_id: options[0].value })
+
+
         })
     }
-    
+
   }, [provider_id])
 
-  useEffect(()=>{
+  useEffect(() => {
     // set provMap account info
     const provInfo = provMap.get(provider_id);
     const _map = new Map(provMap);
-    _map.set( provider_id, {...provInfo, account_id: sourcingOrderForm.account_id} )
+    _map.set(provider_id, { ...provInfo, account_id: sourcingOrderForm.account_id })
     setProvMap(_map)
   },
-  [sourcingOrderForm])
+    [sourcingOrderForm])
 
 
   // = modal =
@@ -167,118 +172,94 @@ function SourcingEdit(props) {
 
   // =======
 
-  const [customers, setCustomers] = useState([
-    {
-      id: '3413',
-      url: 'customers/341',
-      name: 'Mae Jemison',
-      location: 'Decatur, USA',
-      orders: 20,
-      amountSpent: 2400,
-    },
-    {
-      id: '2563',
-      url: 'customers/256',
-      name: 'Ellen Ochoa',
-      location: 'Los Angeles, USA',
-      orders: 30,
-      amountSpent: 140,
-    },
-  ]);
+  const [goodsTableDataMap, setGoodsTableDataMap] = useState(new Map());
+
+  const selectedGoods = useMemo(() => {
+    const arr = [];
+    for (const [key, goods] of goodsTableDataMap) {
+      arr.push(goods);
+    }
+    return arr;
+  }, [goodsTableDataMap]);
+
+
+
   const resourceName = {
-    singular: 'customer',
-    plural: 'customers',
+    singular: '商品',
+    plural: '商品',
   };
 
   const { selectedResources, allResourcesSelected, handleSelectionChange } =
-    useIndexResourceState(customers);
+    useIndexResourceState(selectedGoods, { resourceIDResolver: ( goods )=> goods.sku });
 
   const promotedBulkActions = [
     {
       content: '移除',
-      onAction: () => console.log('Todo: implement bulk edit'),
+      onAction: () => { 
+        console.log(selectedResources)
+        
+        const tempMap = new Map(goodsTableDataMap);
+        
+        selectedResources.map((sku)=>{
+          tempMap.delete(sku);
+          handleSelectionChange("single", false, sku);
+        })
+        setGoodsTableDataMap(tempMap);
+      },
     },
   ];
 
   const goodsFormChangeHandler = useCallback(
-    (idx, val, key) => {
+    (sku, val, key) => {
 
-      const a = [...customers];
+      const _tempGoodItem = goodsTableDataMap.get(sku);
+      _tempGoodItem[key] = val
+      const tempMap = new Map(goodsTableDataMap);
+      tempMap.set(sku, _tempGoodItem);
+      setGoodsTableDataMap(tempMap);
 
-      a[idx][key] = val
-      setCustomers(a);
     },
-    [customers],
+    [goodsTableDataMap],
   );
 
 
-  const rowMarkup = useMemo(() => {
-    return customers.map(
-      ({ id, name, location, orders, amountSpent }, index) => (
-        <IndexTable.Row
-          id={id}
-          key={id}
-          selected={selectedResources.includes(id)}
-          position={index}
-        >
-          <IndexTable.Cell>
-            <TextStyle variation="strong">{name}</TextStyle>
-          </IndexTable.Cell>
-          <IndexTable.Cell>{location}</IndexTable.Cell>
-          <IndexTable.Cell>
-            <TextField
-              type="number"
-              value={orders}
-              onChange={(v) => { goodsFormChangeHandler(index, v, "orders") }}
-            />
-          </IndexTable.Cell>
-          <IndexTable.Cell>
-            <TextField
-              type="number"
-              value={amountSpent}
-              prefix="$"
-              onChange={(v) => { goodsFormChangeHandler(index, v, "amountSpent") }}
-            />
-          </IndexTable.Cell>
-        </IndexTable.Row>
-      ),
-    )
-  },
-    [customers, goodsFormChangeHandler, selectedResources]
-  );
+  const rowMarkup = useMemo(() => 
+    selectedGoods.map(({ cn_name, en_name, price, sku, orders = 0 }, index)=>(
+      <IndexTable.Row
+        id={sku}
+        key={sku}
+        selected={selectedResources.includes(sku)}
+        position={index}
+      >
+        <IndexTable.Cell>
+          {/* <TextStyle variation="strong"> */}
+          {sku}
+          {/* </TextStyle> */}
+        </IndexTable.Cell>
+        <IndexTable.Cell>
+          <TextField
+            type="number"
+            value={ orders }
+            onChange={(v) => { goodsFormChangeHandler(sku, v, "orders") }}
+          />
+        </IndexTable.Cell>
+        <IndexTable.Cell>
+          <TextField
+            type="number"
+            value={price}
+            prefix="$"
+            onChange={(v) => { goodsFormChangeHandler(sku, v, "amountSpent") }}
+          />
+        </IndexTable.Cell>
+      </IndexTable.Row>
+    ))
+  ,
+    [goodsFormChangeHandler, selectedGoods, selectedResources]
+  )
+
   // ======
 
 
-  const tree = {
-    "zte": [
-      {
-        "sku": "6902176907197",
-        "cn_name": "红魔6/6Pro钢化玻璃屏幕保护膜",
-        "en_name": "RedMagic 6/6Pro tempered glass",
-        "qty": 111
-      },
-      {
-        "sku": "6902176903731",
-        "cn_name": "红魔战神手柄",
-        "en_name": "RedMagic 5G E-Sports Handle",
-        "qty": 111
-      }
-    ],
-    "relx": [
-      {
-        "sku": "69021769071971",
-        "cn_name": "红魔6/6Pro钢化玻璃屏幕保护膜1",
-        "en_name": "RedMagic 6/6Pro tempered glass1",
-        "qty": 111
-      },
-      {
-        "sku": "69021769037311",
-        "cn_name": "红魔战神手柄1",
-        "en_name": "RedMagic 5G E-Sports Handle1",
-        "qty": 111
-      }
-    ]
-  }
 
   const treeHeadRender = (rowItem) => {
 
@@ -294,18 +275,42 @@ function SourcingEdit(props) {
     )
   }
 
+  const treeSelectChange = useCallback(
+    (selectsMap) => {
+      setSelectGoodsMapTemp(selectsMap);
+    },
+    [],
+  );
+
+
+  const handleConfirmAddGoods = useCallback(
+    () => {
+      // console.log(selectGoodsMapTemp);
+      setGoodsTableDataMap(selectGoodsMapTemp)
+    },
+    [selectGoodsMapTemp],
+  );
+
   useEffect(() => {
     getGoodsQuery({
-      provider: 6,
+      provider_id: 6,
       currency: "USD",
-      type: "2",
+      type: "",
       search: "",
     })
-    .then(res=>{
-      console.log(res);
+      .then(res => {
+        console.log(res);
 
 
-    })
+      })
+      .finally(() => {
+        const data = '[{"sku":"6902176905315","cn_name":"努比亚24W快速充电器（英规）","en_name":"Nubia UK Adapter","price":"4.0000"},{"sku":"6902176906558","cn_name":"NX659J 红魔5S 银色 亚欧 8G+128G","en_name":"Red Magic 5S 8+128 EU Silver","price":"508.2600"},{"sku":"6902176906565","cn_name":"NX659J 红魔5S 红蓝渐变 亚欧12G+256G","en_name":"RedMagic 5S 12+256 EU Red & Blue","price":"572.7300"},{"sku":"6902176906596","cn_name":"NX659J 红魔5S 银色 美洲 8G+128G","en_name":"RedMagic 5S 8+128 NA Silver","price":"508.2600"},{"sku":"6902176906954","cn_name":"NX659S 红魔5S 黑色 亚欧  8+128","en_name":"RedMagic 5S 8+128 EU Black","price":"508.2600"},{"sku":"6902176906602","cn_name":"NX659J 红魔5S 红蓝渐变 美洲 12G+256G","en_name":"RedMagic 5S 12+256 NA Red & Blue","price":"572.7300"},{"sku":"6902176906831","cn_name":"Nubia 手表绿色 1GB NA版","en_name":"Nubia watch 1G+8G Green NA","price":"174.5100"}]';
+
+        setTree({
+          "其他": JSON.parse(data)
+        })
+
+      })
   }, []);
 
   return (
@@ -339,13 +344,13 @@ function SourcingEdit(props) {
                   <Select
                     label="供应商"
                     options={provList}
-                    value={ provider_id }
+                    value={provider_id}
                     id="provider_id"
-                    onChange={(value)=>{setProvider_id(value)}}
+                    onChange={(value) => { setProvider_id(value) }}
                   />
                   <Select
                     label="收款账户"
-                    options={ accountList }
+                    options={accountList}
                     value={sourcingOrderForm.account_id}
                     id="account_id"
                     onChange={formChangeHandler}
@@ -409,18 +414,18 @@ function SourcingEdit(props) {
 
             <IndexTable
               resourceName={resourceName}
-              itemCount={customers.length}
+              itemCount={selectedGoods.length}
               selectedItemsCount={
                 allResourcesSelected ? 'All' : selectedResources.length
               }
               onSelectionChange={handleSelectionChange}
               promotedBulkActions={promotedBulkActions}
               headings={[
-                { title: 'Name' },
-                { title: 'Location' },
-                { title: 'Order count' },
-                { title: 'Amount spent' },
+                { title: '系统SKU' },
+                { title: '采购数量' },
+                { title: '采购价格' },
               ]}
+              emptyState={`商品为空`}
             >
               {rowMarkup}
             </IndexTable>
@@ -438,8 +443,8 @@ function SourcingEdit(props) {
             <SourcingCardSection title="采购数量" text="text 文字" />
 
           </Card>
-          <SourcingProviCard provInfo={ provMap.get(provider_id) } />
-          <SourcingRepoCard wareInfo={ wareMap.get(sourcingOrderForm.warehouse_code) } />
+          <SourcingProviCard provInfo={provMap.get(provider_id)} />
+          <SourcingRepoCard wareInfo={wareMap.get(sourcingOrderForm.warehouse_code)} />
 
 
 
@@ -454,7 +459,7 @@ function SourcingEdit(props) {
         title="选择采购商品"
         primaryAction={{
           content: '添加',
-          onAction: handleChange,
+          onAction: handleConfirmAddGoods,
         }}
         secondaryActions={[
           {
@@ -493,6 +498,7 @@ function SourcingEdit(props) {
             treeData={tree}
             headRender={treeHeadRender}
             itemRowRender={treeRowRender}
+            onTreeSelectChange={treeSelectChange}
           />
 
         </div>
