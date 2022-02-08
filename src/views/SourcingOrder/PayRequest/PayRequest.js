@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-19 17:05:46
- * @LastEditTime: 2022-01-29 15:09:22
+ * @LastEditTime: 2022-02-08 16:46:56
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -16,6 +16,7 @@ import {
   DeleteMinor
 } from '@shopify/polaris-icons';
 import "./payRequest.scss";
+import { commitPaymentRequest } from "../../../api/requests";
 
 function PayRequest(props) {
 
@@ -47,6 +48,18 @@ function PayRequest(props) {
     [invoice]
   );
 
+  const invoiceChangeHandler = useCallback(
+    (idx, name, val) => {
+
+      setInvoice([
+        ...invoice.slice(0, idx),
+        { ...invoice[idx], [name]: val },
+        ...invoice.slice(idx + 1)
+      ])
+
+    },
+    [invoice],
+  );
 
   const [items, setItems] = useState([
     {
@@ -71,7 +84,6 @@ function PayRequest(props) {
     }
   ]);
 
-
   const productInfo = (products = []) => {
     return products.map(({ cn_name, en_name, image_url, price, sku }, index) => (
       <div key={sku} className="product-container" style={{ maxWidth: "400px", display: "flex", alignItems: "flex-start" }}>
@@ -89,14 +101,9 @@ function PayRequest(props) {
     ))
   }
 
-
   // ====
 
-
-
   const { selectedResources } = useIndexResourceState(items);
-
-
 
   const rowMarkup = useMemo(() => {
     return items.map(
@@ -118,14 +125,24 @@ function PayRequest(props) {
     [items]
   );
 
-
-
   // ===
 
+  const commit = useCallback(
+    () => {
+      commitPaymentRequest()
+      .then((res)=>{
+        console.log(res);
+      })
+      .finally(()=>{
+
+      })
+    },
+    [],
+  );
 
   const invoiceItem = useMemo(() => {
     return invoice.map(
-      ({ }, index) => (
+      ({ price, date, file }, index) => (
         <Card.Section key={index}>
           <div className="invoice-item">
             <div className="invoice-col">
@@ -133,22 +150,31 @@ function PayRequest(props) {
               <div style={{ maxWidth: "8rem" }}>
                 <TextField
                   type="number"
+                  value={price}
+                  onChange={(val) => { invoiceChangeHandler(index, 'price', val) }}
                 />
               </div>
 
             </div>
             <div className="invoice-col">
               <p>发票日期</p>
-              <DatePopover />
-
+              <DatePopover
+                value={date}
+                onChange={(val) => { invoiceChangeHandler(index, 'date', val) }}
+              />
             </div>
             <div className="invoice-col">
               <p>发票文件</p>
               <div style={{ width: "50px", height: "50px" }}>
                 <DropZone
                   id={`file-${index}`}
+                  accept="image/*"
+                  type="image"
+                  allowMultiple={false}
+                  onDropAccepted={(files) => { console.dir(files[0]); invoiceChangeHandler(index, 'file', files[0]) }}
                 >
-                  <DropZone.FileUpload />
+                  <DropZone.FileUpload
+                  />
                 </DropZone>
               </div>
             </div>
@@ -171,7 +197,7 @@ function PayRequest(props) {
       ),
     )
   },
-    [invoice]
+    [deleteHandler, invoice, invoiceChangeHandler]
   );
 
 
@@ -187,9 +213,7 @@ function PayRequest(props) {
         <Layout.Section>
           <Card title="发票信息"
           >
-
             {invoiceItem}
-
             <div style={{ textAlign: "center", padding: "1em" }}>
               <Button onClick={addHandler}>添加发票</Button>
             </div>

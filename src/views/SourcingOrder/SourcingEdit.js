@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-02-08 15:13:13
+ * @LastEditTime: 2022-02-08 15:27:20
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -286,9 +286,10 @@ function SourcingEdit(props) {
   const handleConfirmAddGoods = useCallback(
     () => {
       // console.log(selectGoodsMapTemp);
-      setGoodsTableDataMap(selectGoodsMapTemp)
+      setGoodsTableDataMap(new Map([...goodsTableDataMap, ...selectGoodsMapTemp]))
+      setActive(false);
     },
-    [selectGoodsMapTemp],
+    [goodsTableDataMap, selectGoodsMapTemp],
   );
 
   useEffect(() => {

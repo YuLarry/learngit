@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-01-28 19:03:40
+ * @LastEditTime: 2022-02-08 15:39:38
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -301,11 +301,6 @@ function SourcingList(props) {
       setListLoading(false)
     })
   }, [filter, queryListStatus])
-
-  useEffect(() => {
-    
-
-  }, [])
 
 
   return (

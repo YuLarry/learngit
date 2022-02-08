@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2021-11-24 11:29:42
- * @LastEditTime: 2022-02-08 10:58:31
+ * @LastEditTime: 2022-02-08 16:00:02
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -20,6 +20,7 @@ export const loginRequest = (data)=>{
   return axios.post(`${REACT_APP_AUTH_URL}`)
 };
 
+/*  采购单  */
 // 获取供应商列表
 export const getProviderList = () => ax.get(REQUEST_URLS.GET_PROVIDER_LIST);
 
@@ -44,5 +45,30 @@ export const getSourcingOrderDetail = (id) => ax.get(`${REQUEST_URLS.GET_SOURCIN
 // 查询商品列表
 export const getGoodsQuery = (params) => ax.get(REQUEST_URLS.GET_GOODS_QUERY, { params });
 
+// 提交审批
+export const commitApproval = (id) => ax.put(`${REQUEST_URLS.COMMIT_APPROVAL}/${id}`)
+
+// 取消采购单
+export const cancelSourcingOrder = (data) => ax.put(`${REQUEST_URLS.CANCEL_SOURING_ORDER}`, data)
+
+// 删除采购单
+export const deleteSourcingOrder = (id) => ax.delete(`${REQUEST_URLS.DELETE_SOURING_ORDER}/${id}`)
+
+// 导出采购单 pdf
+export const exportOrderPdf = (id)=> ax.get(`${REQUEST_URLS.EXPORT_SOURING_ORDER_PDF}/${id}`)
+
+// 导出采购单 excel
+export const exportOrderExcel = (params)=> ax.get(`${REQUEST_URLS.EXPORT_SOURING_ORDER_EXCEL}`,{ params })
+
+// 创建|更新采购单
+export const editSourcingOrder = (body)=> ax.post(`${REQUEST_URLS.EDIT_SOURCING_ORDER}`, { ...body })
+
+// 申请付款
+export const commitPaymentRequest = (data) => ax.post(`${REQUEST_URLS.COMMIT_PAYMENT_REQUEST}`, {...data})
+
+
+
+/*  发货单  */
+// 
 
 
