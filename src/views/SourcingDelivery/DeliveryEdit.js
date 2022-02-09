@@ -1,22 +1,26 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-01-21 15:41:51
+ * @LastEditTime: 2022-02-09 17:27:18
  * @LastEditors: lijunwei
  * @Description: 
  */
 
-import { Button, Card, Form, FormLayout, Icon, IndexTable, Layout, Modal, Page, Select, TextField, TextStyle, Thumbnail, useIndexResourceState } from "@shopify/polaris";
+import { Button, Card, DatePicker, Form, FormLayout, Icon, IndexTable, Layout, Modal, Page, Popover, Select, TextField, TextStyle, Thumbnail, useIndexResourceState } from "@shopify/polaris";
 import {
   SearchMinor
 } from '@shopify/polaris-icons';
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { getPoItemList } from "../../api/requests";
 import { FstlnSelectTree } from "../../components/FstlnSelectTree/FstlnSelectTree";
 import { ProductInfoPopover } from "../../components/ProductInfoPopover/ProductInfoPopover";
-import { SourcingCardSection } from "../../components/SecondaryCard/SourcingCardSection";
 import { SourcingNoteCard } from "../../components/SecondaryCard/SourcingNoteCard";
 import { SourcingProviCard } from "../../components/SecondaryCard/SourcingProviCard";
 import { SourcingRepoCard } from "../../components/SecondaryCard/SourcingRepoCard";
+import {
+  CalendarMajor
+} from '@shopify/polaris-icons';
+import "./style/deliveryEdit.scss"
 
 
 
@@ -25,152 +29,445 @@ function DeliveryEdit(props) {
 
   // = modal =
   const [active, setActive] = useState(false);
-
   const handleChange = useCallback(() => setActive(!active), [active]);
-
   // = modal =
 
   // =======
+  const [tree, setTree] = useState({});
+  const [selectGoodsMapTemp, setSelectGoodsMapTemp] = useState(new Map());
 
-  const [customers, setCustomers] = useState([
-    {
-      id: '3413',
-      url: 'customers/341',
-      name: 'Mae Jemison',
-      location: 'Decatur, USA',
-      orders: 20,
-      amountSpent: 2400,
-    },
-    {
-      id: '2563',
-      url: 'customers/256',
-      name: 'Ellen Ochoa',
-      location: 'Los Angeles, USA',
-      orders: 30,
-      amountSpent: 140,
-    },
-  ]);
+  const [goodsTableDataMap, setGoodsTableDataMap] = useState(new Map());
+
+  const selectedGoods = useMemo(() => {
+    const arr = [];
+    for (const [key, goods] of goodsTableDataMap) {
+      arr.push(goods);
+    }
+    return arr;
+  }, [goodsTableDataMap]);
+
+
   const resourceName = {
-    singular: 'customer',
-    plural: 'customers',
+    singular: '商品',
+    plural: '商品',
   };
 
   const { selectedResources, allResourcesSelected, handleSelectionChange } =
-    useIndexResourceState(customers);
+    useIndexResourceState(selectedGoods, { resourceIDResolver: (goods) => goods.sku });
 
   const promotedBulkActions = [
     {
       content: '移除',
-      onAction: () => console.log('Todo: implement bulk edit'),
+      onAction: () => {
+        console.log(selectedResources)
+
+        const tempMap = new Map(goodsTableDataMap);
+
+        selectedResources.map((sku) => {
+          tempMap.delete(sku);
+          handleSelectionChange("single", false, sku);
+        })
+        setGoodsTableDataMap(tempMap);
+      },
     },
   ];
 
   const goodsFormChangeHandler = useCallback(
-    (idx, val, key) => {
+    (sku, val, key) => {
+      const _tempGoodItem = goodsTableDataMap.get(sku);
+      _tempGoodItem[key] = val
+      const tempMap = new Map(goodsTableDataMap);
+      tempMap.set(sku, _tempGoodItem);
+      setGoodsTableDataMap(tempMap);
 
-      const a = [...customers];
-
-      a[idx][key] = val
-      setCustomers(a);
     },
-    [customers],
+    [goodsTableDataMap],
   );
 
+  const rowMarkup = useMemo(() =>
+    selectedGoods.map(({ sku, purchase_num, goods_name, headKey, count = 0 }, index) => (
+      <IndexTable.Row
+        id={sku}
+        key={sku}
+        selected={selectedResources.includes(sku)}
+        position={index}
+      >
+        <IndexTable.Cell>
+          {headKey}
+        </IndexTable.Cell>
+        <IndexTable.Cell>
+          <ProductInfoPopover tableCellText={sku} />
+        </IndexTable.Cell>
+        <IndexTable.Cell>
+          <div style={{ width: "8em" }}>
+            <TextField
+              type="number"
+              value={count}
+              prefix=""
+              onChange={(v) => { goodsFormChangeHandler(sku, v, "count") }}
+            />
+          </div>
+        </IndexTable.Cell>
+      </IndexTable.Row>
+    ))
+    ,
+    [goodsFormChangeHandler, selectedGoods, selectedResources]
+  )
+  // ======
 
-  const productInfo = (product) => {
+
+
+  const treeHeadRender = (rowItem, itemDetail, children) => {
+    const { po_no, warehouse_name, brand_name, purchase_qty } = itemDetail
     return (
-      <div className="product-container" style={{ maxWidth: "400px", display: "flex", alignItems: "flex-start" }}>
-
-        <Thumbnail
-          source="https://burst.shopifycdn.com/photos/black-leather-choker-necklace_373x@2x.jpg"
-          alt="Black choker necklace"
-          size="small"
-        />
-        <div style={{ flex: 1, marginLeft: "1em" }}>
-          <h4>ZTE Watch Live Black</h4>
-          <h4>ZTE 手表 黑</h4>
-          <span>$100</span>
-        </div>
+      <div className="tree-row">
+        <div>{po_no}</div>
+        <div>{brand_name}</div>
+        <div>{warehouse_name}</div>
+        <div>{purchase_qty}</div>
       </div>
     )
   }
 
-  const rowMarkup = useMemo(() => {
-    return customers.map(
-      ({ id, name, location, orders, amountSpent }, index) => (
-        <IndexTable.Row
-          id={id}
-          key={id}
-          selected={selectedResources.includes(id)}
-          position={index}
-        >
-          <IndexTable.Cell>
-            <TextStyle variation="strong">{name}</TextStyle>
-          </IndexTable.Cell>
-          <IndexTable.Cell>
-            <ProductInfoPopover popoverNode={productInfo()} tableCellText={"商品信息"}  />
-          </IndexTable.Cell>
-          <IndexTable.Cell>
-            <TextField
-              type="number"
-              value={orders}
-              onChange={(v) => { goodsFormChangeHandler(index, v, "orders") }}
-            />
-          </IndexTable.Cell>
-          
-        </IndexTable.Row>
-      ),
+  const treeRowRender = (child) => {
+    const { sku, purchase_num, goods_name } = child
+    return (
+      <div className="tree-row">
+        {/* <div style={{width: "20%"}}></div> */}
+        <div>{sku}</div>
+        <div>{goods_name}</div>
+        <div>{purchase_num}</div>
+      </div>
+    )
+  }
+
+  const treeSelectChange = useCallback(
+    (selectsMap) => {
+      setSelectGoodsMapTemp(selectsMap);
+    },
+    [],
+  );
+
+  const handleConfirmAddGoods = useCallback(
+    () => {
+      // console.log(selectGoodsMapTemp);
+      setGoodsTableDataMap(new Map([...goodsTableDataMap, ...selectGoodsMapTemp]))
+      setActive(false);
+    },
+    [goodsTableDataMap, selectGoodsMapTemp],
+  );
+
+  useEffect(() => {
+    getPoItemList({
+      // provider_id: 6,
+      // currency: "USD",
+      // type: "",
+      // search: "",
+    })
+      .then(res => {
+        console.log(res);
+
+
+      })
+      .finally(() => {
+        // const data = '[{"sku":"6902176905315","cn_name":"努比亚24W快速充电器（英规）","en_name":"Nubia UK Adapter","price":"4.0000"},{"sku":"6902176906558","cn_name":"NX659J 红魔5S 银色 亚欧 8G+128G","en_name":"Red Magic 5S 8+128 EU Silver","price":"508.2600"},{"sku":"6902176906565","cn_name":"NX659J 红魔5S 红蓝渐变 亚欧12G+256G","en_name":"RedMagic 5S 12+256 EU Red & Blue","price":"572.7300"},{"sku":"6902176906596","cn_name":"NX659J 红魔5S 银色 美洲 8G+128G","en_name":"RedMagic 5S 8+128 NA Silver","price":"508.2600"},{"sku":"6902176906954","cn_name":"NX659S 红魔5S 黑色 亚欧  8+128","en_name":"RedMagic 5S 8+128 EU Black","price":"508.2600"},{"sku":"6902176906602","cn_name":"NX659J 红魔5S 红蓝渐变 美洲 12G+256G","en_name":"RedMagic 5S 12+256 NA Red & Blue","price":"572.7300"},{"sku":"6902176906831","cn_name":"Nubia 手表绿色 1GB NA版","en_name":"Nubia watch 1G+8G Green NA","price":"174.5100"}]';
+
+        // setTree({
+        //   "其他": JSON.parse(data)
+        // })
+        const data = {
+          "PO#ZTE2112086": {
+            "po_no": "PO#ZTE2112086",
+            "brand_name": "BlackShark",
+            "warehouse_name": "荣晟波兰3仓",
+            "purchase_qty": 0,
+            "provider": {
+              "id": 5,
+              "business_name": "ZTE CORPORATION",
+              "phone": "13818027409",
+              "contacts": "易艳",
+              "business_address": "6/F., A Wing,  ZTE Plaza, Keji Road South, Hi-Tech Industrial Park, Nanshan District, Shenzhen, P.R.China"
+            },
+            "warehouse": {
+              "id": 1,
+              "business_name": "荣晟波兰3仓",
+              "phone": "+48 953 030 195",
+              "contacts": "SR WHPL",
+              "business_address": "Ul. Logistyczna 1, Swiecko  69100, Poland\r\nSR WHPL"
+            },
+            "item_list": [
+              {
+                "sku": "6921815618126",
+                "purchase_num": 3,
+                "goods_name": "红魔7 plus"
+              }
+            ]
+          },
+          "PO#ZTE2112087": {
+            "po_no": "PO#ZTE2112087",
+            "brand_name": "BlackShark",
+            "warehouse_name": "荣晟波兰3仓",
+            "purchase_qty": 0,
+            "provider": {
+              "id": 5,
+              "business_name": "ZTE CORPORATION",
+              "phone": "13818027409",
+              "contacts": "易艳",
+              "business_address": "6/F., A Wing,  ZTE Plaza, Keji Road South, Hi-Tech Industrial Park, Nanshan District, Shenzhen, P.R.China"
+            },
+            "warehouse": {
+              "id": 1,
+              "business_name": "荣晟波兰3仓",
+              "phone": "+48 953 030 195",
+              "contacts": "SR WHPL",
+              "business_address": "Ul. Logistyczna 1, Swiecko  69100, Poland\r\nSR WHPL"
+            },
+            "item_list": [
+              {
+                "sku": "6921815618126",
+                "purchase_num": 2,
+                "goods_name": "红魔7 plus"
+              }
+            ]
+          },
+          "PO#ZTE2112081": {
+            "po_no": "PO#ZTE2112081",
+            "brand_name": "ZTE",
+            "warehouse_name": "荣晟波兰3仓",
+            "purchase_qty": 0,
+            "provider": {
+              "id": 5,
+              "business_name": "ZTE CORPORATION",
+              "phone": "13818027409",
+              "contacts": "易艳",
+              "business_address": "6/F., A Wing,  ZTE Plaza, Keji Road South, Hi-Tech Industrial Park, Nanshan District, Shenzhen, P.R.China"
+            },
+            "warehouse": {
+              "id": 1,
+              "business_name": "荣晟波兰3仓",
+              "phone": "+48 953 030 195",
+              "contacts": "SR WHPL",
+              "business_address": "Ul. Logistyczna 1, Swiecko  69100, Poland\r\nSR WHPL"
+            },
+            "item_list": [
+              {
+                "sku": "6974786420014",
+                "purchase_num": 6,
+                "goods_name": "Heyup迷你三脚架"
+              }
+            ]
+          },
+          "PO#ZTE2112082": {
+            "po_no": "PO#ZTE2112082",
+            "brand_name": "RedMagic",
+            "warehouse_name": "荣晟波兰3仓",
+            "purchase_qty": 0,
+            "provider": {
+              "id": 5,
+              "business_name": "ZTE CORPORATION",
+              "phone": "13818027409",
+              "contacts": "易艳",
+              "business_address": "6/F., A Wing,  ZTE Plaza, Keji Road South, Hi-Tech Industrial Park, Nanshan District, Shenzhen, P.R.China"
+            },
+            "warehouse": {
+              "id": 1,
+              "business_name": "荣晟波兰3仓",
+              "phone": "+48 953 030 195",
+              "contacts": "SR WHPL",
+              "business_address": "Ul. Logistyczna 1, Swiecko  69100, Poland\r\nSR WHPL"
+            },
+            "item_list": [
+              {
+                "sku": "Test210507001",
+                "purchase_num": 188,
+                "goods_name": "红魔 Test210507001"
+              }
+            ]
+          },
+          "PO#ZTE2111261": {
+            "po_no": "PO#ZTE2111261",
+            "brand_name": "ZTE",
+            "warehouse_name": "荣晟波兰3仓",
+            "purchase_qty": 0,
+            "provider": {
+              "id": 5,
+              "business_name": "ZTE CORPORATION",
+              "phone": "13818027409",
+              "contacts": "易艳",
+              "business_address": "6/F., A Wing,  ZTE Plaza, Keji Road South, Hi-Tech Industrial Park, Nanshan District, Shenzhen, P.R.China"
+            },
+            "warehouse": {
+              "id": 1,
+              "business_name": "荣晟波兰3仓",
+              "phone": "+48 953 030 195",
+              "contacts": "SR WHPL",
+              "business_address": "Ul. Logistyczna 1, Swiecko  69100, Poland\r\nSR WHPL"
+            },
+            "item_list": [
+              {
+                "sku": "6902176053009",
+                "purchase_num": 6,
+                "goods_name": "ZTE 手表 黑"
+              },
+              {
+                "sku": "6902176063299",
+                "purchase_num": 100,
+                "goods_name": "Axon 30 5G  8GB Aqua -欧洲整机"
+              }
+            ]
+          },
+          "PO#XIAOMI H.K. LIMITED2110201": {
+            "po_no": "PO#XIAOMI H.K. LIMITED2110201",
+            "brand_name": "Xiaomi",
+            "warehouse_name": "荣晟香港2仓",
+            "purchase_qty": 0,
+            "provider": {
+              "id": 18,
+              "business_name": "小米科技责任有限公司",
+              "phone": "15873187593",
+              "contacts": "老王",
+              "business_address": "Suite 3209, 32/F, Tower 5, The Gateway, Harbour City, 15 Canton Road, Tsim Sha Tsui, Kowloon, Hong Kong"
+            },
+            "warehouse": {
+              "id": 2,
+              "business_name": "荣晟香港2仓",
+              "phone": "(852) 2400 1637",
+              "contacts": "Esther Leung",
+              "business_address": "Shing Fat Transportation Ltd <br /> 23/F GOODMAN DYNAMIC CTR <br /> 188 YEUNG UK ROAD，TSUEN WAN，HONG KONG <br /> Esther Leung Tel:(852)24001637 <br /> 盛發運輸有限公司 <br /> 新界荃灣楊屋道188號嘉民達力中心23樓A室。<br /> *請到3 / 4 / 5樓，乘搭貨用升降機才可以到達23樓貨倉*"
+            },
+            "item_list": [
+              {
+                "sku": "XMSP19049TP",
+                "purchase_num": 88,
+                "goods_name": "小米9T钢化保护膜"
+              }
+            ]
+          },
+          "PO#NOTHING HK2110131": {
+            "po_no": "PO#NOTHING HK2110131",
+            "brand_name": "Nothing",
+            "warehouse_name": "荣晟香港2仓",
+            "purchase_qty": 0,
+            "provider": {
+              "id": 13,
+              "business_name": "Nothing Technology HK Limited",
+              "phone": "18728496519",
+              "contacts": "张佳其",
+              "business_address": "SUITE 3101, EVERBRIGHT CTR, 108 GLOUCESTER RD, WANCHAI, HONG KONG"
+            },
+            "warehouse": {
+              "id": 2,
+              "business_name": "荣晟香港2仓",
+              "phone": "(852) 2400 1637",
+              "contacts": "Esther Leung",
+              "business_address": "Shing Fat Transportation Ltd <br /> 23/F GOODMAN DYNAMIC CTR <br /> 188 YEUNG UK ROAD，TSUEN WAN，HONG KONG <br /> Esther Leung Tel:(852)24001637 <br /> 盛發運輸有限公司 <br /> 新界荃灣楊屋道188號嘉民達力中心23樓A室。<br /> *請到3 / 4 / 5樓，乘搭貨用升降機才可以到達23樓貨倉*"
+            },
+            "item_list": [
+              {
+                "sku": "6974434220089-CTN",
+                "purchase_num": 8500,
+                "goods_name": "Nothing真无线蓝牙耳机日韩版本 卡板"
+              }
+            ]
+          },
+          "PO#NUBIA2109162": {
+            "po_no": "PO#NUBIA2109162",
+            "brand_name": "RedMagic",
+            "warehouse_name": "荣晟香港2仓",
+            "purchase_qty": 0,
+            "provider": {
+              "id": 6,
+              "business_name": "Nubia Technology Co., Ltd.",
+              "phone": "15710800732",
+              "contacts": "陈锐锋",
+              "business_address": "16/F, Building 2, Chongwen Park, Nanshan Zhiyuan, 3370 Liuxian Road, Nanshan District, Shenzhen 518055, China."
+            },
+            "warehouse": {
+              "id": 2,
+              "business_name": "荣晟香港2仓",
+              "phone": "(852) 2400 1637",
+              "contacts": "Esther Leung",
+              "business_address": "Shing Fat Transportation Ltd <br /> 23/F GOODMAN DYNAMIC CTR <br /> 188 YEUNG UK ROAD，TSUEN WAN，HONG KONG <br /> Esther Leung Tel:(852)24001637 <br /> 盛發運輸有限公司 <br /> 新界荃灣楊屋道188號嘉民達力中心23樓A室。<br /> *請到3 / 4 / 5樓，乘搭貨用升降機才可以到達23樓貨倉*"
+            },
+            "item_list": [
+              {
+                "sku": "6902176902864",
+                "purchase_num": 100,
+                "goods_name": "红魔游戏背包"
+              }
+            ]
+          }
+        };
+        setTree(data);
+      })
+  }, []);
+
+
+  const [formObject, setFormObject] = useState({
+    shipping_date: new Date(),
+    shipping_no: "",
+    expected_days: 6,
+    tracking_no: "",
+    tracking_service: "",
+    shipping_price: "",
+    shipping_currency: "USD",
+    // currency: "USD",
+    binning_no: "",
+    remark: ""
+  });
+
+  const handleFormObjectChange = useCallback(
+    (val, id) => {
+      setFormObject({...formObject, [id]: val})
+    },
+    [formObject],
+  );
+
+  const activator = useMemo(() => {
+    const { shipping_date } = formObject;
+    const str = `${shipping_date.getFullYear()}-${shipping_date.getMonth() + 1}-${shipping_date.getDate()}`
+    return (
+    <TextField
+      label="发货日期"
+      prefix={
+        <Icon
+          source={CalendarMajor}
+          color="subdued" />
+      }
+      value={ str }
+      onFocus={() => { setDatePopoverActive(true) }}
+    />)
+  },
+    [formObject])
+
+  const [{ month, year }, setDate] = useState({ month: new Date().getMonth(), year: new Date().getFullYear() });
+  const handleMonthChange = useCallback(
+    (month, year) => setDate({ month, year }),
+    [],
+  );
+
+  const [datePopoverActive, setDatePopoverActive] = useState(false);
+  const datePop = useMemo(() => {
+    return (
+      <Popover
+        active={datePopoverActive}
+        activator={activator}
+        onClose={() => { setDatePopoverActive(false) }}
+        ariaHaspopup={false}
+        sectioned
+      >
+        <DatePicker
+          month={month}
+          year={year}
+          id="shipping_date"
+          onChange={ ({start})=>{ handleFormObjectChange( start, "shipping_date" ) } }
+          onMonthChange={handleMonthChange}
+          selected={formObject.shipping_date}
+        />
+      </Popover>
     )
   },
-    [customers, goodsFormChangeHandler, selectedResources]
-  );
-  // ======
-
-
-  const tree = {
-    "zte": [
-      {
-        "sku": "6902176907197",
-        "cn_name": "红魔6/6Pro钢化玻璃屏幕保护膜",
-        "en_name": "RedMagic 6/6Pro tempered glass",
-        "qty": 111
-      },
-      {
-        "sku": "6902176903731",
-        "cn_name": "红魔战神手柄",
-        "en_name": "RedMagic 5G E-Sports Handle",
-        "qty": 111
-      }
-    ],
-    "relx": [
-      {
-        "sku": "69021769071971",
-        "cn_name": "红魔6/6Pro钢化玻璃屏幕保护膜1",
-        "en_name": "RedMagic 6/6Pro tempered glass1",
-        "qty": 111
-      },
-      {
-        "sku": "69021769037311",
-        "cn_name": "红魔战神手柄1",
-        "en_name": "RedMagic 5G E-Sports Handle1",
-        "qty": 111
-      }
-    ]
-  }
-
-  const treeHeadRender = (rowItem) => {
-
-    return (
-      <div>{rowItem}</div>
-    )
-  }
-
-  const treeRowRender = (rowItem) => {
-
-    return (
-      <div>{rowItem}</div>
-    )
-  }
+    [activator, datePopoverActive, formObject.shipping_date, handleFormObjectChange, handleMonthChange, month, year])
 
 
   return (
@@ -182,32 +479,17 @@ function DeliveryEdit(props) {
       <Layout>
         <Layout.Section>
 
-        <Card title="商品明细"
-            actions={[
-              {
-                content: "添加商品",
-                onAction: () => setActive(true),
-              }
-            ]}
-          >
-            {/* <Card.Section>
-              <TextField
-                prefix={<Icon
-                  source={SearchMinor}
-                  color="subdued" />
-                }
-                connectedRight={<Button>浏览</Button>}
-              />
-            </Card.Section> */}
+          <Card title="商品明细">
 
             <IndexTable
               resourceName={resourceName}
-              itemCount={customers.length}
+              itemCount={selectedGoods.length}
               selectedItemsCount={
                 allResourcesSelected ? 'All' : selectedResources.length
               }
               onSelectionChange={handleSelectionChange}
               promotedBulkActions={promotedBulkActions}
+              emptyState={`商品为空`}
               headings={[
                 { title: '采购单号' },
                 { title: '系统SKU' },
@@ -227,36 +509,65 @@ function DeliveryEdit(props) {
             <Form>
               <FormLayout>
                 <FormLayout.Group>
-                  <TextField 
-                    label="发货日期"
-                  />
-                  <TextField 
+                  {datePop}
+                  <TextField
                     label="发货单单号"
+                    value={ formObject.shipping_no }
+                    name="shipping_no"
+                    id="shipping_no"
+                    onChange={ handleFormObjectChange }
                   />
                 </FormLayout.Group>
                 <FormLayout.Group>
-                <TextField 
+                  <TextField
                     label="预计到货天数"
+                    value={ formObject.expected_days }
+                    name="expected_days"
+                    id="expected_days"
+                    onChange={ handleFormObjectChange }
                   />
-                  <TextField 
+                  <TextField
                     label="物流单号（选填）"
+                    value={ formObject.tracking_no }
+                    name="tracking_no"
+                    id="tracking_no"
+                    onChange={ handleFormObjectChange }
                   />
                 </FormLayout.Group>
                 <FormLayout.Group>
-                <TextField 
-                    label="物流服务商"
+                  <TextField
+                    label="物流服务商（选填）"
+                    value={ formObject.tracking_service }
+                    name="tracking_service"
+                    id="tracking_service"
+                    onChange={ handleFormObjectChange }
                   />
-                  <TextField 
+                  <TextField
                     label="运费（选填）"
+                    value={ formObject.shipping_price }
+                    name="shipping_price"
+                    id="shipping_price"
+                    onChange={ handleFormObjectChange }
                   />
                 </FormLayout.Group>
                 <FormLayout.Group>
                   <Select
                     label="运费币制（运费选了必填）"
-                    onChange={() => { }}
+                    value={ formObject.shipping_currency }
+                    name="shipping_currency"
+                    id="shipping_currency"
+                    onChange={ handleFormObjectChange }
+                    options={[
+                      {label: "USD",value: "USD"},
+                      {label: "RMB",value: "RMB"},
+                    ]}
                   />
-                  <TextField 
+                  <TextField
                     label="入仓号"
+                    value={ formObject.binning_no }
+                    name="binning_no"
+                    id="binning_no"
+                    onChange={ handleFormObjectChange }
                   />
                 </FormLayout.Group>
 
@@ -265,13 +576,13 @@ function DeliveryEdit(props) {
 
 
           </Card>
-          
+
         </Layout.Section>
         <Layout.Section secondary>
-          
+
           <SourcingProviCard />
           <SourcingRepoCard />
-          <SourcingNoteCard />
+          <SourcingNoteCard  />
 
         </Layout.Section>
       </Layout>
@@ -284,7 +595,7 @@ function DeliveryEdit(props) {
         title="选择采购商品"
         primaryAction={{
           content: '添加',
-          onAction: handleChange,
+          onAction: handleConfirmAddGoods,
         }}
         secondaryActions={[
           {
@@ -321,8 +632,10 @@ function DeliveryEdit(props) {
 
           <FstlnSelectTree
             treeData={tree}
-            headRender={treeHeadRender}
-            itemRowRender={treeRowRender}
+            treeHeadRender={treeHeadRender}
+            treeRowRender={treeRowRender}
+            onTreeSelectChange={treeSelectChange}
+            childrenResolver={(item) => item.item_list}
           />
 
         </div>

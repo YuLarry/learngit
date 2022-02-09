@@ -1,0 +1,9 @@
+.sourcing-edit-row{
+  &>div{
+    display: inline-block;
+    width: 32%;
+    vertical-align: middle;
+    line-height: 1.5em;
+    min-height: 2em;
+  }
+}

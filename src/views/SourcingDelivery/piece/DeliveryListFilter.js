@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 15:00:29
- * @LastEditTime: 2022-02-09 11:53:30
+ * @LastEditTime: 2022-02-09 11:55:57
  * @LastEditors: lijunwei
  * @Description: s
  */
@@ -252,20 +252,20 @@ function DeliveryListFilter(props) {
       },
 
 
-      {
-        key: "repo_status",
-        label: "预报状态",
-        filter: (
-          <Stack vertical>
-            {repoStatusCheckboxMarkup}
-          </Stack>
-        ),
-        onClearAll: () => { clearAppliedFilter("repo_status") },
-        shortcut: true,
-      },
+      // {
+      //   key: "repo_status",
+      //   label: "预报状态",
+      //   filter: (
+      //     <Stack vertical>
+      //       {repoStatusCheckboxMarkup}
+      //     </Stack>
+      //   ),
+      //   onClearAll: () => { clearAppliedFilter("repo_status") },
+      //   shortcut: true,
+      // },
     ]
     , 
-    [repoStatusCheckboxMarkup, clearAppliedFilter, clearFilterItem, filterData.shipping_date, handleMonthChange, month, providerRadios, warehouseRadios, year]
+    [providerRadios, warehouseRadios, month, year, handleMonthChange, filterData.shipping_date, repoStatusCheckboxMarkup, clearFilterItem, filterChangeHandler, clearAppliedFilter]
   )
 
   useEffect(() => {

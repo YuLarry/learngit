@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2021-11-23 19:45:00
- * @LastEditTime: 2022-02-08 19:24:42
+ * @LastEditTime: 2022-02-09 14:11:49
  * @LastEditors: lijunwei
  * @Description: request urls config
  */
@@ -29,6 +29,7 @@ export const GET_GOODS_QUERY            = "/po/get-goods-quote"  // 商品列表
 export const EDIT_SOURCING_ORDER        = "/po/store"            // 添加|编辑采购单
 
 export const GET_SHIPING_LIST = "/shipping/list"  // 获取发货单列表
+export const GET_PO_ITEM_LIST = "/shipping/get-po-item"// 查询发货明细列表
 
 
 

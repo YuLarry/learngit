@@ -1,22 +1,22 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-19 17:05:46
- * @LastEditTime: 2022-02-08 16:46:56
+ * @LastEditTime: 2022-02-09 17:10:58
  * @LastEditors: lijunwei
  * @Description: 
  */
 
 import { Badge, Button, Card, DropZone, IndexTable, Layout, Page, ResourceItem, ResourceList, TextField, TextStyle, Thumbnail, useIndexResourceState } from "@shopify/polaris";
 import { useCallback, useMemo, useState } from "react";
-import { DatePopover } from "../../../components/DatePopover/DatePopover";
-import { ProductInfoPopover } from "../../../components/ProductInfoPopover/ProductInfoPopover";
-import { SourcingCardSection } from "../../../components/SecondaryCard/SourcingCardSection";
-import { SourcingInfoCard } from "../../../components/SecondaryCard/SourcingInfoCard";
+import { DatePopover } from "../../components/DatePopover/DatePopover";
+import { ProductInfoPopover } from "../../components/ProductInfoPopover/ProductInfoPopover";
+import { SourcingCardSection } from "../../components/SecondaryCard/SourcingCardSection";
+import { SourcingInfoCard } from "../../components/SecondaryCard/SourcingInfoCard";
 import {
   DeleteMinor
 } from '@shopify/polaris-icons';
-import "./payRequest.scss";
-import { commitPaymentRequest } from "../../../api/requests";
+import "./style/payRequest.scss";
+import { commitPaymentRequest } from "../../api/requests";
 
 function PayRequest(props) {
 

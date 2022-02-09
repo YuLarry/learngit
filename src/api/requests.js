@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2021-11-24 11:29:42
- * @LastEditTime: 2022-02-08 19:25:17
+ * @LastEditTime: 2022-02-09 14:13:10
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -70,5 +70,10 @@ export const commitPaymentRequest = (data) => ax.post(`${REQUEST_URLS.COMMIT_PAY
 
 /*  发货单  */
 // 获取发货单列表
-export const getShipingList = () => ax.get(REQUEST_URLS.GET_SHIPING_LIST);
+export const getShipingList = (query) => ax.get(REQUEST_URLS.GET_SHIPING_LIST, { params: query});
+
+// 获取发货明细列表
+export const getPoItemList = (query) => ax.get(REQUEST_URLS.GET_PO_ITEM_LIST, { params: query});
+
+
 

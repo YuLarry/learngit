@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-02-08 15:27:20
+ * @LastEditTime: 2022-02-09 17:15:56
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -17,7 +17,7 @@ import { SourcingCardSection } from "../../components/SecondaryCard/SourcingCard
 import { SourcingProviCard } from "../../components/SecondaryCard/SourcingProviCard";
 import { SourcingRepoCard } from "../../components/SecondaryCard/SourcingRepoCard";
 import { BUSINESS_TYPE, DEPARTMENT_LIST, PLATFORM_LIST } from "../../utils/StaticData";
-import "./sourcingOrder.scss";
+import "./style/sourcingEdit.scss";
 
 
 
@@ -38,8 +38,6 @@ function SourcingEdit(props) {
   const [tree, setTree] = useState({});
   const [selectGoodsMapTemp, setSelectGoodsMapTemp] = useState(new Map());
   
-  // const [goodsTableData, setGoodsTableData] = useState(new Map());
-
 
   useEffect(() => {
     Promise.all([
@@ -189,8 +187,7 @@ function SourcingEdit(props) {
     plural: '商品',
   };
 
-  const { selectedResources, allResourcesSelected, handleSelectionChange } =
-    useIndexResourceState(selectedGoods, { resourceIDResolver: ( goods )=> goods.sku });
+  const { selectedResources, allResourcesSelected, handleSelectionChange } = useIndexResourceState(selectedGoods, { resourceIDResolver: ( goods )=> goods.sku });
 
   const promotedBulkActions = [
     {
@@ -232,9 +229,7 @@ function SourcingEdit(props) {
         position={index}
       >
         <IndexTable.Cell>
-          {/* <TextStyle variation="strong"> */}
           {sku}
-          {/* </TextStyle> */}
         </IndexTable.Cell>
         <IndexTable.Cell>
           <TextField
@@ -261,17 +256,21 @@ function SourcingEdit(props) {
 
 
 
-  const treeHeadRender = (rowItem) => {
-
+  const treeHeadRender = (rowItem, itemDetail, children) => {
     return (
       <div>{rowItem}</div>
     )
   }
 
-  const treeRowRender = (rowItem) => {
-
+  const treeRowRender = (child) => {
+    const { sku, cn_name, en_name, price } = child
+    
     return (
-      <div>{rowItem}</div>
+      <div className="sourcing-edit-row">
+        <div>{sku}</div>
+        <div>{en_name}</div>
+        <div>{cn_name}</div>
+      </div>
     )
   }
 
@@ -395,24 +394,7 @@ function SourcingEdit(props) {
 
 
           </Card>
-          <Card title="商品明细"
-          // actions={[
-          //   {
-          //     content: "添加商品",
-          //     onAction: () => setActive(true),
-          //   }
-          // ]}
-          >
-            {/* <Card.Section>
-              <TextField
-                prefix={<Icon
-                  source={SearchMinor}
-                  color="subdued" />
-                }
-                connectedRight={<Button>浏览</Button>}
-              />
-            </Card.Section> */}
-
+          <Card title="商品明细">
             <IndexTable
               resourceName={resourceName}
               itemCount={selectedGoods.length}
@@ -496,9 +478,9 @@ function SourcingEdit(props) {
           </div>
 
           <FstlnSelectTree
-            treeData={tree}
-            headRender={treeHeadRender}
-            itemRowRender={treeRowRender}
+            treeData={ tree }
+            treeHeadRender={treeHeadRender}
+            treeRowRender={treeRowRender}
             onTreeSelectChange={treeSelectChange}
           />
 

@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-02-09 11:26:02
+ * @LastEditTime: 2022-02-09 12:22:18
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -166,26 +166,20 @@ function DeliveryList(props) {
   const promotedBulkActions = useMemo(() => {
     return [
       {
-        content: '提交审批',
+        content: '按pcs入库',
         onAction: () => console.log('Todo: implement bulk edit'),
         disabled: !auditEnable,
       },
       {
-        content: '申请付款',
+        content: '按箱入库',
         onAction: () => console.log(navigate("payRequest")),
         disabled: !applyPayEnable,
 
       },
       {
-        content: "取消发货单",
+        content: "按卡板入库",
         onAction: () => console.log('Todo: implement bulk remove tags'),
         disabled: !cancelEnable,
-
-      },
-      {
-        content: "导出发货单",
-        onAction: () => console.log('Todo: implement bulk delete'),
-        disabled: !exportEnable,
 
       },
       {
@@ -218,7 +212,7 @@ function DeliveryList(props) {
   }, [])
 
   const rowMarkup = useMemo(() => sourcingList.map(
-    ({ id, po_no, subject_title, provider_name, warehouse_name, audit_status, payment_status, delivery_status, item }, index) => {
+    ({ id, shipping_no,provider: { business_name }, warehouse: {name}, status, item, shipping_date, expected_date }, index) => {
 
       const prodNod = item.map((goodsItem, idx) => (goodsItemNode(goodsItem, idx)))
 
@@ -234,24 +228,17 @@ function DeliveryList(props) {
             monochrome
             url={`detail/${id}`}
           >
-            <TextStyle variation="strong">{po_no}</TextStyle>
+            <TextStyle variation="strong">{shipping_no}</TextStyle>
           </Button>
         </IndexTable.Cell>
-        <IndexTable.Cell>{subject_title}</IndexTable.Cell>
-        <IndexTable.Cell>{provider_name}</IndexTable.Cell>
-        <IndexTable.Cell>{warehouse_name}</IndexTable.Cell>
+        <IndexTable.Cell>{ business_name }</IndexTable.Cell>
+        <IndexTable.Cell>{ name }</IndexTable.Cell>
         <IndexTable.Cell>
-          {<BadgeAuditStatus status={audit_status} />}
+          {<BadgeAuditStatus status={ status } />}
         </IndexTable.Cell>
-        <IndexTable.Cell>
-          {<BadgePaymentStatus status={payment_status} />}
-        </IndexTable.Cell>
-        <IndexTable.Cell>
-          {<BadgeDeliveryStatus status={delivery_status} />}
-        </IndexTable.Cell>
-        <IndexTable.Cell>
-          <ProductInfoPopover popoverNode={item.length > 0 ? prodNod : null} tableCellText={`${item.length}商品`} />
-        </IndexTable.Cell>
+        <IndexTable.Cell>{ shipping_date }</IndexTable.Cell>
+        <IndexTable.Cell>{ expected_date }</IndexTable.Cell>
+        
       </IndexTable.Row>)
     }
   )
@@ -281,6 +268,7 @@ function DeliveryList(props) {
     } = filter;
     getShipingList(
       {
+        status: "",
         // provider_id,
         // subject_code,
         // warehouse_code,
@@ -307,9 +295,7 @@ function DeliveryList(props) {
       title="发货单列表"
       fullWidth
       primaryAction={{ content: '新建发货单', onAction: () => { navigate("add") } }}
-      secondaryActions={[
-        { content: '导出', onAction: () => { exportHandler() } },
-      ]}
+      
 
     >
       <Card>
@@ -333,16 +319,14 @@ function DeliveryList(props) {
             promotedBulkActions={promotedBulkActions}
             headings={[
               { title: "发货单号" },
-              { title: "采购方" },
               { title: "供应商" },
               { title: '收获仓库' },
-              { title: '审批状态' },
-              { title: '付款状态' },
-              { title: '发货状态' },
-              { title: '商品' },
+              { title: '预报状态' },
+              { title: '发货日期' },
+              { title: '预计入库日期' },
             ]}
           >
-            {rowMarkup}
+            { rowMarkup }
           </IndexTable>
 
           {/* <div>
