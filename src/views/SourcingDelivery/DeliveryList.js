@@ -1,56 +1,85 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-01-24 15:45:32
+ * @LastEditTime: 2022-02-09 11:26:02
  * @LastEditors: lijunwei
  * @Description: 
  */
 
-import { Button, Card, IndexTable, Page, Pagination, Tabs, TextStyle, useIndexResourceState } from "@shopify/polaris";
-import { useCallback, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Button, Card, IndexTable, Page, Pagination, Tabs, TextStyle, Thumbnail, useIndexResourceState } from "@shopify/polaris";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { DeliveryListFilter } from "./piece/DeliveryListFilter";
+import { AUDIT_AUDITING, AUDIT_FAILURE, AUDIT_PASS, AUDIT_REVOKED, AUDIT_UNAUDITED, PAYMENT_STATUS_FAILURE, PO_STATUS } from "../../utils/StaticData";
+import { BadgeAuditStatus } from "../../components/StatusBadges/BadgeAuditStatus";
+import { BadgePaymentStatus } from "../../components/StatusBadges/BadgePaymentStatus";
+import { BadgeDeliveryStatus } from "../../components/StatusBadges/BadgeDeliveryStatus";
+import { ProductInfoPopover } from "../../components/ProductInfoPopover/ProductInfoPopover";
+import { getShipingList } from "../../api/requests";
+
 
 
 function DeliveryList(props) {
 
+
   const navigate = useNavigate();
-
-
-  const [selected, setSelected] = useState(0);
-  const handleTabChange = useCallback(
-    (selectedTabIndex) => setSelected(selectedTabIndex),
-    [],
-  );
-
-
-  const tabs = [
-    {
-      id: 'all-list',
-      content: '全部',
-      accessibilityLabel: '',
-      panelID: 'all-customers-content-1',
-    },
-    {
-      id: 'no-delivered-list',
-      content: '未预报',
-      panelID: 'accepts-marketing-content-1',
-    },
-    {
-      id: 'part-delivered-list',
-      content: '部分预报',
-      panelID: 'repeat-customers-content-1',
-    },
-    {
-      id: 'delivered-list',
-      content: '已预报',
-      panelID: 'prospects-content-1',
-    },
-  ];
 
   const [pageIndex, setPageIndex] = useState(1);
   const pageSize = 20;
   const [total, setTotal] = useState(0);
+
+  const [listLoading, setListLoading] = useState(false);
+
+  const [filter, setFilter] = useState({
+    provider_id: "",
+    warehouse_code: "",
+    shipping_date: null,
+    good_search: "",
+    repo_status: new Set(),
+  });
+
+  const resourceName = {
+    singular: '发货单',
+    plural: '发货单',
+  }
+
+  const tabs = useMemo(() => {
+    return [
+      {
+        id: PO_STATUS.ALL,
+        content: '全部',
+        accessibilityLabel: '',
+        panelID: 'all-delivery-list',
+      },
+      {
+        id: PO_STATUS.PENDING,
+        content: '未预报',
+        panelID: 'wait-delivery-list',
+      },
+      {
+        id: PO_STATUS.FINISH,
+        content: '部分预报',
+        panelID: 'partial-delivery-list',
+      },
+      {
+        id: PO_STATUS.CANCEL,
+        content: '已预报',
+        panelID: 'delivery-done-list',
+      },
+    ]
+  }, []);
+
+  const [queryListStatus, setQueryListStatus] = useState(PO_STATUS.ALL);
+
+  const [selectedTab, setSelectedTab] = useState(0);
+  const handleTabChange = useCallback(
+    (selectedTabIndex) => {
+      setSelectedTab(selectedTabIndex);
+      setQueryListStatus(tabs[selectedTabIndex].id)
+    }, []
+  );
+
+
 
   // const [exporting, setExporting] = useState(false);
 
@@ -70,193 +99,207 @@ function DeliveryList(props) {
   }, [pageIndex, total]);
 
 
-  
-  // =========================
+
+  const [sourcingList, setSourcingList] = useState([]);
+  const [sourcingListMap, setSourcingListMap] = useState(new Map());
+
+
+  useEffect(() => {
+    const tempMap = new Map();
+    sourcingList.map((item) => {
+      const { id } = item;
+      tempMap.set(id, item);
+    })
+    setSourcingListMap(tempMap);
+  }
+    , [sourcingList])
 
 
 
-
-  const sourcingList = [
-    {
-      "id": 1,
-      "po_no": " PO#NUBIA2112172",
-      "provider_id": "6",
-      "warehouse_code": "WSHK02",
-      "subject": "gamegeek_limited",
-      "audit_status": "audit_pass",
-      "payment_status": "payment_applying",
-      "delivery_status": "delivery_pending",
-      "goods_total": 2,
-      "goods_item": [
-        {
-          "shipping_id": 43,
-          "po_no": "PO#NUBIA2112172",
-          "sku": "6902176906473",
-          "purchase_actual_num": "40",
-          "good": {
-            "sku": "6902176906473",
-            "cn_name": "魔盒散热背夹（黑色 带3A线）红魔",
-            "en_name": "Ice Dock"
-          }
-        },
-        {
-          "shipping_id": 43,
-          "po_no": "PO#NUBIA2112172",
-          "sku": "6902176906596",
-          "purchase_actual_num": "20",
-          "good": {
-            "sku": "6902176906596",
-            "cn_name": "NX659J 红魔5S 银色 美洲 8G+128G",
-            "en_name": "RedMagic 5S 8+128 NA Silver"
-          }
-        }
-      ]
-    },
-    {
-      "id": 2,
-      "po_no": " PO#NUBIA2112172",
-      "provider_id": "6",
-      "warehouse_code": "WSHK02",
-      "subject": "gamegeek_limited",
-      "audit_status": "audit_pass",
-      "payment_status": "payment_applying",
-      "delivery_status": "delivery_pending",
-      "goods_total": 2,
-      "goods_item": [
-        {
-          "shipping_id": 43,
-          "po_no": "PO#NUBIA2112172",
-          "sku": "6902176906473",
-          "purchase_actual_num": "40",
-          "good": {
-            "sku": "6902176906473",
-            "cn_name": "魔盒散热背夹（黑色 带3A线）红魔",
-            "en_name": "Ice Dock"
-          }
-        },
-        {
-          "shipping_id": 43,
-          "po_no": "PO#NUBIA2112172",
-          "sku": "6902176906596",
-          "purchase_actual_num": "20",
-          "good": {
-            "sku": "6902176906596",
-            "cn_name": "NX659J 红魔5S 银色 美洲 8G+128G",
-            "en_name": "RedMagic 5S 8+128 NA Silver"
-          }
-        }
-      ]
-    },
-    {
-      "id": 2,
-      "po_no": " PO#NUBIA2112172",
-      "provider_id": "6",
-      "warehouse_code": "WSHK02",
-      "subject": "gamegeek_limited",
-      "audit_status": "audit_pass",
-      "payment_status": "payment_applying",
-      "delivery_status": "delivery_pending",
-      "goods_total": 2,
-      "goods_item": [
-        {
-          "shipping_id": 43,
-          "po_no": "PO#NUBIA2112172",
-          "sku": "6902176906473",
-          "purchase_actual_num": "40",
-          "good": {
-            "sku": "6902176906473",
-            "cn_name": "魔盒散热背夹（黑色 带3A线）红魔",
-            "en_name": "Ice Dock"
-          }
-        },
-        {
-          "shipping_id": 43,
-          "po_no": "PO#NUBIA2112172",
-          "sku": "6902176906596",
-          "purchase_actual_num": "20",
-          "good": {
-            "sku": "6902176906596",
-            "cn_name": "NX659J 红魔5S 银色 美洲 8G+128G",
-            "en_name": "RedMagic 5S 8+128 NA Silver"
-          }
-        }
-      ]
-    }
-  ];
-  const resourceName = {
-    singular: 'customer',
-    plural: 'customers',
-  };
 
   const { selectedResources, allResourcesSelected, handleSelectionChange } = useIndexResourceState(sourcingList);
 
+  // audit enable control
+  const auditEnable = useMemo(() => {
+    const enableArr = [AUDIT_UNAUDITED, AUDIT_FAILURE, AUDIT_REVOKED];
+    const index = selectedResources.findIndex((item) => (enableArr.indexOf(sourcingListMap.get(item).audit_status) === -1))
+    return index === -1
 
-  const promotedBulkActions = [
-    {
-      content: '按pcs入库',
-      onAction: () => {
-        navigate("inbound/pcs")
+  }, [selectedResources, sourcingListMap])
+
+  // apply payment control
+  const applyPayEnable = useMemo(() => {
+    // console.log(1);
+    if (selectedResources.length > 1) { return false };
+
+    const index = selectedResources.findIndex((item) => (sourcingListMap.get(item).audit_status === AUDIT_PASS && sourcingListMap.get(item).payment_status === PAYMENT_STATUS_FAILURE))
+    // const index = selectedResources.findIndex((item)=>() )
+    return index === -1
+  }, [selectedResources, sourcingListMap])
+
+  // cancel enable control
+  const cancelEnable = useMemo(() => {
+    const enableArr = [AUDIT_UNAUDITED, AUDIT_FAILURE, AUDIT_REVOKED];
+    const index = selectedResources.findIndex((item) => (enableArr.indexOf(sourcingListMap.get(item).audit_status) === -1))
+    return index === -1
+
+  }, [selectedResources, sourcingListMap])
+
+  // delete enable control
+  const deleteEnable = useMemo(() => {
+    const enableArr = [AUDIT_UNAUDITED];
+    const index = selectedResources.findIndex((item) => (enableArr.indexOf(sourcingListMap.get(item).audit_status) === -1))
+    return index === -1
+
+  }, [selectedResources, sourcingListMap])
+
+  // export enable control
+  const exportEnable = useMemo(() => {
+    const enableArr = [AUDIT_AUDITING, AUDIT_PASS];
+    const index = selectedResources.findIndex((item) => (enableArr.indexOf(sourcingListMap.get(item).audit_status) === -1))
+
+    return index === -1
+
+  }, [selectedResources, sourcingListMap])
+
+
+  const promotedBulkActions = useMemo(() => {
+    return [
+      {
+        content: '提交审批',
+        onAction: () => console.log('Todo: implement bulk edit'),
+        disabled: !auditEnable,
       },
-    },
-    {
-      content: '按箱入库',
-      onAction: () => navigate("inbound/box"),
-    },
-    {
-      content: "按卡板入库",
-      onAction: () => navigate("inbound/card"),
-    },
-    {
-      content: "删除发货单",
-      destructive: true,
-      onAction: () => console.log('Todo: implement bulk delete'),
-    },
-  ];
-  const bulkActions = [
-    // {
-    //   content: 'Add tags',
-    //   onAction: () => console.log('Todo: implement bulk add tags'),
-    // },
-    // {
-    //   content: 'Remove tags',
-    //   onAction: () => console.log('Todo: implement bulk remove tags'),
-    // },
-    // {
-    //   content: 'Delete customers',
-    //   onAction: () => console.log('Todo: implement bulk delete'),
-    // },
-  ];
+      {
+        content: '申请付款',
+        onAction: () => console.log(navigate("payRequest")),
+        disabled: !applyPayEnable,
 
+      },
+      {
+        content: "取消发货单",
+        onAction: () => console.log('Todo: implement bulk remove tags'),
+        disabled: !cancelEnable,
 
+      },
+      {
+        content: "导出发货单",
+        onAction: () => console.log('Todo: implement bulk delete'),
+        disabled: !exportEnable,
 
-  const rowMarkup = sourcingList.map(
-    ({ id, po_no, subject_code, provider_id, warehouse_code, audit, payment_status, delivery_status, good_search }, index) => (
-      <IndexTable.Row
+      },
+      {
+        content: "删除发货单",
+        onAction: () => console.log('Todo: implement bulk delete'),
+        disabled: !deleteEnable,
+
+      },
+    ];
+  }, [applyPayEnable, auditEnable, cancelEnable, deleteEnable, exportEnable])
+
+  const goodsItemNode = useCallback((item, idx) => {
+    if (!item) return null;
+    const { sku, purchase_num, goods } = item;
+    const { image_url = "", en_name = "" } = goods || {}
+    return (
+      <div className="product-container" key={idx} style={{ maxWidth: "400px", display: "flex", alignItems: "flex-start" }}>
+
+        <Thumbnail
+          source={image_url || ""}
+          alt={en_name}
+          size="small"
+        />
+        <div style={{ flex: 1, marginLeft: "1em" }}>
+          <Button plain>{sku}</Button>
+          <p>{purchase_num}</p>
+        </div>
+      </div>
+    )
+  }, [])
+
+  const rowMarkup = useMemo(() => sourcingList.map(
+    ({ id, po_no, subject_title, provider_name, warehouse_name, audit_status, payment_status, delivery_status, item }, index) => {
+
+      const prodNod = item.map((goodsItem, idx) => (goodsItemNode(goodsItem, idx)))
+
+      return (<IndexTable.Row
         id={id}
         key={index}
         selected={selectedResources.includes(id)}
         position={index}
       >
         <IndexTable.Cell>
-          <Button 
+          <Button
             plain
             monochrome
-            url={`detail`}
+            url={`detail/${id}`}
           >
             <TextStyle variation="strong">{po_no}</TextStyle>
           </Button>
-          {/* <Link to={`detail/${id}`}>{po_no}</Link> */}
         </IndexTable.Cell>
-        <IndexTable.Cell>{subject_code}</IndexTable.Cell>
-        <IndexTable.Cell>{provider_id}</IndexTable.Cell>
-        <IndexTable.Cell>{warehouse_code}</IndexTable.Cell>
-        <IndexTable.Cell>{audit}</IndexTable.Cell>
-        <IndexTable.Cell>{payment_status}</IndexTable.Cell>
-        <IndexTable.Cell>{delivery_status}</IndexTable.Cell>
-        <IndexTable.Cell>{good_search}</IndexTable.Cell>
-      </IndexTable.Row>
-    ),
+        <IndexTable.Cell>{subject_title}</IndexTable.Cell>
+        <IndexTable.Cell>{provider_name}</IndexTable.Cell>
+        <IndexTable.Cell>{warehouse_name}</IndexTable.Cell>
+        <IndexTable.Cell>
+          {<BadgeAuditStatus status={audit_status} />}
+        </IndexTable.Cell>
+        <IndexTable.Cell>
+          {<BadgePaymentStatus status={payment_status} />}
+        </IndexTable.Cell>
+        <IndexTable.Cell>
+          {<BadgeDeliveryStatus status={delivery_status} />}
+        </IndexTable.Cell>
+        <IndexTable.Cell>
+          <ProductInfoPopover popoverNode={item.length > 0 ? prodNod : null} tableCellText={`${item.length}商品`} />
+        </IndexTable.Cell>
+      </IndexTable.Row>)
+    }
+  )
+    , [goodsItemNode, selectedResources, sourcingList]);
+
+
+  const exportHandler = useCallback(
+    () => {
+      console.log("export");
+    },
+    [],
   );
+
+
+
+  useEffect(() => {
+    setListLoading(true);
+    const {
+      provider_id = "",
+      subject_code = "",
+      warehouse_code = "",
+      po = "",
+      good_search = "",
+      audit_status = new Set(),
+      payment_status = new Set(),
+      delivery_status = new Set(),
+    } = filter;
+    getShipingList(
+      {
+        // provider_id,
+        // subject_code,
+        // warehouse_code,
+        // po,
+        // good_search,
+        // audit: [...audit_status],
+        // payment_status: [...payment_status],
+        // delivery_status: [...delivery_status],
+        // PO_STATUS: queryListStatus,
+      }
+    )
+      .then(res => {
+        const { data: { data, meta } } = res;
+        setSourcingList(data);
+      })
+      .finally(() => {
+        setListLoading(false)
+      })
+  }, [filter, queryListStatus])
 
 
   return (
@@ -264,34 +307,32 @@ function DeliveryList(props) {
       title="发货单列表"
       fullWidth
       primaryAction={{ content: '新建发货单', onAction: () => { navigate("add") } }}
-      // secondaryActions={[
-      //   { content: '导出', onAction: () => { } },
-      // ]}
+      secondaryActions={[
+        { content: '导出', onAction: () => { exportHandler() } },
+      ]}
+
     >
       <Card>
         <Tabs
-          tabs={tabs} selected={selected} onSelect={handleTabChange}
+          tabs={tabs} selected={selectedTab} onSelect={handleTabChange}
         >
-          {/* <p>Tab {selected} selected</p> */}
-
           <div style={{ padding: '16px', display: 'flex' }}>
             <div style={{ flex: 1 }}>
-              <DeliveryListFilter />
+              <DeliveryListFilter filter={filter} onChange={(filter) => { setFilter(filter) }} />
             </div>
 
           </div>
           <IndexTable
+            loading={listLoading}
             resourceName={resourceName}
             itemCount={sourcingList.length}
             selectedItemsCount={
               allResourcesSelected ? 'All' : selectedResources.length
             }
             onSelectionChange={handleSelectionChange}
-            bulkActions={bulkActions}
             promotedBulkActions={promotedBulkActions}
-            lastColumnSticky
             headings={[
-              { title: "采购单号" },
+              { title: "发货单号" },
               { title: "采购方" },
               { title: "供应商" },
               { title: '收获仓库' },
@@ -304,6 +345,28 @@ function DeliveryList(props) {
             {rowMarkup}
           </IndexTable>
 
+          {/* <div>
+              <BadgeAuditStatus status="audit_unaudited" />
+              <BadgeAuditStatus status="audit_auditing" />
+              <BadgeAuditStatus status="audit_pass" />
+              <BadgeAuditStatus status="audit_failure" />
+              <BadgeAuditStatus status="audit_revoked" />
+            </div>
+            <div>
+              <BadgePaymentStatus status="payment_pending" />
+              <BadgePaymentStatus status="payment_applying" />
+              <BadgePaymentStatus status="payment_pass" />
+              <BadgePaymentStatus status="payment_paid" />
+              <BadgePaymentStatus status="payment_failure" />
+            </div>
+            <div>
+              <BadgeDeliveryStatus status="delivery_pending" />
+              <BadgeDeliveryStatus status="delivery_transport" />
+              <BadgeDeliveryStatus status="delivery_partial_transport" />
+              <BadgeDeliveryStatus status="delivery_already_transport" />
+              <BadgeDeliveryStatus status="delivery_partial_finish" />
+              <BadgeDeliveryStatus status="delivery_finish" />
+            </div> */}
           <div className="f-list-footer">
             <Pagination
               // label="This is Results"
@@ -323,5 +386,6 @@ function DeliveryList(props) {
 
     </Page>
   );
+
 }
 export { DeliveryList }

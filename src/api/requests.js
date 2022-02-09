@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2021-11-24 11:29:42
- * @LastEditTime: 2022-02-08 16:00:02
+ * @LastEditTime: 2022-02-08 19:25:17
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -69,6 +69,6 @@ export const commitPaymentRequest = (data) => ax.post(`${REQUEST_URLS.COMMIT_PAY
 
 
 /*  发货单  */
-// 
-
+// 获取发货单列表
+export const getShipingList = () => ax.get(REQUEST_URLS.GET_SHIPING_LIST);
 

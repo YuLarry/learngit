@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-24 17:49:30
- * @LastEditTime: 2022-01-28 15:29:31
+ * @LastEditTime: 2022-02-09 11:35:28
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -33,6 +33,11 @@ export const DELIVERY_PARTIAL_TRANSPORT = "delivery_partial_transport"
 export const DELIVERY_ALREADY_TRANSPORT = "delivery_already_transport"
 export const DELIVERY_PARTIAL_FINISH    = "delivery_partial_finish"
 export const DELIVERY_FINISH            = "delivery_finish"
+
+export const REPO_STATUS_PENDING = "pending";
+export const REPO_STATUS_PORTION = "portion";
+export const REPO_STATUS_FAILURE = "failure";
+export const REPO_STATUS_SUCCESS = "success";
 
 
 export const AUDIT_STATUS = new Map([
@@ -82,3 +87,13 @@ export const DEPARTMENT_LIST = [
   {label: "韩国", value: "韩国"},
 
 ]
+
+
+
+
+export const REPO_STATUS = new Map([
+  [ REPO_STATUS_PENDING , '未预报' ],     // 未预报
+  [ REPO_STATUS_PORTION , '部分预报' ],   // 部分预报
+  // [ REPO_STATUS_FAILURE , '预报失败' ],   // 预报失败
+  [ REPO_STATUS_SUCCESS , '已预报' ],     // 完成、成功
+])
