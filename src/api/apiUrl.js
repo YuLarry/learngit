@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2021-11-23 19:45:00
- * @LastEditTime: 2022-02-10 14:46:33
+ * @LastEditTime: 2022-02-10 18:43:15
  * @LastEditors: lijunwei
  * @Description: request urls config
  */
@@ -36,4 +36,6 @@ export const GET_PO_ITEM_LIST = "/shipping/get-po-item"// 查询发货明细列�
 export const GET_SHIPPING_DETAIL = "/shipping/detail" // 获取发货单详情
 
 export const GET_SKU_OPTIONS = "/shipping/get-warehouse-relation" // 获取sku下拉选项
+
+export const GET_REPO_TABLE_LIST = "/inbound/list"      // 获取入库列表
 

@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2021-11-24 11:29:42
- * @LastEditTime: 2022-02-10 14:47:48
+ * @LastEditTime: 2022-02-10 18:44:24
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -89,6 +89,14 @@ export const getShippingDetail = (id) => ax.get(`${REQUEST_URLS.GET_SHIPPING_DET
 
 // 获取sku下拉列表
 export const getSkuOptionsList = (query) => ax.get(REQUEST_URLS.GET_SKU_OPTIONS, { params: query });
+
+
+
+/* 入库 */
+// 入库单表格
+export const getRepoTableList = (query) => ax.get(REQUEST_URLS.GET_REPO_TABLE_LIST, {params: query})
+
+
 
 
 

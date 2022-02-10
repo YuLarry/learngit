@@ -92,7 +92,7 @@ function InRepositoryManualModal(props) {
   );
   // ====-=
 
-  const [modalOpen, setModalOpen] = useState(true);
+  const [modalOpen, setModalOpen] = useState(false);
   const handleChange = useCallback(
     () => {
       setModalOpen(false);

@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-24 15:50:14
- * @LastEditTime: 2022-01-24 16:10:48
+ * @LastEditTime: 2022-02-10 16:57:27
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -86,14 +86,13 @@ function RepositoryDetail(props) {
 
   return (
     <Page
-      breadcrumbs={[{ content: '采购实施列表', url: '/sourcing' }]}
+      breadcrumbs={[{ content: '采购实施列表', url: '/repository' }]}
       title="order id"
       titleMetadata={<div><Badge status="attention">Verified</Badge> <Badge status="attention">Verified</Badge> <Badge status="attention">Verified</Badge></div>}
       subtitle="2021-12-25 10:05:00 由xxxxxxxxx创建"
     >
       <Layout>
         <Layout.Section>
-
 
           <Card
             title="产品明细"
@@ -123,8 +122,10 @@ function RepositoryDetail(props) {
           <Card
             title="操作记录"
           >
+            <Card.Section>
 
-            <FstlnTimeline />
+              <FstlnTimeline />
+            </Card.Section>
 
           </Card>
 
@@ -146,7 +147,7 @@ function RepositoryDetail(props) {
       </Layout>
 
 
-    <InRepositoryManualModal />
+      <InRepositoryManualModal />
     </Page>
   );
 }
