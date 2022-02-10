@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-24 17:49:30
- * @LastEditTime: 2022-02-09 11:35:28
+ * @LastEditTime: 2022-02-10 10:33:06
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -87,8 +87,6 @@ export const DEPARTMENT_LIST = [
   {label: "韩国", value: "韩国"},
 
 ]
-
-
 
 
 export const REPO_STATUS = new Map([

@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-02-08 15:39:38
+ * @LastEditTime: 2022-02-10 14:35:17
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -222,7 +222,8 @@ function SourcingList(props) {
     ({ id, po_no, subject_title, provider_name, warehouse_name, audit_status, payment_status, delivery_status, item }, index) => {
 
       const prodNod = item.map((goodsItem, idx) => (goodsItemNode(goodsItem, idx)))
-
+      const poBase64 = window.btoa( encodeURIComponent( po_no ));
+      console.log(poBase64);
       return (<IndexTable.Row
         id={id}
         key={index}
@@ -233,7 +234,7 @@ function SourcingList(props) {
           <Button
             plain
             monochrome
-            url={`detail/${id}`}
+            url={`detail/${poBase64}`}
           >
             <TextStyle variation="strong">{po_no}</TextStyle>
           </Button>

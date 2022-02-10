@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2021-11-24 11:29:42
- * @LastEditTime: 2022-02-09 14:13:10
+ * @LastEditTime: 2022-02-10 14:47:48
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -35,6 +35,15 @@ export const getBrandList = () => ax.get(REQUEST_URLS.GET_PROJECT_LIST);
 
 // 获取供应商详情
 export const getProviderDetail = (id) => ax.get(`${REQUEST_URLS.GET_PROVIDER_DETAIL}/${id}`);
+
+// 获取货主列表
+export const getClientAccount = ()=> ax.get(REQUEST_URLS.GET_CLIENT_ACCOUNT_LIST);
+
+// 获取货区列表
+export const getWarehouseArea = ()=> ax.get(REQUEST_URLS.GET_WAREHOUSE_AREA);
+
+
+
 
 // 获取采购单列表
 export const querySourcingList = (params) => ax.get(REQUEST_URLS.QUERY_SOURCING_ORDER_LIST, { params })
@@ -70,10 +79,16 @@ export const commitPaymentRequest = (data) => ax.post(`${REQUEST_URLS.COMMIT_PAY
 
 /*  发货单  */
 // 获取发货单列表
-export const getShipingList = (query) => ax.get(REQUEST_URLS.GET_SHIPING_LIST, { params: query});
+export const getShipingList = (query) => ax.get(REQUEST_URLS.GET_SHIPPING_LIST, { params: query});
 
 // 获取发货明细列表
 export const getPoItemList = (query) => ax.get(REQUEST_URLS.GET_PO_ITEM_LIST, { params: query});
+
+// 获取发货单详情
+export const getShippingDetail = (id) => ax.get(`${REQUEST_URLS.GET_SHIPPING_DETAIL}/${id}`);
+
+// 获取sku下拉列表
+export const getSkuOptionsList = (query) => ax.get(REQUEST_URLS.GET_SKU_OPTIONS, { params: query });
 
 
 

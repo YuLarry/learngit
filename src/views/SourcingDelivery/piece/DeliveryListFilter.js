@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 15:00:29
- * @LastEditTime: 2022-02-09 11:55:57
+ * @LastEditTime: 2022-02-10 10:20:46
  * @LastEditors: lijunwei
  * @Description: s
  */
@@ -300,7 +300,7 @@ function DeliveryListFilter(props) {
 
   return (
     <Filters
-      queryPlaceholder="采购单号/系统SKU/商品中英文名称搜索"
+      queryPlaceholder="发货单号/SKU/中英文名称搜索"
       queryValue={filterData.good_search}
       filters={filters}
       appliedFilters={appliedFilters}

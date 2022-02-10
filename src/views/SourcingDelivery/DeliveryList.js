@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-02-09 12:22:18
+ * @LastEditTime: 2022-02-10 10:39:36
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -16,6 +16,7 @@ import { BadgePaymentStatus } from "../../components/StatusBadges/BadgePaymentSt
 import { BadgeDeliveryStatus } from "../../components/StatusBadges/BadgeDeliveryStatus";
 import { ProductInfoPopover } from "../../components/ProductInfoPopover/ProductInfoPopover";
 import { getShipingList } from "../../api/requests";
+import { BadgeRepoStatus } from "../../components/StatusBadges/BadgeRepoStatus";
 
 
 
@@ -100,92 +101,92 @@ function DeliveryList(props) {
 
 
 
-  const [sourcingList, setSourcingList] = useState([]);
-  const [sourcingListMap, setSourcingListMap] = useState(new Map());
+  const [deliveryList, setDeliveryList] = useState([]);
+  const [deliveryListMap, setDeliveryListMap] = useState(new Map());
 
 
   useEffect(() => {
     const tempMap = new Map();
-    sourcingList.map((item) => {
+    deliveryList.map((item) => {
       const { id } = item;
       tempMap.set(id, item);
     })
-    setSourcingListMap(tempMap);
+    setDeliveryListMap(tempMap);
   }
-    , [sourcingList])
+    , [deliveryList])
 
 
 
 
-  const { selectedResources, allResourcesSelected, handleSelectionChange } = useIndexResourceState(sourcingList);
+  const { selectedResources, allResourcesSelected, handleSelectionChange } = useIndexResourceState(deliveryList);
 
   // audit enable control
   const auditEnable = useMemo(() => {
     const enableArr = [AUDIT_UNAUDITED, AUDIT_FAILURE, AUDIT_REVOKED];
-    const index = selectedResources.findIndex((item) => (enableArr.indexOf(sourcingListMap.get(item).audit_status) === -1))
+    const index = selectedResources.findIndex((item) => (enableArr.indexOf(deliveryListMap.get(item).audit_status) === -1))
     return index === -1
 
-  }, [selectedResources, sourcingListMap])
+  }, [selectedResources, deliveryListMap])
 
   // apply payment control
   const applyPayEnable = useMemo(() => {
     // console.log(1);
     if (selectedResources.length > 1) { return false };
 
-    const index = selectedResources.findIndex((item) => (sourcingListMap.get(item).audit_status === AUDIT_PASS && sourcingListMap.get(item).payment_status === PAYMENT_STATUS_FAILURE))
+    const index = selectedResources.findIndex((item) => (deliveryListMap.get(item).audit_status === AUDIT_PASS && deliveryListMap.get(item).payment_status === PAYMENT_STATUS_FAILURE))
     // const index = selectedResources.findIndex((item)=>() )
     return index === -1
-  }, [selectedResources, sourcingListMap])
+  }, [selectedResources, deliveryListMap])
 
   // cancel enable control
   const cancelEnable = useMemo(() => {
     const enableArr = [AUDIT_UNAUDITED, AUDIT_FAILURE, AUDIT_REVOKED];
-    const index = selectedResources.findIndex((item) => (enableArr.indexOf(sourcingListMap.get(item).audit_status) === -1))
+    const index = selectedResources.findIndex((item) => (enableArr.indexOf(deliveryListMap.get(item).audit_status) === -1))
     return index === -1
 
-  }, [selectedResources, sourcingListMap])
+  }, [selectedResources, deliveryListMap])
 
   // delete enable control
   const deleteEnable = useMemo(() => {
     const enableArr = [AUDIT_UNAUDITED];
-    const index = selectedResources.findIndex((item) => (enableArr.indexOf(sourcingListMap.get(item).audit_status) === -1))
+    const index = selectedResources.findIndex((item) => (enableArr.indexOf(deliveryListMap.get(item).audit_status) === -1))
     return index === -1
 
-  }, [selectedResources, sourcingListMap])
+  }, [selectedResources, deliveryListMap])
 
   // export enable control
   const exportEnable = useMemo(() => {
     const enableArr = [AUDIT_AUDITING, AUDIT_PASS];
-    const index = selectedResources.findIndex((item) => (enableArr.indexOf(sourcingListMap.get(item).audit_status) === -1))
+    const index = selectedResources.findIndex((item) => (enableArr.indexOf(deliveryListMap.get(item).audit_status) === -1))
 
     return index === -1
 
-  }, [selectedResources, sourcingListMap])
+  }, [selectedResources, deliveryListMap])
 
 
   const promotedBulkActions = useMemo(() => {
     return [
       {
         content: '按pcs入库',
-        onAction: () => console.log('Todo: implement bulk edit'),
-        disabled: !auditEnable,
+        onAction: () => { navigate("inbound/pcs") }
+        // disabled: !auditEnable,
       },
       {
         content: '按箱入库',
         onAction: () => console.log(navigate("payRequest")),
-        disabled: !applyPayEnable,
+        // disabled: !applyPayEnable,
 
       },
       {
         content: "按卡板入库",
         onAction: () => console.log('Todo: implement bulk remove tags'),
-        disabled: !cancelEnable,
+        // disabled: !cancelEnable,
 
       },
       {
         content: "删除发货单",
         onAction: () => console.log('Todo: implement bulk delete'),
-        disabled: !deleteEnable,
+        // disabled: !deleteEnable,
 
       },
     ];
@@ -211,7 +212,7 @@ function DeliveryList(props) {
     )
   }, [])
 
-  const rowMarkup = useMemo(() => sourcingList.map(
+  const rowMarkup = useMemo(() => deliveryList.map(
     ({ id, shipping_no,provider: { business_name }, warehouse: {name}, status, item, shipping_date, expected_date }, index) => {
 
       const prodNod = item.map((goodsItem, idx) => (goodsItemNode(goodsItem, idx)))
@@ -234,7 +235,7 @@ function DeliveryList(props) {
         <IndexTable.Cell>{ business_name }</IndexTable.Cell>
         <IndexTable.Cell>{ name }</IndexTable.Cell>
         <IndexTable.Cell>
-          {<BadgeAuditStatus status={ status } />}
+          {<BadgeRepoStatus status={ status } />}
         </IndexTable.Cell>
         <IndexTable.Cell>{ shipping_date }</IndexTable.Cell>
         <IndexTable.Cell>{ expected_date }</IndexTable.Cell>
@@ -242,7 +243,7 @@ function DeliveryList(props) {
       </IndexTable.Row>)
     }
   )
-    , [goodsItemNode, selectedResources, sourcingList]);
+    , [goodsItemNode, selectedResources, deliveryList]);
 
 
   const exportHandler = useCallback(
@@ -281,8 +282,201 @@ function DeliveryList(props) {
       }
     )
       .then(res => {
-        const { data: { data, meta } } = res;
-        setSourcingList(data);
+
+        // const { data: { data, meta } } = res;
+
+        const data = [
+          {
+            "id": 49,
+            "shipping_no": "NBY209019200392",
+            "binning_no": "SRT2021081102",
+            "expected_days": 6,
+            "tracking_no": "SF100293801",
+            "tracking_service": "顺丰快递",
+            "shipping_price": "8.8000",
+            "remark": "补发",
+            "provider_name": "ZTE CORPORATION",
+            "warehouse_name": "荣晟波兰3仓",
+            "status": "pending",
+            "shipping_date": "2022-01-01",
+            "expected_date": "2022-01-07",
+            "item": [
+              {
+                "sku": "6902176063282",
+                "po_no": "PO#ZTE2201261",
+                "shipping_num": 1,
+                "goods": {
+                  "sku": "6902176063282",
+                  "cn_name": "Axon 30 5G  8GB Aqua -北美整机",
+                  "en_name": "Axon 30 5G 8GB aqua -US",
+                  "price": "500.00",
+                  "image_url": "https://cdn.shopify.com/s/files/1/0510/4556/4565/products/4_d9d43bfd-ce21-4239-8a70-5a80fd6803c3.png?v=1628847793"
+                }
+              },
+              {
+                "sku": "6974786420014",
+                "po_no": "PO#ZTE2201261",
+                "shipping_num": 1,
+                "goods": {
+                  "sku": "6974786420014",
+                  "cn_name": "Heyup迷你三脚架",
+                  "en_name": "Heyup Mini Tripod",
+                  "price": "30.00",
+                  "image_url": null
+                }
+              }
+            ],
+            "provider": {
+              "id": 5,
+              "business_name": "ZTE CORPORATION",
+              "business_address": "6/F., A Wing,  ZTE Plaza, Keji Road South, Hi-Tech Industrial Park, Nanshan District, Shenzhen, P.R.China",
+              "contacts": "易艳",
+              "phone": "13818027409"
+            },
+            "warehouse": {
+              "id": 1,
+              "name": "荣晟波兰3仓",
+              "cn_address": "Ul. Logistyczna 1, Swiecko  69100, Poland\r\nSR WHPL",
+              "phone": "+48 953 030 195",
+              "contacts_cn_name": "SR WHPL"
+            }
+          },
+          {
+            "id": 47,
+            "shipping_no": "NBY209019200391",
+            "binning_no": null,
+            "expected_days": 5,
+            "tracking_no": "SF100293801",
+            "tracking_service": null,
+            "shipping_price": "9.9000",
+            "remark": "补发",
+            "provider_name": "Nubia Technology Co., Ltd.",
+            "warehouse_name": "荣晟香港2仓",
+            "status": "portion",
+            "shipping_date": "2022-01-01",
+            "expected_date": "2022-01-06",
+            "item": [
+              {
+                "sku": "6902176906473",
+                "po_no": "PO#NUBIA2103021",
+                "shipping_num": 20,
+                "goods": {
+                  "sku": "6902176906473",
+                  "cn_name": "魔盒散热背夹（黑色 带3A线）红魔",
+                  "en_name": "Ice Dock",
+                  "price": "14.90",
+                  "image_url": ""
+                }
+              },
+              {
+                "sku": "6902176906596",
+                "po_no": "PO#NUBIA2103041",
+                "shipping_num": 20,
+                "goods": {
+                  "sku": "6902176906596",
+                  "cn_name": "NX659J 红魔5S 银色 美洲 8G+128G",
+                  "en_name": "RedMagic 5S 8+128 NA Silver",
+                  "price": "579.00",
+                  "image_url": ""
+                }
+              },
+              {
+                "sku": "6902176906664",
+                "po_no": "PO#NUBIA2103041",
+                "shipping_num": 30,
+                "goods": {
+                  "sku": "6902176906664",
+                  "cn_name": "红魔5S 12+256 UK 红蓝渐变",
+                  "en_name": "RedMagic 5S 12+256 UK Red & Blue",
+                  "price": "549.00",
+                  "image_url": ""
+                }
+              }
+            ],
+            "provider": {
+              "id": 6,
+              "business_name": "Nubia Technology Co., Ltd.",
+              "business_address": "16/F, Building 2, Chongwen Park, Nanshan Zhiyuan, 3370 Liuxian Road, Nanshan District, Shenzhen 518055, China.",
+              "contacts": "陈锐锋",
+              "phone": "15710800732"
+            },
+            "warehouse": {
+              "id": 2,
+              "name": "荣晟香港2仓",
+              "cn_address": "Shing Fat Transportation Ltd <br /> 23/F GOODMAN DYNAMIC CTR <br /> 188 YEUNG UK ROAD，TSUEN WAN，HONG KONG <br /> Esther Leung Tel:(852)24001637 <br /> 盛發運輸有限公司 <br /> 新界荃灣楊屋道188號嘉民達力中心23樓A室。<br /> *請到3 / 4 / 5樓，乘搭貨用升降機才可以到達23樓貨倉*",
+              "phone": "(852) 2400 1637",
+              "contacts_cn_name": "Esther Leung"
+            }
+          },
+          {
+            "id": 47,
+            "shipping_no": "NBY209019200391",
+            "binning_no": null,
+            "expected_days": 5,
+            "tracking_no": "SF100293801",
+            "tracking_service": null,
+            "shipping_price": "9.9000",
+            "remark": "补发",
+            "provider_name": "Nubia Technology Co., Ltd.",
+            "warehouse_name": "荣晟香港2仓",
+            "status": "success",
+            "shipping_date": "2022-01-01",
+            "expected_date": "2022-01-06",
+            "item": [
+              {
+                "sku": "6902176906473",
+                "po_no": "PO#NUBIA2103021",
+                "shipping_num": 20,
+                "goods": {
+                  "sku": "6902176906473",
+                  "cn_name": "魔盒散热背夹（黑色 带3A线）红魔",
+                  "en_name": "Ice Dock",
+                  "price": "14.90",
+                  "image_url": ""
+                }
+              },
+              {
+                "sku": "6902176906596",
+                "po_no": "PO#NUBIA2103041",
+                "shipping_num": 20,
+                "goods": {
+                  "sku": "6902176906596",
+                  "cn_name": "NX659J 红魔5S 银色 美洲 8G+128G",
+                  "en_name": "RedMagic 5S 8+128 NA Silver",
+                  "price": "579.00",
+                  "image_url": ""
+                }
+              },
+              {
+                "sku": "6902176906664",
+                "po_no": "PO#NUBIA2103041",
+                "shipping_num": 30,
+                "goods": {
+                  "sku": "6902176906664",
+                  "cn_name": "红魔5S 12+256 UK 红蓝渐变",
+                  "en_name": "RedMagic 5S 12+256 UK Red & Blue",
+                  "price": "549.00",
+                  "image_url": ""
+                }
+              }
+            ],
+            "provider": {
+              "id": 6,
+              "business_name": "Nubia Technology Co., Ltd.",
+              "business_address": "16/F, Building 2, Chongwen Park, Nanshan Zhiyuan, 3370 Liuxian Road, Nanshan District, Shenzhen 518055, China.",
+              "contacts": "陈锐锋",
+              "phone": "15710800732"
+            },
+            "warehouse": {
+              "id": 2,
+              "name": "荣晟香港2仓",
+              "cn_address": "Shing Fat Transportation Ltd <br /> 23/F GOODMAN DYNAMIC CTR <br /> 188 YEUNG UK ROAD，TSUEN WAN，HONG KONG <br /> Esther Leung Tel:(852)24001637 <br /> 盛發運輸有限公司 <br /> 新界荃灣楊屋道188號嘉民達力中心23樓A室。<br /> *請到3 / 4 / 5樓，乘搭貨用升降機才可以到達23樓貨倉*",
+              "phone": "(852) 2400 1637",
+              "contacts_cn_name": "Esther Leung"
+            }
+          }
+        ]
+        setDeliveryList(data);
       })
       .finally(() => {
         setListLoading(false)
@@ -311,7 +505,7 @@ function DeliveryList(props) {
           <IndexTable
             loading={listLoading}
             resourceName={resourceName}
-            itemCount={sourcingList.length}
+            itemCount={deliveryList.length}
             selectedItemsCount={
               allResourcesSelected ? 'All' : selectedResources.length
             }
@@ -329,28 +523,6 @@ function DeliveryList(props) {
             { rowMarkup }
           </IndexTable>
 
-          {/* <div>
-              <BadgeAuditStatus status="audit_unaudited" />
-              <BadgeAuditStatus status="audit_auditing" />
-              <BadgeAuditStatus status="audit_pass" />
-              <BadgeAuditStatus status="audit_failure" />
-              <BadgeAuditStatus status="audit_revoked" />
-            </div>
-            <div>
-              <BadgePaymentStatus status="payment_pending" />
-              <BadgePaymentStatus status="payment_applying" />
-              <BadgePaymentStatus status="payment_pass" />
-              <BadgePaymentStatus status="payment_paid" />
-              <BadgePaymentStatus status="payment_failure" />
-            </div>
-            <div>
-              <BadgeDeliveryStatus status="delivery_pending" />
-              <BadgeDeliveryStatus status="delivery_transport" />
-              <BadgeDeliveryStatus status="delivery_partial_transport" />
-              <BadgeDeliveryStatus status="delivery_already_transport" />
-              <BadgeDeliveryStatus status="delivery_partial_finish" />
-              <BadgeDeliveryStatus status="delivery_finish" />
-            </div> */}
           <div className="f-list-footer">
             <Pagination
               // label="This is Results"
