@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-02-11 17:26:25
+ * @LastEditTime: 2022-02-11 17:41:43
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -28,29 +28,30 @@ function RepositoryList(props) {
   );
 
 
-  const tabs = [
+  const tabs = useMemo(() => ([
     {
       id: INBOUND_STATUS_ALL,
       content: '全部',
       accessibilityLabel: '',
-      panelID: 'all-customers-content-1',
+      panelID: 'all-content-1',
     },
     {
       id: INBOUND_STATUS_PENDING,
       content: '待入库',
-      panelID: 'accepts-marketing-content-1',
+      panelID: 'pending-content-1',
     },
     {
       id: INBOUND_STATUS_PORTION,
       content: '部分入库',
-      panelID: 'repeat-customers-content-1',
+      panelID: 'partial-content-1',
     },
     {
       id: INBOUND_STATUS_FINISH,
       content: '已入库',
-      panelID: 'prospects-content-1',
+      panelID: 'finished-content-1',
     },
-  ];
+  ]),
+    []);
 
   const [pageIndex, setPageIndex] = useState(1);
   const pageSize = 20;
@@ -109,7 +110,7 @@ function RepositoryList(props) {
   ];
 
   const rowMarkup = tableList.map(
-    ({ id, inbound_no, plan_total_qty, actual_total_qty, client_account_code,item, provider_name, warehouse_area, warehouse_name, status }, index) => (
+    ({ id, inbound_no, plan_total_qty, actual_total_qty, client_account_code, item, provider_name, warehouse_area, warehouse_name, status }, index) => (
       <IndexTable.Row
         id={id}
         key={inbound_no}
@@ -130,7 +131,7 @@ function RepositoryList(props) {
         <IndexTable.Cell>{warehouse_name}</IndexTable.Cell>
         <IndexTable.Cell>{warehouse_area}</IndexTable.Cell>
         <IndexTable.Cell>
-          <BadgeInboundStatus status={ status } />
+          <BadgeInboundStatus status={status} />
         </IndexTable.Cell>
         <IndexTable.Cell>商品</IndexTable.Cell>
         <IndexTable.Cell>{plan_total_qty}</IndexTable.Cell>
@@ -256,51 +257,50 @@ function RepositoryList(props) {
         <Tabs
           tabs={tabs} selected={selected} onSelect={handleTabChange}
         >
-          <div style={{ padding: '16px', display: 'flex' }}>
-            <div style={{ flex: 1 }}>
-              <RepositoryListFilter />
-            </div>
-
-          </div>
-          <IndexTable
-            resourceName={resourceName}
-            itemCount={tableList.length}
-            selectedItemsCount={
-              allResourcesSelected ? 'All' : selectedResources.length
-            }
-            onSelectionChange={handleSelectionChange}
-            bulkActions={bulkActions}
-            promotedBulkActions={promotedBulkActions}
-            headings={[
-              { title: "入库单号" },
-              { title: "货主" },
-              { title: "供应商" },
-              { title: '收获仓库' },
-              { title: '货区' },
-              { title: '状态' },
-              { title: '商品' },
-              { title: '预入库总数' },
-              { title: '已入库总数' },
-            ]}
-          >
-            {rowMarkup}
-          </IndexTable>
-
-          <div className="f-list-footer">
-            <Pagination
-              // label="This is Results"
-              hasPrevious={pageStatus.hasPrevious}
-              onPrevious={() => {
-                setPageIndex(pageIndex - 1)
-              }}
-              hasNext={pageStatus.hasNext}
-              onNext={() => {
-                setPageIndex(pageIndex + 1)
-              }}
-            />
-          </div>
-
         </Tabs>
+        <div style={{ padding: '16px', display: 'flex' }}>
+          <div style={{ flex: 1 }}>
+            <RepositoryListFilter />
+          </div>
+
+        </div>
+        <IndexTable
+          resourceName={resourceName}
+          itemCount={tableList.length}
+          selectedItemsCount={
+            allResourcesSelected ? 'All' : selectedResources.length
+          }
+          onSelectionChange={handleSelectionChange}
+          bulkActions={bulkActions}
+          promotedBulkActions={promotedBulkActions}
+          headings={[
+            { title: "入库单号" },
+            { title: "货主" },
+            { title: "供应商" },
+            { title: '收获仓库' },
+            { title: '货区' },
+            { title: '状态' },
+            { title: '商品' },
+            { title: '预入库总数' },
+            { title: '已入库总数' },
+          ]}
+        >
+          {rowMarkup}
+        </IndexTable>
+
+        <div className="f-list-footer">
+          <Pagination
+            // label="This is Results"
+            hasPrevious={pageStatus.hasPrevious}
+            onPrevious={() => {
+              setPageIndex(pageIndex - 1)
+            }}
+            hasNext={pageStatus.hasNext}
+            onNext={() => {
+              setPageIndex(pageIndex + 1)
+            }}
+          />
+        </div>
       </Card>
 
 

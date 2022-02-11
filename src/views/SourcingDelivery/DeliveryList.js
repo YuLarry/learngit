@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-02-11 17:25:18
+ * @LastEditTime: 2022-02-11 17:41:12
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -213,7 +213,7 @@ function DeliveryList(props) {
   }, [])
 
   const rowMarkup = useMemo(() => deliveryList.map(
-    ({ id, shipping_no,provider: { business_name }, warehouse: {name}, status, item, shipping_date, expected_date }, index) => {
+    ({ id, shipping_no, provider: { business_name }, warehouse: { name }, status, item, shipping_date, expected_date }, index) => {
 
       const prodNod = item.map((goodsItem, idx) => (goodsItemNode(goodsItem, idx)))
 
@@ -232,14 +232,14 @@ function DeliveryList(props) {
             <TextStyle variation="strong">{shipping_no}</TextStyle>
           </Button>
         </IndexTable.Cell>
-        <IndexTable.Cell>{ business_name }</IndexTable.Cell>
-        <IndexTable.Cell>{ name }</IndexTable.Cell>
+        <IndexTable.Cell>{business_name}</IndexTable.Cell>
+        <IndexTable.Cell>{name}</IndexTable.Cell>
         <IndexTable.Cell>
-          {<BadgeRepoStatus status={ status } />}
+          {<BadgeRepoStatus status={status} />}
         </IndexTable.Cell>
-        <IndexTable.Cell>{ shipping_date }</IndexTable.Cell>
-        <IndexTable.Cell>{ expected_date }</IndexTable.Cell>
-        
+        <IndexTable.Cell>{shipping_date}</IndexTable.Cell>
+        <IndexTable.Cell>{expected_date}</IndexTable.Cell>
+
       </IndexTable.Row>)
     }
   )
@@ -489,55 +489,52 @@ function DeliveryList(props) {
       title="发货单列表"
       fullWidth
       primaryAction={{ content: '新建发货单', onAction: () => { navigate("add") } }}
-      
+
 
     >
       <Card>
         <Tabs
           tabs={tabs} selected={selectedTab} onSelect={handleTabChange}
+        ></Tabs>
+        <div style={{ padding: '16px', display: 'flex' }}>
+          <div style={{ flex: 1 }}>
+            <DeliveryListFilter filter={filter} onChange={(filter) => { setFilter(filter) }} />
+          </div>
+        </div>
+        <IndexTable
+          loading={listLoading}
+          resourceName={resourceName}
+          itemCount={deliveryList.length}
+          selectedItemsCount={
+            allResourcesSelected ? 'All' : selectedResources.length
+          }
+          onSelectionChange={handleSelectionChange}
+          promotedBulkActions={promotedBulkActions}
+          headings={[
+            { title: "发货单号" },
+            { title: "供应商" },
+            { title: '收获仓库' },
+            { title: '预报状态' },
+            { title: '发货日期' },
+            { title: '预计入库日期' },
+          ]}
         >
-          <div style={{ padding: '16px', display: 'flex' }}>
-            <div style={{ flex: 1 }}>
-              <DeliveryListFilter filter={filter} onChange={(filter) => { setFilter(filter) }} />
-            </div>
+          {rowMarkup}
+        </IndexTable>
 
-          </div>
-          <IndexTable
-            loading={listLoading}
-            resourceName={resourceName}
-            itemCount={deliveryList.length}
-            selectedItemsCount={
-              allResourcesSelected ? 'All' : selectedResources.length
-            }
-            onSelectionChange={handleSelectionChange}
-            promotedBulkActions={promotedBulkActions}
-            headings={[
-              { title: "发货单号" },
-              { title: "供应商" },
-              { title: '收获仓库' },
-              { title: '预报状态' },
-              { title: '发货日期' },
-              { title: '预计入库日期' },
-            ]}
-          >
-            { rowMarkup }
-          </IndexTable>
-
-          <div className="f-list-footer">
-            <Pagination
-              // label="This is Results"
-              hasPrevious={pageStatus.hasPrevious}
-              onPrevious={() => {
-                setPageIndex(pageIndex - 1)
-              }}
-              hasNext={pageStatus.hasNext}
-              onNext={() => {
-                setPageIndex(pageIndex + 1)
-              }}
-            />
-          </div>
-
-        </Tabs>
+        <div className="f-list-footer">
+          <Pagination
+            // label="This is Results"
+            hasPrevious={pageStatus.hasPrevious}
+            onPrevious={() => {
+              setPageIndex(pageIndex - 1)
+            }}
+            hasNext={pageStatus.hasNext}
+            onNext={() => {
+              setPageIndex(pageIndex + 1)
+            }}
+          />
+        </div>
       </Card>
 
     </Page>

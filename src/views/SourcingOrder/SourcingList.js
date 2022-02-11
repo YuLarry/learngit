@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-02-11 17:21:22
+ * @LastEditTime: 2022-02-11 17:40:29
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -354,11 +354,13 @@ function SourcingList(props) {
         <Tabs
           tabs={tabs} selected={selectedTab} onSelect={handleTabChange}
         >
-          <div style={{ padding: '16px', display: 'flex' }}>
+          
+
+        </Tabs>
+        <div style={{ padding: '16px', display: 'flex' }}>
             <div style={{ flex: 1 }}>
               <SourcingListFilter filter={filter} onChange={(filter) => { setFilter(filter) }} />
             </div>
-
           </div>
           <IndexTable
             loading={listLoading}
@@ -418,8 +420,6 @@ function SourcingList(props) {
               }}
             />
           </div>
-
-        </Tabs>
       </Card>
 
     </Page>
