@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-02-09 17:15:56
+ * @LastEditTime: 2022-02-11 16:38:44
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -10,12 +10,17 @@ import { Button, Card, Form, FormLayout, Icon, IndexTable, Layout, Modal, Page, 
 import {
   SearchMinor
 } from '@shopify/polaris-icons';
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { getBrandList, getGoodsQuery, getProviderDetail, getProviderList, getSubjectList, getWarehouseList } from "../../api/requests";
+import { FstlnLoading } from "../../components/FstlnLoading";
 import { FstlnSelectTree } from "../../components/FstlnSelectTree/FstlnSelectTree";
 import { SourcingCardSection } from "../../components/SecondaryCard/SourcingCardSection";
+import { SourcingRemarkCard } from "../../components/SecondaryCard/SourcingNoteCard";
 import { SourcingProviCard } from "../../components/SecondaryCard/SourcingProviCard";
 import { SourcingRepoCard } from "../../components/SecondaryCard/SourcingRepoCard";
+import { LoadingContext } from "../../context/LoadingContext";
+import { ModalContext } from "../../context/ModalContext";
+import { UnsavedChangeContext } from "../../context/UnsavedChangeContext";
 import { BUSINESS_TYPE, DEPARTMENT_LIST, PLATFORM_LIST } from "../../utils/StaticData";
 import "./style/sourcingEdit.scss";
 
@@ -28,8 +33,7 @@ function SourcingEdit(props) {
   const [subjList, setSubjList] = useState([]);
   const [wareList, setWareList] = useState([]);
 
-  // const [brandMap, setBrandMap] = useState(new Map());
-  // const [subjMap, setSubjMap] = useState(new Map());
+
   const [provMap, setProvMap] = useState(new Map());
   const [wareMap, setWareMap] = useState(new Map());
 
@@ -37,63 +41,11 @@ function SourcingEdit(props) {
 
   const [tree, setTree] = useState({});
   const [selectGoodsMapTemp, setSelectGoodsMapTemp] = useState(new Map());
-  
-
-  useEffect(() => {
-    Promise.all([
-      getBrandList(),
-      getProviderList(),
-      getSubjectList(),
-      getWarehouseList(),
-
-    ])
-      .then(([resBrand, resProv, resSubj, resWare]) => {
-        const { data } = resBrand;
-        const brandListArr = Object.keys(data).map((key) => ({ label: data[key], value: key }))
-        setBrandList(brandListArr);
-
-        const { data: subjData } = resSubj;
-        const subjListArr = Object.keys(subjData).map((key) => ({ label: subjData[key], value: key }))
-        setSubjList(subjListArr);
-
-        const { data: provData } = resProv;
-        const provDataMap = new Map();
-        const provListArr = provData.map((item) => {
-          provDataMap.set(item.id.toString(), item);
-          return ({ label: item.business_name, value: item.id.toString() })
-        })
-        setProvList(provListArr)
-        setProvMap(provDataMap);
 
 
-
-        const { data: wareData } = resWare;
-        const wareDataMap = new Map();
-        const wareListArr = wareData.map((item) => {
-          wareDataMap.set(item.code, item);
-          return ({ label: item.name, value: item.code })
-        })
-        setWareList(wareListArr)
-        setWareMap(wareDataMap);
-
-
-        // set initial form value
-        setSourcingOrderForm({
-          ...sourcingOrderForm,
-          brand_code: brandListArr[0].value,
-          // provider_id: provListArr[0].value,
-          warehouse_code: wareListArr[0].value,
-          subject_code: subjListArr[0].value,
-          cause_team: DEPARTMENT_LIST[0].value,
-          business_type: BUSINESS_TYPE[0].value,
-          platform: PLATFORM_LIST[0].value,
-
-        })
-        setProvider_id(provListArr[0].value)
-
-      })
-  },
-    [])
+  const loadingContext = useContext(LoadingContext);
+  const unsavedChangeContext = useContext(UnsavedChangeContext);
+  const modalContext = useContext(ModalContext);
 
 
   const [sourcingOrderForm, setSourcingOrderForm] = useState({
@@ -122,8 +74,118 @@ function SourcingEdit(props) {
     [sourcingOrderForm],
   );
 
-
   const [providerDetailMap, setproviderDetailMap] = useState(new Map());
+
+  const saveOrder = useCallback(
+    () => {
+      console.log(sourcingOrderForm)
+    },
+    [sourcingOrderForm],
+  );
+
+  useEffect(() => {
+    loadingContext.loading(true)
+    Promise.all([
+      getBrandList(),
+      getProviderList(),
+      getSubjectList(),
+      getWarehouseList(),
+
+    ])
+      .then(([resBrand, resProv, resSubj, resWare]) => {
+        const { data } = resBrand;
+        const brandListArr = Object.keys(data).map((key) => ({ label: data[key], value: key }))
+        setBrandList(brandListArr);
+
+        const { data: subjData } = resSubj;
+        const subjListArr = Object.keys(subjData).map((key) => ({ label: subjData[key], value: key }))
+        setSubjList(subjListArr);
+
+        const { data: provData } = resProv;
+        const provDataMap = new Map();
+        const provListArr = provData.map((item) => {
+          provDataMap.set(item.id.toString(), item);
+          return ({ label: item.business_name, value: item.id.toString() })
+        })
+        setProvList(provListArr)
+        setProvMap(provDataMap);
+
+
+        const { data: wareData } = resWare;
+        const wareDataMap = new Map();
+        const wareListArr = wareData.map((item) => {
+          wareDataMap.set(item.code, item);
+          return ({ label: item.name, value: item.code })
+        })
+        setWareList(wareListArr)
+        setWareMap(wareDataMap);
+
+
+        // set initial form value
+        setSourcingOrderForm({
+          ...sourcingOrderForm,
+          brand_code: brandListArr[0].value,
+          // provider_id: provListArr[0].value,
+          warehouse_code: wareListArr[0].value,
+          subject_code: subjListArr[0].value,
+          cause_team: DEPARTMENT_LIST[0].value,
+          business_type: BUSINESS_TYPE[0].value,
+          platform: PLATFORM_LIST[0].value,
+
+        })
+        setProvider_id(provListArr[0].value)
+
+
+
+      })
+      .finally(() => {
+        loadingContext.loading(false);
+      })
+  },
+    [])
+
+  useEffect(() => {
+    unsavedChangeContext.remind({
+      active: true,
+      message: "未保存的修改",
+      actions: {
+        saveAction: {
+          content: "保存",
+          onAction: () => {
+            saveOrder();
+          },
+        },
+        discardAction: {
+          content: "取消",
+          onAction: () => {
+            modalContext.modal({
+              active: true,
+              title: "取消",
+              message: "确认放弃保存？",
+              primaryAction: {
+                content: "确认",
+                destructive: true,
+                onAction: () => {
+
+                },
+              },
+              secondaryActions: [
+                {
+                  content: "取消",
+                  onAction: () => {
+                    modalContext.modal({ active: false });
+                  },
+                }
+              ],
+
+            })
+          },
+        }
+      },
+    })
+  },
+  [saveOrder])
+
 
   useEffect(() => {
     if (!provider_id) return;
@@ -161,14 +223,9 @@ function SourcingEdit(props) {
     [sourcingOrderForm])
 
 
-  // = modal =
   const [active, setActive] = useState(false);
-
   const handleChange = useCallback(() => setActive(!active), [active]);
 
-  // = modal =
-
-  // =======
 
   const [goodsTableDataMap, setGoodsTableDataMap] = useState(new Map());
 
@@ -180,24 +237,22 @@ function SourcingEdit(props) {
     return arr;
   }, [goodsTableDataMap]);
 
-
-
   const resourceName = {
     singular: '商品',
     plural: '商品',
   };
 
-  const { selectedResources, allResourcesSelected, handleSelectionChange } = useIndexResourceState(selectedGoods, { resourceIDResolver: ( goods )=> goods.sku });
+  const { selectedResources, allResourcesSelected, handleSelectionChange } = useIndexResourceState(selectedGoods, { resourceIDResolver: (goods) => goods.sku });
 
   const promotedBulkActions = [
     {
       content: '移除',
-      onAction: () => { 
+      onAction: () => {
         console.log(selectedResources)
-        
+
         const tempMap = new Map(goodsTableDataMap);
-        
-        selectedResources.map((sku)=>{
+
+        selectedResources.map((sku) => {
           tempMap.delete(sku);
           handleSelectionChange("single", false, sku);
         })
@@ -220,8 +275,8 @@ function SourcingEdit(props) {
   );
 
 
-  const rowMarkup = useMemo(() => 
-    selectedGoods.map(({ cn_name, en_name, price, sku, orders = 0 }, index)=>(
+  const rowMarkup = useMemo(() =>
+    selectedGoods.map(({ cn_name, en_name, price, sku, orders = 0 }, index) => (
       <IndexTable.Row
         id={sku}
         key={sku}
@@ -234,7 +289,7 @@ function SourcingEdit(props) {
         <IndexTable.Cell>
           <TextField
             type="number"
-            value={ orders }
+            value={orders}
             onChange={(v) => { goodsFormChangeHandler(sku, v, "orders") }}
           />
         </IndexTable.Cell>
@@ -248,13 +303,23 @@ function SourcingEdit(props) {
         </IndexTable.Cell>
       </IndexTable.Row>
     ))
-  ,
+    ,
     [goodsFormChangeHandler, selectedGoods, selectedResources]
   )
 
-  // ======
 
+  const [treeLoading, setTreeLoading] = useState(false);
+  const [treeQueryForm, setTreeQueryForm] = useState({
+    type: "1",
+    query: ""
+  });
 
+  const treeQueryFormChangeHandler = useCallback(
+    (val, id) => {
+      setTreeQueryForm({ ...treeQueryForm, [id]: val })
+    },
+    [],
+  );
 
   const treeHeadRender = (rowItem, itemDetail, children) => {
     return (
@@ -264,7 +329,7 @@ function SourcingEdit(props) {
 
   const treeRowRender = (child) => {
     const { sku, cn_name, en_name, price } = child
-    
+
     return (
       <div className="sourcing-edit-row">
         <div>{sku}</div>
@@ -292,26 +357,25 @@ function SourcingEdit(props) {
   );
 
   useEffect(() => {
+    if (active === false) return;
+    setTreeLoading(true);
     getGoodsQuery({
-      provider_id: 6,
+      // ...treeQueryForm,
+      provider_id,
       currency: "USD",
-      type: "",
-      search: "",
     })
       .then(res => {
-        console.log(res);
+        const { data } = res;
+        setTree(data);
 
 
       })
       .finally(() => {
-        const data = '[{"sku":"6902176905315","cn_name":"努比亚24W快速充电器（英规）","en_name":"Nubia UK Adapter","price":"4.0000"},{"sku":"6902176906558","cn_name":"NX659J 红魔5S 银色 亚欧 8G+128G","en_name":"Red Magic 5S 8+128 EU Silver","price":"508.2600"},{"sku":"6902176906565","cn_name":"NX659J 红魔5S 红蓝渐变 亚欧12G+256G","en_name":"RedMagic 5S 12+256 EU Red & Blue","price":"572.7300"},{"sku":"6902176906596","cn_name":"NX659J 红魔5S 银色 美洲 8G+128G","en_name":"RedMagic 5S 8+128 NA Silver","price":"508.2600"},{"sku":"6902176906954","cn_name":"NX659S 红魔5S 黑色 亚欧  8+128","en_name":"RedMagic 5S 8+128 EU Black","price":"508.2600"},{"sku":"6902176906602","cn_name":"NX659J 红魔5S 红蓝渐变 美洲 12G+256G","en_name":"RedMagic 5S 12+256 NA Red & Blue","price":"572.7300"},{"sku":"6902176906831","cn_name":"Nubia 手表绿色 1GB NA版","en_name":"Nubia watch 1G+8G Green NA","price":"174.5100"}]';
-
-        setTree({
-          "其他": JSON.parse(data)
-        })
-
+        setTreeLoading(false)
       })
-  }, []);
+  },
+    [active, treeQueryForm, provider_id]
+  );
 
   return (
     <Page
@@ -428,7 +492,7 @@ function SourcingEdit(props) {
           </Card>
           <SourcingProviCard provInfo={provMap.get(provider_id)} />
           <SourcingRepoCard wareInfo={wareMap.get(sourcingOrderForm.warehouse_code)} />
-
+          <SourcingRemarkCard remark={sourcingOrderForm.remark} onChange={(val) => { formChangeHandler(val, "remark") }} />
 
 
         </Layout.Section>
@@ -457,32 +521,43 @@ function SourcingEdit(props) {
             <TextField
               type="text"
               placeholder="搜索商品"
-              onChange={formChangeHandler}
-
+              id="query"
+              value={treeQueryForm.query}
+              onChange={treeQueryFormChangeHandler}
               prefix={<Icon
                 source={SearchMinor}
                 color="subdued"
               />
               }
               connectedLeft={
-                <Select
-                  onChange={formChangeHandler}
-
-                  options={[
-                    { label: "商品SKU ", value: "1" },
-                    { label: "品牌", value: "2" },
-                  ]}
-                />
+                <div style={{ width: "8em" }}>
+                  <Select
+                    onChange={treeQueryFormChangeHandler}
+                    id="type"
+                    value={treeQueryForm.type}
+                    options={[
+                      { label: "商品SKU ", value: "1" },
+                      { label: "品牌", value: "2" },
+                    ]}
+                  />
+                </div>
               }
             />
           </div>
 
-          <FstlnSelectTree
-            treeData={ tree }
-            treeHeadRender={treeHeadRender}
-            treeRowRender={treeRowRender}
-            onTreeSelectChange={treeSelectChange}
-          />
+          {
+            treeLoading
+              ?
+              <FstlnLoading />
+              :
+              <FstlnSelectTree
+                treeData={tree}
+                treeHeadRender={treeHeadRender}
+                treeRowRender={treeRowRender}
+                onTreeSelectChange={treeSelectChange}
+              />
+          }
+
 
         </div>
       </Modal>

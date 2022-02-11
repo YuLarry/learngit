@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-20 16:16:03
- * @LastEditTime: 2022-01-28 18:10:44
+ * @LastEditTime: 2022-02-11 15:34:24
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -13,12 +13,11 @@ import { getSourcingOrderDetail } from "../../api/requests";
 import { FstlnTimeline } from "../../components/FstlnTimeline/FstlnTimeline";
 import { ProductInfoPopover } from "../../components/ProductInfoPopover/ProductInfoPopover";
 import { SourcingInfoCard } from "../../components/SecondaryCard/SourcingInfoCard";
-import { SourcingNoteCard } from "../../components/SecondaryCard/SourcingNoteCard";
+import { SourcingRemarkCard } from "../../components/SecondaryCard/SourcingNoteCard";
 import { SourcingProviCard } from "../../components/SecondaryCard/SourcingProviCard";
 import { SourcingRepoCard } from "../../components/SecondaryCard/SourcingRepoCard";
 
 function SourcingDetail(props) {
-
   const { id } = useParams();
 
   const [order, setOrder] = useState(null);
@@ -143,7 +142,7 @@ function SourcingDetail(props) {
           <SourcingInfoCard poInfo={ order || {} } />
           <SourcingProviCard provInfo={ order ? order.provider : {} } />
           <SourcingRepoCard wareInfo={ order ? order.warehouse : {} } />
-          <SourcingNoteCard />
+          <SourcingRemarkCard />
         </Layout.Section>
       </Layout>
 

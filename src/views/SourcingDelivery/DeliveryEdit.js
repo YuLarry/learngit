@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-02-09 17:27:18
+ * @LastEditTime: 2022-02-11 15:34:04
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -14,7 +14,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { getPoItemList } from "../../api/requests";
 import { FstlnSelectTree } from "../../components/FstlnSelectTree/FstlnSelectTree";
 import { ProductInfoPopover } from "../../components/ProductInfoPopover/ProductInfoPopover";
-import { SourcingNoteCard } from "../../components/SecondaryCard/SourcingNoteCard";
+import { SourcingRemarkCard } from "../../components/SecondaryCard/SourcingNoteCard";
 import { SourcingProviCard } from "../../components/SecondaryCard/SourcingProviCard";
 import { SourcingRepoCard } from "../../components/SecondaryCard/SourcingRepoCard";
 import {
@@ -25,7 +25,6 @@ import "./style/deliveryEdit.scss"
 
 
 function DeliveryEdit(props) {
-
 
   // = modal =
   const [active, setActive] = useState(false);
@@ -582,7 +581,7 @@ function DeliveryEdit(props) {
 
           <SourcingProviCard />
           <SourcingRepoCard />
-          <SourcingNoteCard  />
+          <SourcingRemarkCard  />
 
         </Layout.Section>
       </Layout>

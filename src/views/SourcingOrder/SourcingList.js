@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-02-10 14:35:17
+ * @LastEditTime: 2022-02-11 16:22:26
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -77,7 +77,8 @@ function SourcingList(props) {
     (selectedTabIndex) => {
       setSelectedTab(selectedTabIndex);
       setQueryListStatus(tabs[selectedTabIndex].id)
-    }, []
+    }, 
+    [tabs]
   );
 
 
@@ -130,7 +131,6 @@ function SourcingList(props) {
 
   // apply payment control
   const applyPayEnable = useMemo(() => {
-    console.log(1);
     if (selectedResources.length > 1) { return false };
 
     const index = selectedResources.findIndex((item) => (sourcingListMap.get(item).audit_status === AUDIT_PASS && sourcingListMap.get(item).payment_status === PAYMENT_STATUS_FAILURE))
@@ -223,7 +223,7 @@ function SourcingList(props) {
 
       const prodNod = item.map((goodsItem, idx) => (goodsItemNode(goodsItem, idx)))
       const poBase64 = window.btoa( encodeURIComponent( po_no ));
-      console.log(poBase64);
+      // console.log(poBase64);
       return (<IndexTable.Row
         id={id}
         key={index}
