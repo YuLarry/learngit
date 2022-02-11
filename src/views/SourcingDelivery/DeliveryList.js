@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-02-10 10:39:36
+ * @LastEditTime: 2022-02-11 17:25:18
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -10,7 +10,7 @@ import { Button, Card, IndexTable, Page, Pagination, Tabs, TextStyle, Thumbnail,
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { DeliveryListFilter } from "./piece/DeliveryListFilter";
-import { AUDIT_AUDITING, AUDIT_FAILURE, AUDIT_PASS, AUDIT_REVOKED, AUDIT_UNAUDITED, PAYMENT_STATUS_FAILURE, PO_STATUS } from "../../utils/StaticData";
+import { AUDIT_AUDITING, AUDIT_FAILURE, AUDIT_PASS, AUDIT_REVOKED, AUDIT_UNAUDITED, PAYMENT_STATUS_FAILURE, REPO_STATUS_ALL, REPO_STATUS_PENDING, REPO_STATUS_PORTION, REPO_STATUS_SUCCESS } from "../../utils/StaticData";
 import { BadgeAuditStatus } from "../../components/StatusBadges/BadgeAuditStatus";
 import { BadgePaymentStatus } from "../../components/StatusBadges/BadgePaymentStatus";
 import { BadgeDeliveryStatus } from "../../components/StatusBadges/BadgeDeliveryStatus";
@@ -47,30 +47,30 @@ function DeliveryList(props) {
   const tabs = useMemo(() => {
     return [
       {
-        id: PO_STATUS.ALL,
+        id: REPO_STATUS_ALL,
         content: '全部',
         accessibilityLabel: '',
         panelID: 'all-delivery-list',
       },
       {
-        id: PO_STATUS.PENDING,
+        id: REPO_STATUS_PENDING,
         content: '未预报',
         panelID: 'wait-delivery-list',
       },
       {
-        id: PO_STATUS.FINISH,
+        id: REPO_STATUS_PORTION,
         content: '部分预报',
         panelID: 'partial-delivery-list',
       },
       {
-        id: PO_STATUS.CANCEL,
+        id: REPO_STATUS_SUCCESS,
         content: '已预报',
         panelID: 'delivery-done-list',
       },
     ]
   }, []);
 
-  const [queryListStatus, setQueryListStatus] = useState(PO_STATUS.ALL);
+  const [queryListStatus, setQueryListStatus] = useState(REPO_STATUS_ALL);
 
   const [selectedTab, setSelectedTab] = useState(0);
   const handleTabChange = useCallback(

@@ -1,31 +1,28 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-02-11 16:22:26
+ * @LastEditTime: 2022-02-11 17:21:22
  * @LastEditors: lijunwei
  * @Description: 
  */
 
 import { Button, Card, IndexTable, Page, Pagination, Tabs, TextStyle, Thumbnail, useIndexResourceState } from "@shopify/polaris";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { querySourcingList } from "../../api/requests";
+import { cancelSourcingOrder, commitApproval, deleteSourcingOrder, querySourcingList } from "../../api/requests";
 import { ProductInfoPopover } from "../../components/ProductInfoPopover/ProductInfoPopover";
 import { BadgeAuditStatus } from "../../components/StatusBadges/BadgeAuditStatus";
 import { BadgeDeliveryStatus } from "../../components/StatusBadges/BadgeDeliveryStatus";
 import { BadgePaymentStatus } from "../../components/StatusBadges/BadgePaymentStatus";
-import { AUDIT_AUDITING, AUDIT_FAILURE, AUDIT_PASS, AUDIT_REVOKED, AUDIT_UNAUDITED, PAYMENT_STATUS_FAILURE, PO_STATUS } from "../../utils/StaticData";
+import { LoadingContext } from "../../context/LoadingContext";
+import { AUDIT_AUDITING, AUDIT_FAILURE, AUDIT_PASS, AUDIT_REVOKED, AUDIT_UNAUDITED, PAYMENT_STATUS_FAILURE, PO_STATUS_ALL, PO_STATUS_CANCEL, PO_STATUS_FINISH, PO_STATUS_PENDING } from "../../utils/StaticData";
 import { SourcingListFilter } from "./piece/SourcingListFilter";
 
 
 function SourcingList(props) {
 
-  const resourceName = {
-    singular: '采购单',
-    plural: '采购单',
-  }
-
   const navigate = useNavigate();
+  const loadingContext = useContext(LoadingContext);
 
   const [pageIndex, setPageIndex] = useState(1);
   const pageSize = 20;
@@ -47,44 +44,41 @@ function SourcingList(props) {
   const tabs = useMemo(() => {
     return [
       {
-        id: PO_STATUS.ALL,
+        id: PO_STATUS_ALL,
         content: '全部',
         accessibilityLabel: '',
-        panelID: 'all-customers-content-1',
+        panelID: 'all-content-1',
       },
       {
-        id: PO_STATUS.PENDING,
+        id: PO_STATUS_PENDING,
         content: '已创建',
-        panelID: 'accepts-marketing-content-1',
+        panelID: 'created-content-1',
       },
       {
-        id: PO_STATUS.FINISH,
+        id: PO_STATUS_FINISH,
         content: '已完结',
-        panelID: 'repeat-customers-content-1',
+        panelID: 'done-content-1',
       },
       {
-        id: PO_STATUS.CANCEL,
+        id: PO_STATUS_CANCEL,
         content: '已取消',
-        panelID: 'prospects-content-1',
+        panelID: 'canceled-content-1',
       },
     ]
   }, []);
 
-  const [queryListStatus, setQueryListStatus] = useState(PO_STATUS.ALL);
+  const [queryListStatus, setQueryListStatus] = useState(PO_STATUS_ALL);
 
   const [selectedTab, setSelectedTab] = useState(0);
   const handleTabChange = useCallback(
     (selectedTabIndex) => {
       setSelectedTab(selectedTabIndex);
       setQueryListStatus(tabs[selectedTabIndex].id)
-    }, 
+    },
     [tabs]
   );
 
-
-
   // const [exporting, setExporting] = useState(false);
-
 
   const pageStatus = useMemo(() => {
     const status = {
@@ -100,11 +94,13 @@ function SourcingList(props) {
     return status
   }, [pageIndex, total]);
 
-
-
+  const resourceName = {
+    singular: '采购单',
+    plural: '采购单',
+  }
   const [sourcingList, setSourcingList] = useState([]);
   const [sourcingListMap, setSourcingListMap] = useState(new Map());
-  
+
 
   useEffect(() => {
     const tempMap = new Map();
@@ -115,8 +111,6 @@ function SourcingList(props) {
     setSourcingListMap(tempMap);
   }
     , [sourcingList])
-
-
 
 
   const { selectedResources, allResourcesSelected, handleSelectionChange } = useIndexResourceState(sourcingList);
@@ -163,35 +157,77 @@ function SourcingList(props) {
 
   }, [selectedResources, sourcingListMap])
 
+  const actionCommitAudit = useCallback(
+    () => {
+      loadingContext.loading(true)
+      commitApproval(selectedResources[0])
+        .then((res)=>{
+
+        })
+        .finally(() => {
+          loadingContext.loading(false)
+        })
+    },
+    [ selectedResources],
+  );
+
+  const actionCommitCancelOrder = useCallback(
+    () => {
+      loadingContext.loading(true)
+      cancelSourcingOrder(selectedResources[0])
+        .then((res)=>{
+
+        })
+        .finally(() => {
+          loadingContext.loading(false)
+        })
+    },
+    [ selectedResources],
+  );
+
+  const actionDeleteOrder = useCallback(
+    () => {
+      loadingContext.loading(true)
+      deleteSourcingOrder(selectedResources[0])
+        .then((res)=>{
+
+        })
+        .finally(() => {
+          loadingContext.loading(false)
+        })
+    },
+    [ selectedResources],
+  );
+
 
   const promotedBulkActions = useMemo(() => {
     return [
       {
         content: '提交审批',
-        onAction: () => console.log('Todo: implement bulk edit'),
+        onAction: actionCommitAudit,
         disabled: !auditEnable,
       },
       {
         content: '申请付款',
-        onAction: () => console.log(navigate("payRequest")),
+        onAction: () => { navigate(`payRequest/${ selectedResources[0] }`) },
         disabled: !applyPayEnable,
 
       },
       {
         content: "取消采购单",
-        onAction: () => console.log('Todo: implement bulk remove tags'),
+        onAction: actionCommitCancelOrder,
         disabled: !cancelEnable,
 
       },
       {
         content: "导出采购单",
-        onAction: () => console.log('Todo: implement bulk delete'),
+        onAction: ()=>{ console.log( "export ")},
         disabled: !exportEnable,
 
       },
       {
         content: "删除采购单",
-        onAction: () => console.log('Todo: implement bulk delete'),
+        onAction: actionDeleteOrder,
         disabled: !deleteEnable,
 
       },
@@ -222,7 +258,7 @@ function SourcingList(props) {
     ({ id, po_no, subject_title, provider_name, warehouse_name, audit_status, payment_status, delivery_status, item }, index) => {
 
       const prodNod = item.map((goodsItem, idx) => (goodsItemNode(goodsItem, idx)))
-      const poBase64 = window.btoa( encodeURIComponent( po_no ));
+      const poBase64 = window.btoa(encodeURIComponent(po_no));
       // console.log(poBase64);
       return (<IndexTable.Row
         id={id}
@@ -283,24 +319,24 @@ function SourcingList(props) {
     } = filter;
     querySourcingList(
       {
-      // provider_id,
-      // subject_code,
-      // warehouse_code,
-      // po,
-      // good_search,
-      // audit: [...audit_status],
-      // payment_status: [...payment_status],
-      // delivery_status: [...delivery_status],
-      // po_status: queryListStatus,
-    }
+        provider_id,
+        subject_code,
+        warehouse_code,
+        po,
+        good_search,
+        audit: [...audit_status],
+        payment_status: [...payment_status],
+        delivery_status: [...delivery_status],
+        po_status: queryListStatus,
+      }
     )
-    .then(res=>{
-      const { data: {data, meta} } =res;
-      setSourcingList(data);
-    })
-    .finally(()=>{
-      setListLoading(false)
-    })
+      .then(res => {
+        const { data: { data, meta } } = res;
+        setSourcingList(data);
+      })
+      .finally(() => {
+        setListLoading(false)
+      })
   }, [filter, queryListStatus])
 
 
@@ -320,12 +356,12 @@ function SourcingList(props) {
         >
           <div style={{ padding: '16px', display: 'flex' }}>
             <div style={{ flex: 1 }}>
-              <SourcingListFilter filter={ filter } onChange={ (filter)=>{setFilter(filter)} } />
+              <SourcingListFilter filter={filter} onChange={(filter) => { setFilter(filter) }} />
             </div>
 
           </div>
           <IndexTable
-            loading={ listLoading }
+            loading={listLoading}
             resourceName={resourceName}
             itemCount={sourcingList.length}
             selectedItemsCount={

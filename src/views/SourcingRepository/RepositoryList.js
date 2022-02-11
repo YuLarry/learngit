@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-02-11 11:54:37
+ * @LastEditTime: 2022-02-11 17:26:25
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -11,6 +11,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getRepoTableList } from "../../api/requests";
 import { BadgeInboundStatus } from "../../components/StatusBadges/BadgeInboundStatus";
+import { INBOUND_STATUS_ALL, INBOUND_STATUS_FINISH, INBOUND_STATUS_PENDING, INBOUND_STATUS_PORTION } from "../../utils/StaticData";
 import { InRepositoryManualModal } from "./piece/InRepositoryManualModal";
 import { RepositoryListFilter } from "./piece/RepositoryListFilter";
 
@@ -29,23 +30,23 @@ function RepositoryList(props) {
 
   const tabs = [
     {
-      id: 'all-list',
+      id: INBOUND_STATUS_ALL,
       content: '全部',
       accessibilityLabel: '',
       panelID: 'all-customers-content-1',
     },
     {
-      id: 'unbound-list',
+      id: INBOUND_STATUS_PENDING,
       content: '待入库',
       panelID: 'accepts-marketing-content-1',
     },
     {
-      id: 'part-bound-list',
+      id: INBOUND_STATUS_PORTION,
       content: '部分入库',
       panelID: 'repeat-customers-content-1',
     },
     {
-      id: 'bound-list',
+      id: INBOUND_STATUS_FINISH,
       content: '已入库',
       panelID: 'prospects-content-1',
     },

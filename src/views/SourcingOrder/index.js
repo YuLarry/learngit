@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2021-11-23 12:18:22
- * @LastEditTime: 2022-02-09 17:11:16
+ * @LastEditTime: 2022-02-11 17:11:56
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -22,7 +22,7 @@ function SourcingOrder(props) {
       <Route path="list" element={ <SourcingList /> }></Route>
       <Route path="add" element={ <SourcingEdit /> }></Route>
       <Route path="detail/:id" element={ <SourcingDetail /> }></Route>
-      <Route path="payRequest" element={ <PayRequest /> }></Route>
+      <Route path="payRequest/:id" element={ <PayRequest /> }></Route>
       
     </Fragment>
   )

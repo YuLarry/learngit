@@ -1,17 +1,15 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-24 17:49:30
- * @LastEditTime: 2022-02-10 19:01:40
+ * @LastEditTime: 2022-02-11 17:23:31
  * @LastEditors: lijunwei
  * @Description: 
  */
 
-export const PO_STATUS = {
-  ALL:      "",
-  PENDING : "po_pending",   // 已创建/待完成
-  FINISH  : "po_finish",    // 已完结
-  CANCEL  : "po_cancel",    // 已取消
-}
+export const PO_STATUS_ALL     = "";
+export const PO_STATUS_PENDING = "po_pending";  // 已创建/待完成
+export const PO_STATUS_FINISH  = "po_finish";   // 已完结
+export const PO_STATUS_CANCEL  = "po_cancel";   // 已取消
 
 
 export const AUDIT_UNAUDITED            = "audit_unaudited"
@@ -34,11 +32,13 @@ export const DELIVERY_ALREADY_TRANSPORT = "delivery_already_transport"
 export const DELIVERY_PARTIAL_FINISH    = "delivery_partial_finish"
 export const DELIVERY_FINISH            = "delivery_finish"
 
+export const REPO_STATUS_ALL     = "";
 export const REPO_STATUS_PENDING = "pending";
 export const REPO_STATUS_PORTION = "portion";
 export const REPO_STATUS_FAILURE = "failure";
 export const REPO_STATUS_SUCCESS = "success";
 
+export const INBOUND_STATUS_ALL     = ''
 export const INBOUND_STATUS_PENDING = 'inbound_pending'
 export const INBOUND_STATUS_PORTION = 'inbound_portion'
 export const INBOUND_STATUS_FINISH  = 'inbound_finish'
