@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2021-11-23 19:45:00
- * @LastEditTime: 2022-02-10 18:43:15
+ * @LastEditTime: 2022-02-11 11:40:19
  * @LastEditors: lijunwei
  * @Description: request urls config
  */
@@ -38,4 +38,5 @@ export const GET_SHIPPING_DETAIL = "/shipping/detail" // 获取发货单详情
 export const GET_SKU_OPTIONS = "/shipping/get-warehouse-relation" // 获取sku下拉选项
 
 export const GET_REPO_TABLE_LIST = "/inbound/list"      // 获取入库列表
+export const GET_INBOUND_DETAIL = "/inbound/detail"    // 获取入库单详情
 

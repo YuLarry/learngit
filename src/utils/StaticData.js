@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-24 17:49:30
- * @LastEditTime: 2022-02-10 10:33:06
+ * @LastEditTime: 2022-02-10 19:01:40
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -38,6 +38,10 @@ export const REPO_STATUS_PENDING = "pending";
 export const REPO_STATUS_PORTION = "portion";
 export const REPO_STATUS_FAILURE = "failure";
 export const REPO_STATUS_SUCCESS = "success";
+
+export const INBOUND_STATUS_PENDING = 'inbound_pending'
+export const INBOUND_STATUS_PORTION = 'inbound_portion'
+export const INBOUND_STATUS_FINISH  = 'inbound_finish'
 
 
 export const AUDIT_STATUS = new Map([
@@ -94,4 +98,10 @@ export const REPO_STATUS = new Map([
   [ REPO_STATUS_PORTION , '部分预报' ],   // 部分预报
   // [ REPO_STATUS_FAILURE , '预报失败' ],   // 预报失败
   [ REPO_STATUS_SUCCESS , '已预报' ],     // 完成、成功
+])
+
+export const INBOUND_STATUS = new Map([
+  [ INBOUND_STATUS_PENDING , "待入库"],
+  [ INBOUND_STATUS_PORTION , "部分入库"],
+  [ INBOUND_STATUS_FINISH  , "已入库"]
 ])

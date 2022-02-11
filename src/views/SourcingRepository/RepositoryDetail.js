@@ -1,19 +1,24 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-24 15:50:14
- * @LastEditTime: 2022-02-10 16:57:27
+ * @LastEditTime: 2022-02-11 11:48:56
  * @LastEditors: lijunwei
  * @Description: 
  */
 
 import { Badge, Card, IndexTable, Layout, Page, Thumbnail } from "@shopify/polaris";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useParams } from "react-router-dom";
+import { getInboundDetail } from "../../api/requests";
 import { FstlnTimeline } from "../../components/FstlnTimeline/FstlnTimeline";
 import { ProductInfoPopover } from "../../components/ProductInfoPopover/ProductInfoPopover";
 import { SourcingCardSection } from "../../components/SecondaryCard/SourcingCardSection";
 import { InRepositoryManualModal } from "./piece/InRepositoryManualModal";
 
 function RepositoryDetail(props) {
+
+  const { id } = useParams();
+  const [detail, setDetail] = useState({});
 
   const orderList = [
     {
@@ -83,6 +88,18 @@ function RepositoryDetail(props) {
   },
     []
   );
+
+  useEffect(() => {
+    id && getInboundDetail(id)
+    .then((res)=>{
+      const { data } = res;
+      setDetail(data);
+
+    })
+    .finally(()=>{
+    
+    })
+  }, [id]);
 
   return (
     <Page

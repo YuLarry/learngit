@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 11:28:36
- * @LastEditTime: 2022-02-10 17:37:12
+ * @LastEditTime: 2022-02-11 11:56:05
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -17,7 +17,7 @@ function SourcingRepository(props) {
     <Fragment>
       <Route index element={ <RepositoryList /> }></Route>
       {/* <Route path="list" element={ <RepositoryList /> }></Route> */}
-      <Route path="detail" element={ <RepositoryDetail /> }></Route>
+      <Route path="detail/:id" element={ <RepositoryDetail /> }></Route>
     </Fragment>
   )
 }

@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2021-11-24 11:29:42
- * @LastEditTime: 2022-02-10 18:44:24
+ * @LastEditTime: 2022-02-11 11:41:42
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -95,6 +95,8 @@ export const getSkuOptionsList = (query) => ax.get(REQUEST_URLS.GET_SKU_OPTIONS,
 /* 入库 */
 // 入库单表格
 export const getRepoTableList = (query) => ax.get(REQUEST_URLS.GET_REPO_TABLE_LIST, {params: query})
+
+export const getInboundDetail = (id) => ax.get(`${REQUEST_URLS.GET_INBOUND_DETAIL}/${id}`);
 
 
 
