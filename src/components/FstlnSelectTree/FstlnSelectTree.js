@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-19 14:30:33
- * @LastEditTime: 2022-02-09 16:52:44
+ * @LastEditTime: 2022-02-14 11:24:58
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -12,7 +12,7 @@ import "./FstlnSelectTree.scss";
 
 function FstlnSelectTree(props) {
 
-  const { treeData, treeHeadRender, treeRowRender, onTreeSelectChange, childrenResolver = (item)=>item } = props;
+  const { identifier = item => item.sku, treeData, treeHeadRender, treeRowRender, onTreeSelectChange, childrenResolver = (item) => item } = props;
 
   const [selectedItems, setSelectedItems] = useState(new Map());
 
@@ -21,12 +21,12 @@ function FstlnSelectTree(props) {
     (val, key) => {
       console.log(key);
       const _tempSelected = new Map(selectedItems);
-      const children = childrenResolver( treeData[key] )
+      const children = childrenResolver(treeData[key])
       children.map((item) => {
         if (val) {
-          _tempSelected.set(item.sku, item);
-        } else if (_tempSelected.has(item.sku)) {
-          _tempSelected.delete(item.sku);
+          _tempSelected.set(identifier(item), item);
+        } else if (_tempSelected.has(identifier(item))) {
+          _tempSelected.delete(identifier(item));
         }
       })
       setSelectedItems(_tempSelected);
@@ -37,9 +37,9 @@ function FstlnSelectTree(props) {
     (val, item) => {
       const _tempSelected = new Map(selectedItems);
       if (val) {
-        _tempSelected.set(item.sku, item);
-      } else if (_tempSelected.has(item.sku)) {
-        _tempSelected.delete(item.sku);
+        _tempSelected.set(identifier(item), item);
+      } else if (_tempSelected.has(identifier(item))) {
+        _tempSelected.delete(identifier(item));
       }
       setSelectedItems(_tempSelected);
     },
@@ -56,14 +56,14 @@ function FstlnSelectTree(props) {
     selectedItems.forEach((item, sku) => {
       keyCount[item["headKey"]] += 1
     })
-    
+
     Object.keys(treeData).map((key) => {
-      const children = childrenResolver( treeData[key] )
-      if( keyCount[key] === children.length ){
+      const children = childrenResolver(treeData[key])
+      if (keyCount[key] === children.length) {
         rlt[key] = true;
-      }else if( keyCount[key] > 0 && keyCount[key] < children.length ){
+      } else if (keyCount[key] > 0 && keyCount[key] < children.length) {
         rlt[key] = "indeterminate"
-      }else{
+      } else {
         rlt[key] = false
       }
     })
@@ -72,43 +72,43 @@ function FstlnSelectTree(props) {
 
   const rowsTemp = useMemo(() =>
     Object.keys(treeData).map((key) => {
-      
+
       const children = childrenResolver(treeData[key]);
 
-      const innerLis = children.map((item) =>{
+      const innerLis = children.map((item) => {
         // set headkey for compute counts
         item["headKey"] = key;
         return (
-          <li className="fcsl-li" key={item.sku}>
-          <label className="fcsl-item">
-            <Checkbox
-              checked={selectedItems.has(item.sku)}
-              onChange={(v) => { rowChangeHandler(v, item) }}
+          <li className="fcsl-li" key={identifier(item)}>
+            <label className="fcsl-item">
+              <Checkbox
+                checked={selectedItems.has(identifier(item))}
+                onChange={(v) => { rowChangeHandler(v, item) }}
 
-            />
-            <div className="fcsl-row">
-              {treeRowRender(item)}
-            </div>
-          </label>
-        </li>
+              />
+              <div className="fcsl-row">
+                {treeRowRender(item)}
+              </div>
+            </label>
+          </li>
         )
       })
-      
+
       const checkedVal = computeHeadsCheckedStatus[key];
 
       return (
         <li className="fcsl-li" key={key}>
           <label className="fcsl-item">
             <Checkbox
-              checked={ checkedVal }
+              checked={checkedVal}
               onChange={(v) => { headChangeHandler(v, key) }}
             />
             <div className="fcsl-head">
-              { treeHeadRender(key, treeData[key], children ) }
+              {treeHeadRender(key, treeData[key], children)}
             </div>
           </label>
           <ul className="fcsl-ul">
-            { innerLis }
+            {innerLis}
           </ul>
         </li >)
     })
@@ -117,7 +117,7 @@ function FstlnSelectTree(props) {
   )
 
   useEffect(() => {
-    onTreeSelectChange( selectedItems )
+    onTreeSelectChange(selectedItems)
   }, [onTreeSelectChange, selectedItems]);
 
   return (
@@ -126,7 +126,7 @@ function FstlnSelectTree(props) {
 
         <ul className="fcsl-ul">
           {rowsTemp}
-          {/* <li className="fcsl-li">
+          { /* <li className="fcsl-li">
           <div className="fcsl-item">
             <Checkbox
               checked={false}
@@ -260,9 +260,8 @@ function FstlnSelectTree(props) {
               </div>
             </li>
           </ul>
-        </li> */}
-
-
+        </li> */
+          }
 
         </ul>
       </Scrollable>

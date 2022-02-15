@@ -1,12 +1,13 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-20 16:16:03
- * @LastEditTime: 2022-02-11 15:34:24
+ * @LastEditTime: 2022-02-15 18:01:12
  * @LastEditors: lijunwei
  * @Description: 
  */
 
 import { Badge, Card, IndexTable, Layout, Page, Thumbnail } from "@shopify/polaris";
+import { useContext } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { getSourcingOrderDetail } from "../../api/requests";
@@ -16,9 +17,18 @@ import { SourcingInfoCard } from "../../components/SecondaryCard/SourcingInfoCar
 import { SourcingRemarkCard } from "../../components/SecondaryCard/SourcingNoteCard";
 import { SourcingProviCard } from "../../components/SecondaryCard/SourcingProviCard";
 import { SourcingRepoCard } from "../../components/SecondaryCard/SourcingRepoCard";
+import { BadgeAuditStatus } from "../../components/StatusBadges/BadgeAuditStatus";
+import { BadgeDeliveryStatus } from "../../components/StatusBadges/BadgeDeliveryStatus";
+import { BadgePaymentStatus } from "../../components/StatusBadges/BadgePaymentStatus";
+import { LoadingContext } from "../../context/LoadingContext";
 
 function SourcingDetail(props) {
   const { id } = useParams();
+
+  const idDecode = atob(id);
+  const idURIDecode = decodeURIComponent(idDecode);
+
+  const loadingContext = useContext(LoadingContext);
 
   const [order, setOrder] = useState(null);
 
@@ -41,70 +51,96 @@ function SourcingDetail(props) {
     },
   ];
 
-  const productInfo = (product) => {
-    return (
-      <div className="product-container" style={{ maxWidth: "400px", display: "flex", alignItems: "flex-start" }}>
 
-        <Thumbnail
-          source="https://burst.shopifycdn.com/photos/black-leather-choker-necklace_373x@2x.jpg"
-          alt="Black choker necklace"
-          size="small"
-        />
-        <div style={{ flex: 1, marginLeft: "1em" }}>
-          <h4>ZTE Watch Live Black</h4>
-          <h4>ZTE 手表 黑</h4>
-          <span>$100</span>
+  const productInfo = ( goodsItem ) => {
+      const { cn_name, en_name, id, image_url, price, sku } = goodsItem;
+      return (
+        <div className="product-container" style={{ maxWidth: "400px", display: "flex", alignItems: "flex-start" }}>
+
+          <Thumbnail
+            source={image_url || ""}
+            alt={en_name}
+            size="small"
+          />
+          <div style={{ flex: 1, marginLeft: "1em" }}>
+            <h4>{en_name}</h4>
+            <h4>{cn_name}</h4>
+            <span>{price}</span>
+          </div>
         </div>
-      </div>
-    )
+      )
   }
 
   const rowMarkup = useMemo(() => {
-    return orderList.map(
-      ({ id, name, location, orders, amountSpent }, index) => (
+    if (!order) return null;
+    return order.item.map(
+      ({ sku, purchase_num, goods, purchase_price }, idx) => (
         <IndexTable.Row
-          id={id}
-          key={id}
-          position={index}
+          id={idx}
+          key={idx}
+          position={idx}
         >
           <IndexTable.Cell>
-            <ProductInfoPopover popoverNode={productInfo()} tableCellText="custom text" />
+            <ProductInfoPopover
+              popoverNode={productInfo(goods)}
+              tableCellText={sku}
+
+            />
 
           </IndexTable.Cell>
-          <IndexTable.Cell>{location}</IndexTable.Cell>
           <IndexTable.Cell>
-
+            {purchase_num}
           </IndexTable.Cell>
           <IndexTable.Cell>
-
+            {purchase_price}
           </IndexTable.Cell>
+          {/* <IndexTable.Cell>
+
+          </IndexTable.Cell> */}
         </IndexTable.Row>
       ),
     )
   },
-    []
+    [order]
   );
 
+  const badgesMarkup = useMemo(() => {
+    if (!order) return null;
+    const { audit_status, payment_status, delivery_status } = order;
+    return (
+      <div>
+        <BadgeAuditStatus status={audit_status} />
+        <BadgePaymentStatus status={payment_status} />
+        <BadgeDeliveryStatus status={delivery_status} />
+      </div>
+    )
+  }, [order])
+
   useEffect(() => {
-    getSourcingOrderDetail(id)
-    .then(res=>{
-      console.log(res);
-      setOrder(res.data)
-    })
-    
+    if (!id) return;
+    loadingContext.loading(true);
+    getSourcingOrderDetail(idDecode)
+      .then(res => {
+        // console.log(res);
+        setOrder(res.data)
+      })
+      .finally(() => {
+        loadingContext.loading(false);
+      })
+
   }, []);
+
+
 
   return (
     <Page
       breadcrumbs={[{ content: '采购实施列表', url: '/sourcing' }]}
-      title="order id"
-      titleMetadata={<div><Badge status="attention">Verified</Badge> <Badge status="attention">Verified</Badge> <Badge status="attention">Verified</Badge></div>}
+      title={idURIDecode}
+      titleMetadata={badgesMarkup}
       subtitle="2021-12-25 10:05:00 由xxxxxxxxx创建"
     >
       <Layout>
         <Layout.Section>
-
-
           <Card
             title="采购明细"
           >
@@ -131,7 +167,10 @@ function SourcingDetail(props) {
             title="操作记录"
           >
             <Card.Section>
-              <FstlnTimeline />
+              <FstlnTimeline
+                dateKey="created_at"
+                timeline={order ? order.operation_record : []}
+              />
 
             </Card.Section>
 
@@ -139,10 +178,10 @@ function SourcingDetail(props) {
 
         </Layout.Section>
         <Layout.Section secondary>
-          <SourcingInfoCard poInfo={ order || {} } />
-          <SourcingProviCard provInfo={ order ? order.provider : {} } />
-          <SourcingRepoCard wareInfo={ order ? order.warehouse : {} } />
-          <SourcingRemarkCard />
+          <SourcingInfoCard poInfo={order || {}} />
+          <SourcingProviCard provInfo={order ? order.provider : {}} />
+          <SourcingRepoCard wareInfo={order ? order.warehouse : {}} />
+          <SourcingRemarkCard readOnly={true} remark={ order && order.remark }  />
         </Layout.Section>
       </Layout>
 

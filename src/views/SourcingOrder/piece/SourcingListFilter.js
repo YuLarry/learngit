@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 15:00:29
- * @LastEditTime: 2022-02-09 16:55:07
+ * @LastEditTime: 2022-02-15 17:57:44
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -19,11 +19,12 @@ function SourcingListFilter(props) {
     subject_code: "",
     warehouse_code: "",
     po: "",
-    good_search: "",
+    common_search: "",
     audit_status: new Set(),
     payment_status: new Set(),
     delivery_status: new Set(),
   }, onChange = ()=>{} } = props
+  const [common_search, setCommon_search] = useState("");
 
   const toastContext = useContext(ToastContext);
   const [providerList, setProviderList] = useState([]);
@@ -358,14 +359,26 @@ function SourcingListFilter(props) {
   },
     [])
 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      onChange({
+        ...filter,
+        common_search
+      })
+    }, 1000);
+    return () => {
+      clearTimeout(timer)
+    }
+  }, [common_search]);
+
   return (
     <Filters
       queryPlaceholder="采购单号/系统SKU/商品中英文名称搜索"
-      queryValue={filterData.good_search}
+      queryValue={common_search}
       filters={filters}
       appliedFilters={appliedFilters}
-      onQueryChange={(val) => { filterChangeHandler("good_search", val) }}
-      onQueryClear={() => { filterChangeHandler("good_search", "") }}
+      onQueryChange={(val) => { setCommon_search(val) }}
+      onQueryClear={() => { setCommon_search("") }}
       onClearAll={handleClearAll}
     />
   );

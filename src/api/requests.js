@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2021-11-24 11:29:42
- * @LastEditTime: 2022-02-11 11:41:42
+ * @LastEditTime: 2022-02-15 16:04:05
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -31,7 +31,7 @@ export const getWarehouseList = () => ax.get(REQUEST_URLS.GET_WAREHOUSE_LIST);
 export const getSubjectList = () => ax.get(REQUEST_URLS.GET_SUBJECT_LIST);
 
 // 获取项目列表
-export const getBrandList = () => ax.get(REQUEST_URLS.GET_PROJECT_LIST);
+export const getBrandList = () => ax.get(REQUEST_URLS.GET_BRAND_LIST);
 
 // 获取供应商详情
 export const getProviderDetail = (id) => ax.get(`${REQUEST_URLS.GET_PROVIDER_DETAIL}/${id}`);
@@ -55,19 +55,19 @@ export const getSourcingOrderDetail = (id) => ax.get(`${REQUEST_URLS.GET_SOURCIN
 export const getGoodsQuery = (params) => ax.get(REQUEST_URLS.GET_GOODS_QUERY, { params });
 
 // 提交审批
-export const commitApproval = (id) => ax.put(`${REQUEST_URLS.COMMIT_APPROVAL}/${id}`)
+export const commitApproval = (id) => ax.put(`${REQUEST_URLS.COMMIT_APPROVAL}`, { id })
 
 // 取消采购单
-export const cancelSourcingOrder = (data) => ax.put(`${REQUEST_URLS.CANCEL_SOURING_ORDER}`, data)
+export const cancelSourcingOrder = (id) => ax.put(`${REQUEST_URLS.CANCEL_SOURING_ORDER}`, { id })
 
 // 删除采购单
-export const deleteSourcingOrder = (id) => ax.delete(`${REQUEST_URLS.DELETE_SOURING_ORDER}/${id}`)
+export const deleteSourcingOrder = (id) => ax.delete(`${REQUEST_URLS.DELETE_SOURING_ORDER}`, { data: { id } })
 
 // 导出采购单 pdf
-export const exportOrderPdf = (id)=> ax.get(`${REQUEST_URLS.EXPORT_SOURING_ORDER_PDF}/${id}`)
+export const exportOrderPdf = (data)=> ax.get(`${REQUEST_URLS.EXPORT_SOURING_ORDER_PDF}`, { params: data })
 
 // 导出采购单 excel
-export const exportOrderExcel = (params)=> ax.get(`${REQUEST_URLS.EXPORT_SOURING_ORDER_EXCEL}`,{ params })
+export const exportOrderExcel = (params)=> ax.get(`${REQUEST_URLS.EXPORT_SOURING_ORDER_EXCEL}`,{ params,responseType: 'blob' })
 
 // 创建|更新采购单
 export const editSourcingOrder = (body)=> ax.post(`${REQUEST_URLS.EDIT_SOURCING_ORDER}`, { ...body })

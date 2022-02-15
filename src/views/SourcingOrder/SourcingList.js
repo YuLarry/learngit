@@ -1,41 +1,45 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-02-11 17:40:29
+ * @LastEditTime: 2022-02-15 17:58:23
  * @LastEditors: lijunwei
  * @Description: 
  */
 
-import { Button, Card, IndexTable, Page, Pagination, Tabs, TextStyle, Thumbnail, useIndexResourceState } from "@shopify/polaris";
+import { Button, Card, DatePicker, IndexTable, Modal, Page, Pagination, RadioButton, Select, Stack, Tabs, TextStyle, Thumbnail, useIndexResourceState } from "@shopify/polaris";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { cancelSourcingOrder, commitApproval, deleteSourcingOrder, querySourcingList } from "../../api/requests";
+import { cancelSourcingOrder, commitApproval, deleteSourcingOrder, exportOrderExcel, exportOrderPdf, getBrandList, querySourcingList } from "../../api/requests";
 import { ProductInfoPopover } from "../../components/ProductInfoPopover/ProductInfoPopover";
 import { BadgeAuditStatus } from "../../components/StatusBadges/BadgeAuditStatus";
 import { BadgeDeliveryStatus } from "../../components/StatusBadges/BadgeDeliveryStatus";
 import { BadgePaymentStatus } from "../../components/StatusBadges/BadgePaymentStatus";
 import { LoadingContext } from "../../context/LoadingContext";
+import { ToastContext } from "../../context/ToastContext";
 import { AUDIT_AUDITING, AUDIT_FAILURE, AUDIT_PASS, AUDIT_REVOKED, AUDIT_UNAUDITED, PAYMENT_STATUS_FAILURE, PO_STATUS_ALL, PO_STATUS_CANCEL, PO_STATUS_FINISH, PO_STATUS_PENDING } from "../../utils/StaticData";
 import { SourcingListFilter } from "./piece/SourcingListFilter";
+import moment from "moment";
 
 
 function SourcingList(props) {
 
   const navigate = useNavigate();
   const loadingContext = useContext(LoadingContext);
+  const toastContext = useContext(ToastContext);
 
   const [pageIndex, setPageIndex] = useState(1);
   const pageSize = 20;
   const [total, setTotal] = useState(0);
-
+  const [refresh, setRefresh] = useState(0);
   const [listLoading, setListLoading] = useState(false);
+
 
   const [filter, setFilter] = useState({
     provider_id: "",
     subject_code: "",
     warehouse_code: "",
     po: "",
-    good_search: "",
+    common_search: "",
     audit_status: new Set(),
     payment_status: new Set(),
     delivery_status: new Set(),
@@ -113,7 +117,21 @@ function SourcingList(props) {
     , [sourcingList])
 
 
+
   const { selectedResources, allResourcesSelected, handleSelectionChange } = useIndexResourceState(sourcingList);
+
+  const clearSelectedResources = useCallback(()=>{
+    selectedResources.map((selectedItem)=>{
+      handleSelectionChange( "single", false, selectedItem )
+    })
+  },
+  [handleSelectionChange, selectedResources])
+  
+  const refreshTrigger = useCallback(()=>{
+    clearSelectedResources();
+    setRefresh( refresh + 1 )
+  },
+  [clearSelectedResources, refresh])
 
   // audit enable control
   const auditEnable = useMemo(() => {
@@ -161,43 +179,68 @@ function SourcingList(props) {
     () => {
       loadingContext.loading(true)
       commitApproval(selectedResources[0])
-        .then((res)=>{
-
+        .then((res) => {
+          refreshTrigger();
+          toastContext.toast({
+            active: true,
+            message: "提交审批成功",
+          })
         })
         .finally(() => {
           loadingContext.loading(false)
         })
     },
-    [ selectedResources],
+    [selectedResources, refreshTrigger],
   );
 
   const actionCommitCancelOrder = useCallback(
     () => {
       loadingContext.loading(true)
       cancelSourcingOrder(selectedResources[0])
-        .then((res)=>{
-
+        .then((res) => {
+          refreshTrigger();
+          toastContext.toast({
+            active: true,
+            message: "取消采购单成功",
+          })
         })
         .finally(() => {
           loadingContext.loading(false)
         })
     },
-    [ selectedResources],
+    [selectedResources, refreshTrigger],
   );
 
   const actionDeleteOrder = useCallback(
     () => {
       loadingContext.loading(true)
       deleteSourcingOrder(selectedResources[0])
-        .then((res)=>{
-
+        .then((res) => {
+          refreshTrigger();
+          toastContext.toast({
+            active: true,
+            message: "删除采购单成功",
+          })
         })
         .finally(() => {
           loadingContext.loading(false)
         })
     },
-    [ selectedResources],
+    [refreshTrigger, selectedResources],
   );
+
+
+  const exportPdf = useCallback(() => {
+    loadingContext.loading(true)
+    exportOrderPdf({ po_id: selectedResources[0] })
+      .then(res => {
+
+      })
+      .finally(() => {
+        loadingContext.loading(false)
+      })
+  }, [selectedResources])
+
 
 
   const promotedBulkActions = useMemo(() => {
@@ -209,7 +252,7 @@ function SourcingList(props) {
       },
       {
         content: '申请付款',
-        onAction: () => { navigate(`payRequest/${ selectedResources[0] }`) },
+        onAction: () => { navigate(`payRequest/${selectedResources[0]}`) },
         disabled: !applyPayEnable,
 
       },
@@ -221,7 +264,7 @@ function SourcingList(props) {
       },
       {
         content: "导出采购单",
-        onAction: ()=>{ console.log( "export ")},
+        onAction: () => { exportPdf() },
         disabled: !exportEnable,
 
       },
@@ -312,7 +355,7 @@ function SourcingList(props) {
       subject_code = "",
       warehouse_code = "",
       po = "",
-      good_search = "",
+      common_search = "",
       audit_status = new Set(),
       payment_status = new Set(),
       delivery_status = new Set(),
@@ -323,21 +366,129 @@ function SourcingList(props) {
         subject_code,
         warehouse_code,
         po,
-        good_search,
-        audit: [...audit_status],
+        common_search,
+        audit_status: [...audit_status],
         payment_status: [...payment_status],
         delivery_status: [...delivery_status],
         po_status: queryListStatus,
+        per_page: pageSize,
+        page: pageIndex
       }
     )
       .then(res => {
-        const { data: { data, meta } } = res;
-        setSourcingList(data);
+        const { data: { list, meta: { pagination: { total = 0 } } } } = res;
+        setSourcingList(list);
+        setTotal(total)
       })
       .finally(() => {
         setListLoading(false)
       })
-  }, [filter, queryListStatus])
+  }, [filter, pageIndex, queryListStatus, refresh])
+
+
+  // export modal
+  const RADIO_KEY = useMemo(() => (
+    {
+      BRAND: "brand",
+      ALL: "all",
+      TIME: "time",
+    }
+  ), [])
+
+  const [active, setActive] = useState(false);
+  const handleChange = useCallback(() => setActive(!active), [active]);
+
+  const [exportRadio, setExportRadio] = useState(RADIO_KEY.BRAND);
+  const handleExportRadioChange = useCallback((checked, id) => setExportRadio(id), []);
+
+  const [brandObject, setBrandObject] = useState({});
+  const brandOptions = useMemo(() => {
+    return Object.keys((brandObject)).map((brandKey) => ({ id: brandKey, label: brandObject[brandKey], value: brandObject[brandKey] }))
+  },
+    [brandObject])
+
+  const [exportRadioBrand, setExportRadioBrand] = useState("");
+  useEffect(() => {
+    brandOptions.length > 0 && setExportRadioBrand(brandOptions[0].value)
+  },
+    [brandOptions])
+
+
+  const [{ month, year }, setDate] = useState({ month: new Date().getMonth(), year: new Date().getFullYear() });
+  const [selectedDates, setSelectedDates] = useState({
+    start: new Date(),
+    end: new Date(),
+  });
+
+  const handleMonthChange = useCallback(
+    (month, year) => setDate({ month, year }),
+    [],
+  );
+
+  useEffect(() => {
+    getBrandList()
+      .then((res) => {
+        const { data } = res;
+        setBrandObject(data);
+      })
+  }, [])
+
+  const exportExcel = useCallback(() => {
+    loadingContext.loading(true)
+    let queryObject = {};
+    if (exportRadio === RADIO_KEY.BRAND) {
+      queryObject = {
+        brand_name: exportRadioBrand
+      }
+    } else if (exportRadio === RADIO_KEY.TIME) {
+      const { start, end } = selectedDates;
+      queryObject = {
+        create_time: [
+          moment(start).format("YYYY-MM-DD"),
+          moment(end).format("YYYY-MM-DD"),
+        ]
+      }
+    }
+
+    exportOrderExcel(queryObject)
+      .then(res => {
+        const blob = res;
+        let fileName = "";
+        switch (exportRadio) {
+
+          case RADIO_KEY.BRAND:
+            fileName = `采购单数据_${exportRadioBrand}_${new Date().getTime()}.xls`
+            break;
+          case RADIO_KEY.TIME:
+            const { start, end } = selectedDates;
+            fileName = `采购单数据_${moment(start).format("YYYYMMDD")}-${moment(end).format("YYYYMMDD")}.xls`
+            break;
+          default:
+            fileName = `采购单数据_all_${new Date().getTime()}`
+            break;
+        }
+        if ('download' in document.createElement('a')) { // 非IE下载
+          const elink = document.createElement('a')
+          elink.download = fileName
+          elink.style.display = 'none'
+          elink.href = URL.createObjectURL(blob)
+          document.body.appendChild(elink)
+          elink.click()
+          URL.revokeObjectURL(elink.href) // 释放URL 对象
+          document.body.removeChild(elink)
+        } else { // IE10+下载
+          navigator.msSaveBlob(blob, fileName)
+        }
+        setActive( false );
+        toastContext.toast({
+          active: true,
+          message: "导出成功"
+        })
+      })
+      .finally(() => {
+        loadingContext.loading(false)
+      })
+  }, [exportRadio, exportRadioBrand, selectedDates])
 
 
   return (
@@ -346,7 +497,7 @@ function SourcingList(props) {
       fullWidth
       primaryAction={{ content: '新建采购单', onAction: () => { navigate("add") } }}
       secondaryActions={[
-        { content: '导出', onAction: () => { exportHandler() } },
+        { content: '导出', onAction: () => { setActive(true) } },
       ]}
 
     >
@@ -354,38 +505,38 @@ function SourcingList(props) {
         <Tabs
           tabs={tabs} selected={selectedTab} onSelect={handleTabChange}
         >
-          
+
 
         </Tabs>
         <div style={{ padding: '16px', display: 'flex' }}>
-            <div style={{ flex: 1 }}>
-              <SourcingListFilter filter={filter} onChange={(filter) => { setFilter(filter) }} />
-            </div>
+          <div style={{ flex: 1 }}>
+            <SourcingListFilter filter={filter} onChange={(filter) => { setFilter(filter) }} />
           </div>
-          <IndexTable
-            loading={listLoading}
-            resourceName={resourceName}
-            itemCount={sourcingList.length}
-            selectedItemsCount={
-              allResourcesSelected ? 'All' : selectedResources.length
-            }
-            onSelectionChange={handleSelectionChange}
-            promotedBulkActions={promotedBulkActions}
-            headings={[
-              { title: "采购单号" },
-              { title: "采购方" },
-              { title: "供应商" },
-              { title: '收获仓库' },
-              { title: '审批状态' },
-              { title: '付款状态' },
-              { title: '发货状态' },
-              { title: '商品' },
-            ]}
-          >
-            {rowMarkup}
-          </IndexTable>
+        </div>
+        <IndexTable
+          loading={listLoading}
+          resourceName={resourceName}
+          itemCount={sourcingList.length}
+          selectedItemsCount={
+            allResourcesSelected ? 'All' : selectedResources.length
+          }
+          onSelectionChange={(a, b,c  )=>{ console.log(a,b,c) ;handleSelectionChange(a,b,c) }}
+          promotedBulkActions={promotedBulkActions}
+          headings={[
+            { title: "采购单号" },
+            { title: "采购方" },
+            { title: "供应商" },
+            { title: '收获仓库' },
+            { title: '审批状态' },
+            { title: '付款状态' },
+            { title: '发货状态' },
+            { title: '商品' },
+          ]}
+        >
+          {rowMarkup}
+        </IndexTable>
 
-          {/* <div>
+        {/* <div>
               <BadgeAuditStatus status="audit_unaudited" />
               <BadgeAuditStatus status="audit_auditing" />
               <BadgeAuditStatus status="audit_pass" />
@@ -407,20 +558,90 @@ function SourcingList(props) {
               <BadgeDeliveryStatus status="delivery_partial_finish" />
               <BadgeDeliveryStatus status="delivery_finish" />
             </div> */}
-          <div className="f-list-footer">
-            <Pagination
-              // label="This is Results"
-              hasPrevious={pageStatus.hasPrevious}
-              onPrevious={() => {
-                setPageIndex(pageIndex - 1)
-              }}
-              hasNext={pageStatus.hasNext}
-              onNext={() => {
-                setPageIndex(pageIndex + 1)
-              }}
-            />
-          </div>
+        <div className="f-list-footer">
+          <Pagination
+            // label="This is Results"
+            hasPrevious={pageStatus.hasPrevious}
+            onPrevious={() => {
+              setPageIndex(pageIndex - 1)
+            }}
+            hasNext={pageStatus.hasNext}
+            onNext={() => {
+              setPageIndex(pageIndex + 1)
+            }}
+          />
+        </div>
       </Card>
+
+      <Modal
+        large={false}
+        open={active}
+        onClose={handleChange}
+        title="导出采购单"
+        primaryAction={{
+          content: '导出',
+          onAction: exportExcel,
+        }}
+        secondaryActions={[
+          {
+            content: '取消',
+            onAction: handleChange,
+          },
+        ]}
+      >
+        <Modal.Section>
+          <Stack vertical>
+            <RadioButton
+              label="按项目"
+              checked={exportRadio === 'brand'}
+              id="brand"
+              name="exportRadio"
+              onChange={handleExportRadioChange}
+            />
+            {
+              exportRadio === 'brand' &&
+              <div>
+                <Select
+                  options={brandOptions}
+                  value={exportRadioBrand}
+                  onChange={val => setExportRadioBrand(val)}
+                />
+              </div>
+            }
+            <RadioButton
+              label="所有采购单"
+              id="all"
+              name="exportRadio"
+              checked={exportRadio === 'all'}
+              onChange={handleExportRadioChange}
+
+            />
+            <RadioButton
+              label="按创建时间"
+              id="time"
+              name="exportRadio"
+              checked={exportRadio === 'time'}
+              onChange={handleExportRadioChange}
+
+            />
+            {
+              exportRadio === 'time' &&
+              <div>
+                <DatePicker
+                  month={month}
+                  year={year}
+                  onChange={setSelectedDates}
+                  onMonthChange={handleMonthChange}
+                  selected={selectedDates}
+                  allowRange={true}
+                />
+              </div>
+            }
+          </Stack>
+
+        </Modal.Section>
+
+      </Modal>
 
     </Page>
   );

@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-02-11 17:41:12
+ * @LastEditTime: 2022-02-15 11:50:59
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -259,26 +259,15 @@ function DeliveryList(props) {
     setListLoading(true);
     const {
       provider_id = "",
-      subject_code = "",
       warehouse_code = "",
-      po = "",
+      shipping_date = null,
       good_search = "",
-      audit_status = new Set(),
-      payment_status = new Set(),
-      delivery_status = new Set(),
+      repo_status = new Set(),
     } = filter;
     getShipingList(
       {
+        ...filter,
         status: "",
-        // provider_id,
-        // subject_code,
-        // warehouse_code,
-        // po,
-        // good_search,
-        // audit: [...audit_status],
-        // payment_status: [...payment_status],
-        // delivery_status: [...delivery_status],
-        // PO_STATUS: queryListStatus,
       }
     )
       .then(res => {

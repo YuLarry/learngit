@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2021-12-20 16:40:04
- * @LastEditTime: 2022-02-11 16:24:43
+ * @LastEditTime: 2022-02-15 17:15:54
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -27,7 +27,18 @@ function EntryRoute() {
 
   !ax['_INTERCEPTOR_SETTED_'] && ax.interceptors.response.use(
     (res) => {
-      return Promise.resolve(res.data);
+      if( res.config.responseType === "blob" ){
+        return Promise.resolve(res.data)
+      }else{
+        const { code, message } = res.data;
+        if( code === 200 ){
+          return Promise.resolve(res.data);
+        }else{
+          toastContext.toast({ active: true, message, error: true });
+          return Promise.reject("message")
+        }
+      }
+      
     },
     (err) => {
       // console.dir(err);
