@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-02-16 17:54:26
+ * @LastEditTime: 2022-02-16 19:26:27
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -250,7 +250,7 @@ function DeliveryEdit(props) {
       shipping_date: moment(formObject.shipping_date).format("YYYY-MM-DD"),
       shipping_detail,
       provider_id: provider.id,
-      warehouse_code: warehouse.id,
+      warehouse_code: warehouse.code,
     })
       .then(res => {
 
