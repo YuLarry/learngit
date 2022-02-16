@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 15:00:29
- * @LastEditTime: 2022-02-10 18:39:04
+ * @LastEditTime: 2022-02-16 19:17:28
  * @LastEditors: lijunwei
  * @Description: s
  */
@@ -14,14 +14,14 @@ import { REPO_STATUS } from "../../../utils/StaticData";
 
 
 function RepositoryListFilter(props) {
-
+  const toastContext = useContext(ToastContext);
 
   const {
     filter = {
       provider_id: "",
       warehouse_code: "",
       shipping_date: null,
-      good_search: "",
+      common_search: "",
       client_account_code: "",
       warehouse_area: "",
       // repo_status: new Set(),
@@ -29,7 +29,25 @@ function RepositoryListFilter(props) {
     onChange = () => { }
   } = props
 
-  const toastContext = useContext(ToastContext);
+  const [common_search, setCommon_search] = useState("");
+  
+  const [pointer, setPointer] = useState(0);
+  useEffect(() => {
+    // use pointer to remove init triger filter onchange
+    setPointer( pointer + 1);
+    if( pointer > 0 ){
+      const timer = setTimeout(() => {
+        onChange({
+          ...filter,
+          common_search
+        })
+      }, 1000);
+      return () => {
+        clearTimeout(timer)
+      }
+    }
+  }, [common_search]);
+  
 
 
   const [providerListMap, setProviderListMap] = useState(new Map());
@@ -232,7 +250,7 @@ function RepositoryListFilter(props) {
       provider_id: "",
       warehouse_code: "",
       shipping_date: null,
-      repo_status: new Set(),
+      // repo_status: new Set(),
     })
   }, []);
 
@@ -353,12 +371,12 @@ function RepositoryListFilter(props) {
 
   return (
     <Filters
-      queryPlaceholder="发货单号/SKU/中英文名称搜索"
-      queryValue={filterData.good_search}
+      queryPlaceholder="入库单号/SKU/中英文名称搜索"
+      queryValue={common_search}
       filters={filters}
       appliedFilters={appliedFilters}
-      onQueryChange={(val) => { filterChangeHandler("good_search", val) }}
-      onQueryClear={() => { filterChangeHandler("good_search", "") }}
+      onQueryChange={(val) => { setCommon_search(val) }}
+      onQueryClear={() => { setCommon_search("") }}
       onClearAll={handleClearAll}
     />
   );

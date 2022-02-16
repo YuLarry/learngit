@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2021-11-24 11:29:42
- * @LastEditTime: 2022-02-16 16:20:33
+ * @LastEditTime: 2022-02-16 19:10:17
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -96,6 +96,9 @@ export const getSkuOptionsList = (query) => ax.get(REQUEST_URLS.GET_SKU_OPTIONS,
 
 // 创建|更新发货单
 export const editShippingOrder = (body)=> ax.post(`${REQUEST_URLS.SAVE_SHIPPING_ORDER}`, { ...body })
+
+// 删除发货单
+export const deleteShippingOrder = ( id )=> ax.delete(`${REQUEST_URLS.DELETE_SHIPPING_ORDER}/${id}`);
 
 
 /* 入库 */

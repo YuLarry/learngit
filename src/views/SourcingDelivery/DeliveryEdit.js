@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-02-16 17:03:31
+ * @LastEditTime: 2022-02-16 17:54:26
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -176,16 +176,31 @@ function DeliveryEdit(props) {
     [],
   );
 
+
+
   const handleConfirmAddGoods = useCallback(
     () => {
-      // console.log(selectGoodsMapTemp);
       setGoodsTableDataMap(new Map([...goodsTableDataMap, ...selectGoodsMapTemp]))
       setActive(false);
     },
     [goodsTableDataMap, selectGoodsMapTemp],
   );
 
-  const [searchKey, setSearchKey] = useState("po_no");
+  const selectedPoItemInfo = useMemo(()=>{
+    if( goodsTableDataMap && goodsTableDataMap.size > 0 ){
+      const { headKey } = goodsTableDataMap.values().next().value;
+      console.log(tree[headKey])
+      return tree[headKey];
+    }else{
+      return undefined
+    }
+  },[goodsTableDataMap, tree])
+
+  const provider = useMemo(()=>(selectedPoItemInfo && selectedPoItemInfo.provider),[selectedPoItemInfo])
+  const warehouse = useMemo(()=>(selectedPoItemInfo && selectedPoItemInfo.warehouse),[selectedPoItemInfo])
+
+
+  const [searchKey, setSearchKey] = useState("provider_name");
   const [searchVal, setSearchVal] = useState("");
   const [querying, setQuerying] = useState(false);
 
@@ -219,7 +234,6 @@ function DeliveryEdit(props) {
 
 
   const saveDeliveryOrder = useCallback(() => {
-    if (!active) return;
     loadingContext.loading(true);
     const shipping_detail = [];
     goodsTableDataMap.forEach((item) => {
@@ -235,6 +249,8 @@ function DeliveryEdit(props) {
       ...formObject,
       shipping_date: moment(formObject.shipping_date).format("YYYY-MM-DD"),
       shipping_detail,
+      provider_id: provider.id,
+      warehouse_code: warehouse.id,
     })
       .then(res => {
 
@@ -457,8 +473,8 @@ function DeliveryEdit(props) {
         </Layout.Section>
         <Layout.Section secondary>
 
-          <SourcingProviCard />
-          <SourcingRepoCard />
+          <SourcingProviCard provInfo={ provider } />
+          <SourcingRepoCard wareInfo={ warehouse } />
           <SourcingRemarkCard />
 
         </Layout.Section>
@@ -496,10 +512,11 @@ function DeliveryEdit(props) {
               }
               connectedLeft={
                 <Select
+                  value={ searchKey }
                   onChange={(val) => { setSearchKey(val) }}
                   options={[
-                    { label: "采购单 ", value: "po_no" },
                     { label: "供应商", value: "provider_name" },
+                    { label: "采购单 ", value: "po_no" },
                     { label: "收货仓库", value: "warehouse_name" },
                   ]}
                 />

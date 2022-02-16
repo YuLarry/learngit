@@ -1,16 +1,19 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-02-11 17:41:43
+ * @LastEditTime: 2022-02-16 19:21:51
  * @LastEditors: lijunwei
  * @Description: 
  */
 
 import { Button, Card, IndexTable, Page, Pagination, Tabs, TextStyle, useIndexResourceState } from "@shopify/polaris";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getRepoTableList } from "../../api/requests";
 import { BadgeInboundStatus } from "../../components/StatusBadges/BadgeInboundStatus";
+import { LoadingContext } from "../../context/LoadingContext";
+import { ModalContext } from "../../context/ModalContext";
+import { ToastContext } from "../../context/ToastContext";
 import { INBOUND_STATUS_ALL, INBOUND_STATUS_FINISH, INBOUND_STATUS_PENDING, INBOUND_STATUS_PORTION } from "../../utils/StaticData";
 import { InRepositoryManualModal } from "./piece/InRepositoryManualModal";
 import { RepositoryListFilter } from "./piece/RepositoryListFilter";
@@ -20,13 +23,10 @@ function RepositoryList(props) {
 
   const navigation = useNavigate();
 
-
-  const [selected, setSelected] = useState(0);
-  const handleTabChange = useCallback(
-    (selectedTabIndex) => setSelected(selectedTabIndex),
-    [],
-  );
-
+  const loadingContext = useContext(LoadingContext);
+  const modalContext = useContext(ModalContext);
+  const toastContext = useContext(ToastContext);
+  const [listLoading, setListLoading] = useState(false);
 
   const tabs = useMemo(() => ([
     {
@@ -52,6 +52,26 @@ function RepositoryList(props) {
     },
   ]),
     []);
+
+
+  const [filter, setFilter] = useState({
+    provider_id: "",
+    warehouse_code: "",
+    shipping_date: null,
+    common_search: "",
+    client_account_code: "",
+    warehouse_area: "",
+  });
+
+  const [selectedTab, setSelectedTab] = useState(0);
+  const status = useMemo(() => (tabs[selectedTab].id), [selectedTab, tabs]);
+  const handleTabChange = useCallback(
+    (selectedTabIndex) => setSelectedTab(selectedTabIndex),
+    [],
+  );
+
+
+
 
   const [pageIndex, setPageIndex] = useState(1);
   const pageSize = 20;
@@ -142,110 +162,24 @@ function RepositoryList(props) {
 
 
   useEffect(() => {
-    getRepoTableList({
-
-    })
+    // loadingContext.loading(true)
+    setListLoading(true)
+    const data = {
+      ...filter,
+      status,
+      per_page: pageSize,
+      page: pageIndex,
+    }
+    getRepoTableList(
+      data
+    )
       .then()
       .finally(() => {
-        const data = [
-          {
-            "id": 40,
-            "inbound_no": "RK2022020700002",
-            "provider_name": "Nubia Technology Co., Ltd.",
-            "warehouse_name": "荣晟香港2仓",
-            "plan_total_qty": 20,
-            "actual_total_qty": 0,
-            "status": "inbound_pending",
-            "warehouse_area": "B2C销售区",
-            "client_account_code": "WSRM",
-            "item": [
-              {
-                "sku": "6902176906596",
-                "plan_qty": 20,
-                "goods": {
-                  "sku": "6902176906596",
-                  "cn_name": "NX659J 红魔5S 银色 美洲 8G+128G",
-                  "en_name": "RedMagic 5S 8+128 NA Silver",
-                  "price": "579.00",
-                  "image_url": ""
-                }
-              }
-            ]
-          },
-          {
-            "id": 39,
-            "inbound_no": "RK2022020700001",
-            "provider_name": "Nubia Technology Co., Ltd.",
-            "warehouse_name": "荣晟香港2仓",
-            "plan_total_qty": 50,
-            "actual_total_qty": 0,
-            "status": "inbound_portion",
-            "warehouse_area": "B2C销售区",
-            "client_account_code": "WSRM",
-            "item": [
-              {
-                "sku": "6902176906664",
-                "plan_qty": 30,
-                "goods": {
-                  "sku": "6902176906664",
-                  "cn_name": "红魔5S 12+256 UK 红蓝渐变",
-                  "en_name": "RedMagic 5S 12+256 UK Red & Blue",
-                  "price": "549.00",
-                  "image_url": ""
-                }
-              },
-              {
-                "sku": "6902176906473",
-                "plan_qty": 20,
-                "goods": {
-                  "sku": "6902176906473",
-                  "cn_name": "魔盒散热背夹（黑色 带3A线）红魔",
-                  "en_name": "Ice Dock",
-                  "price": "14.90",
-                  "image_url": ""
-                }
-              }
-            ]
-          },
-          {
-            "id": 31239,
-            "inbound_no": "RK2022020700123",
-            "provider_name": "Nubia Technology Co., Ltd.",
-            "warehouse_name": "荣晟香港2仓",
-            "plan_total_qty": 50,
-            "actual_total_qty": 0,
-            "status": "inbound_finish",
-            "warehouse_area": "B2C销售区",
-            "client_account_code": "WSRM",
-            "item": [
-              {
-                "sku": "6902176906664",
-                "plan_qty": 30,
-                "goods": {
-                  "sku": "6902176906664",
-                  "cn_name": "红魔5S 12+256 UK 红蓝渐变",
-                  "en_name": "RedMagic 5S 12+256 UK Red & Blue",
-                  "price": "549.00",
-                  "image_url": ""
-                }
-              },
-              {
-                "sku": "6902176906473",
-                "plan_qty": 20,
-                "goods": {
-                  "sku": "6902176906473",
-                  "cn_name": "魔盒散热背夹（黑色 带3A线）红魔",
-                  "en_name": "Ice Dock",
-                  "price": "14.90",
-                  "image_url": ""
-                }
-              }
-            ]
-          }
-        ];
-        setTableList(data);
+        // loadingContext.loading(false)
+        setListLoading(false)
+
       })
-  }, []);
+  }, [filter, selectedTab]);
 
 
   return (
@@ -255,16 +189,20 @@ function RepositoryList(props) {
     >
       <Card>
         <Tabs
-          tabs={tabs} selected={selected} onSelect={handleTabChange}
+          tabs={tabs} selected={selectedTab} onSelect={handleTabChange}
         >
         </Tabs>
         <div style={{ padding: '16px', display: 'flex' }}>
           <div style={{ flex: 1 }}>
-            <RepositoryListFilter />
+            <RepositoryListFilter
+              filter={filter}
+              onChange={(filter) => { setFilter(filter) }}
+            />
           </div>
 
         </div>
         <IndexTable
+          loading={listLoading}
           resourceName={resourceName}
           itemCount={tableList.length}
           selectedItemsCount={

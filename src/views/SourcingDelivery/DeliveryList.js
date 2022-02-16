@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-02-16 14:37:42
+ * @LastEditTime: 2022-02-16 19:21:22
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -15,7 +15,7 @@ import { BadgeAuditStatus } from "../../components/StatusBadges/BadgeAuditStatus
 import { BadgePaymentStatus } from "../../components/StatusBadges/BadgePaymentStatus";
 import { BadgeDeliveryStatus } from "../../components/StatusBadges/BadgeDeliveryStatus";
 import { ProductInfoPopover } from "../../components/ProductInfoPopover/ProductInfoPopover";
-import { getShipingList } from "../../api/requests";
+import { deleteShippingOrder, getShipingList } from "../../api/requests";
 import { BadgeRepoStatus } from "../../components/StatusBadges/BadgeRepoStatus";
 import { LoadingContext } from "../../context/LoadingContext";
 import { ToastContext } from "../../context/ToastContext";
@@ -170,6 +170,21 @@ function DeliveryList(props) {
 
   }, [selectedResources, deliveryListMap])
 
+  const deleteOrder = useCallback((id)=>{
+    loadingContext.loading(true);
+    deleteShippingOrder( id )
+    .then(res=>{
+      toastContext.toast({
+        active: true,
+        message: "删除成功",
+        duriation: 1000,
+      })
+    })
+    .finally(()=>{
+      loadingContext.loading(false);
+    })
+  },[])
+
 
   const promotedBulkActions = useMemo(() => {
     return [
@@ -192,7 +207,9 @@ function DeliveryList(props) {
       },
       {
         content: "删除发货单",
-        onAction: () => console.log('Todo: implement bulk delete'),
+        onAction: () => {
+          deleteOrder(selectedResources[0])
+        },
         // disabled: !deleteEnable,
 
       },
@@ -253,15 +270,6 @@ function DeliveryList(props) {
     , [goodsItemNode, selectedResources, deliveryList]);
 
 
-  const exportHandler = useCallback(
-    () => {
-      console.log("export");
-    },
-    [],
-  );
-
-
-
   useEffect(() => {
     setListLoading(true);
     const {
@@ -274,6 +282,8 @@ function DeliveryList(props) {
     getShipingList(
       {
         ...filter,
+        per_page: pageSize,
+        page: pageIndex,
         status: queryListStatus,
       }
     )
