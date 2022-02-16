@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2021-11-24 11:29:42
- * @LastEditTime: 2022-02-15 16:04:05
+ * @LastEditTime: 2022-02-16 11:53:39
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -73,7 +73,12 @@ export const exportOrderExcel = (params)=> ax.get(`${REQUEST_URLS.EXPORT_SOURING
 export const editSourcingOrder = (body)=> ax.post(`${REQUEST_URLS.EDIT_SOURCING_ORDER}`, { ...body })
 
 // 申请付款
-export const commitPaymentRequest = (data) => ax.post(`${REQUEST_URLS.COMMIT_PAYMENT_REQUEST}`, {...data})
+export const commitPaymentRequest = (formData) => ax({
+  method: "POST",
+  url: `${REQUEST_URLS.COMMIT_PAYMENT_REQUEST}`, 
+  data: formData,
+  headers: { "Content-Type": "multipart/form-data" }
+})
 
 
 

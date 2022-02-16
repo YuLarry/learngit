@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-02-15 17:58:23
+ * @LastEditTime: 2022-02-15 19:08:00
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -102,8 +102,8 @@ function SourcingList(props) {
     singular: '采购单',
     plural: '采购单',
   }
-  const [sourcingList, setSourcingList] = useState([]);
   const [sourcingListMap, setSourcingListMap] = useState(new Map());
+  const [sourcingList, setSourcingList] = useState([]);
 
 
   useEffect(() => {
@@ -229,7 +229,6 @@ function SourcingList(props) {
     [refreshTrigger, selectedResources],
   );
 
-
   const exportPdf = useCallback(() => {
     loadingContext.loading(true)
     exportOrderPdf({ po_id: selectedResources[0] })
@@ -242,7 +241,6 @@ function SourcingList(props) {
   }, [selectedResources])
 
 
-
   const promotedBulkActions = useMemo(() => {
     return [
       {
@@ -252,7 +250,11 @@ function SourcingList(props) {
       },
       {
         content: '申请付款',
-        onAction: () => { navigate(`payRequest/${selectedResources[0]}`) },
+        onAction: () => { 
+          const { po_no } = sourcingListMap.get(selectedResources[0]);
+          
+          navigate(`payRequest/${ btoa(po_no) }`)
+         },
         disabled: !applyPayEnable,
 
       },

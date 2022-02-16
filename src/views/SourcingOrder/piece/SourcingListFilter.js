@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 15:00:29
- * @LastEditTime: 2022-02-15 17:57:44
+ * @LastEditTime: 2022-02-15 19:30:29
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -359,15 +359,20 @@ function SourcingListFilter(props) {
   },
     [])
 
+  const [pointer, setPointer] = useState(0);
   useEffect(() => {
-    const timer = setTimeout(() => {
-      onChange({
-        ...filter,
-        common_search
-      })
-    }, 1000);
-    return () => {
-      clearTimeout(timer)
+    // use pointer to remove init triger filter onchange
+    setPointer( pointer + 1);
+    if( pointer > 0 ){
+      const timer = setTimeout(() => {
+        onChange({
+          ...filter,
+          common_search
+        })
+      }, 1000);
+      return () => {
+        clearTimeout(timer)
+      }
     }
   }, [common_search]);
 

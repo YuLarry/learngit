@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-20 16:16:03
- * @LastEditTime: 2022-02-15 18:01:12
+ * @LastEditTime: 2022-02-15 18:21:05
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -179,7 +179,7 @@ function SourcingDetail(props) {
         </Layout.Section>
         <Layout.Section secondary>
           <SourcingInfoCard poInfo={order || {}} />
-          <SourcingProviCard provInfo={order ? order.provider : {}} />
+          <SourcingProviCard provInfo={order ? { ...order.provider,account_id: order.bank_card_number } : {}} />
           <SourcingRepoCard wareInfo={order ? order.warehouse : {}} />
           <SourcingRemarkCard readOnly={true} remark={ order && order.remark }  />
         </Layout.Section>
