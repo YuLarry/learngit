@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-02-15 11:50:59
+ * @LastEditTime: 2022-02-16 14:37:42
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -17,6 +17,9 @@ import { BadgeDeliveryStatus } from "../../components/StatusBadges/BadgeDelivery
 import { ProductInfoPopover } from "../../components/ProductInfoPopover/ProductInfoPopover";
 import { getShipingList } from "../../api/requests";
 import { BadgeRepoStatus } from "../../components/StatusBadges/BadgeRepoStatus";
+import { LoadingContext } from "../../context/LoadingContext";
+import { ToastContext } from "../../context/ToastContext";
+import { useContext } from "react";
 
 
 
@@ -24,6 +27,10 @@ function DeliveryList(props) {
 
 
   const navigate = useNavigate();
+
+  const loadingContext = useContext(LoadingContext);
+  const toastContext = useContext(ToastContext);
+
 
   const [pageIndex, setPageIndex] = useState(1);
   const pageSize = 20;
@@ -35,7 +42,7 @@ function DeliveryList(props) {
     provider_id: "",
     warehouse_code: "",
     shipping_date: null,
-    good_search: "",
+    common_search: "",
     repo_status: new Set(),
   });
 
@@ -261,19 +268,17 @@ function DeliveryList(props) {
       provider_id = "",
       warehouse_code = "",
       shipping_date = null,
-      good_search = "",
+      common_search = "",
       repo_status = new Set(),
     } = filter;
     getShipingList(
       {
         ...filter,
-        status: "",
+        status: queryListStatus,
       }
     )
       .then(res => {
-
         // const { data: { data, meta } } = res;
-
         const data = [
           {
             "id": 49,

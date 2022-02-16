@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-19 17:05:46
- * @LastEditTime: 2022-02-16 14:14:20
+ * @LastEditTime: 2022-02-16 15:48:33
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -230,7 +230,6 @@ function PayRequest(props) {
         invoiceFormdata.append( `invoice_info[${idx}][price]`, price )
         invoiceFormdata.append( `invoice_info[${idx}][image]`, file )
       })
-      
 
       console.log(invoiceFormdata)
       commitPaymentRequest(invoiceFormdata)
@@ -289,6 +288,11 @@ function PayRequest(props) {
         }
       },
     })
+    return ()=>{
+      unsavedChangeContext.remind({
+        active: false,
+      })
+    }
   },
     [savePay])
 

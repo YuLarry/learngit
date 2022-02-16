@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-02-15 12:13:04
+ * @LastEditTime: 2022-02-16 14:20:05
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -234,7 +234,12 @@ function SourcingEdit(props) {
           },
         }
       },
-    })
+    });
+    return ()=>{
+      unsavedChangeContext.remind({
+        active: false,
+      })
+    }
   },
   [saveOrder])
 

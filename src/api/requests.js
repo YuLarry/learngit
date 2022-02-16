@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2021-11-24 11:29:42
- * @LastEditTime: 2022-02-16 11:53:39
+ * @LastEditTime: 2022-02-16 16:20:33
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -77,7 +77,6 @@ export const commitPaymentRequest = (formData) => ax({
   method: "POST",
   url: `${REQUEST_URLS.COMMIT_PAYMENT_REQUEST}`, 
   data: formData,
-  headers: { "Content-Type": "multipart/form-data" }
 })
 
 
@@ -95,6 +94,8 @@ export const getShippingDetail = (id) => ax.get(`${REQUEST_URLS.GET_SHIPPING_DET
 // 获取sku下拉列表
 export const getSkuOptionsList = (query) => ax.get(REQUEST_URLS.GET_SKU_OPTIONS, { params: query });
 
+// 创建|更新发货单
+export const editShippingOrder = (body)=> ax.post(`${REQUEST_URLS.SAVE_SHIPPING_ORDER}`, { ...body })
 
 
 /* 入库 */

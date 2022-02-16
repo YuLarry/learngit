@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2021-11-23 19:45:00
- * @LastEditTime: 2022-02-15 15:31:17
+ * @LastEditTime: 2022-02-16 16:19:50
  * @LastEditors: lijunwei
  * @Description: request urls config
  */
@@ -36,6 +36,7 @@ export const GET_SHIPPING_LIST = "/api/pms/shipping/list"  // 获取发货单列
 export const GET_PO_ITEM_LIST = "/api/pms/shipping/get-po-item"// 查询发货明细列表
 
 export const GET_SHIPPING_DETAIL = "/api/pms/shipping/detail" // 获取发货单详情
+export const SAVE_SHIPPING_ORDER = "/api/pms/shipping/store"  // 保存发货单
 
 export const GET_SKU_OPTIONS = "/api/pms/shipping/get-warehouse-relation" // 获取sku下拉选项
 

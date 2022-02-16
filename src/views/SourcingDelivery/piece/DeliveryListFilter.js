@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 15:00:29
- * @LastEditTime: 2022-02-10 17:26:33
+ * @LastEditTime: 2022-02-16 14:34:46
  * @LastEditors: lijunwei
  * @Description: s
  */
@@ -21,7 +21,7 @@ function DeliveryListFilter(props) {
       provider_id: "",
       warehouse_code: "",
       shipping_date: null,
-      good_search: "",
+      common_search: "",
       repo_status: new Set(),
     },
     onChange = () => { }
@@ -34,6 +34,9 @@ function DeliveryListFilter(props) {
   const [wareHouseListMap, setWareHouseListMap] = useState(new Map());
 
   const [filterData, setFilterData] = useState(filter);
+
+  const [common_search, setCommon_search] = useState("");
+
 
   useEffect(() => {
     onChange(filterData)
@@ -144,14 +147,14 @@ function DeliveryListFilter(props) {
     const filters = [];
     for (const key of filterConfig.keys()) {
       const { type, label, dataPool } = filterConfig.get(key);
-      if( type === "date" && filterData[key] ){
+      if (type === "date" && filterData[key]) {
         filters.push({
           key: key,
           label: `${label}: ${filterData[key]}`,
           onRemove: () => { clearAppliedFilter(key) }
         })
       }
-      else if ( type === "radio" && filterData[key]) {
+      else if (type === "radio" && filterData[key]) {
         const { textKey } = filterConfig.get(key);
 
         const _temObj = dataPool.get(filterData[key]);
@@ -188,12 +191,6 @@ function DeliveryListFilter(props) {
     (month, year) => setDate({ month, year }),
     [],
   );
-
-  useEffect(() => {
-    console.log(filterData.repo_status);
-  
-    
-  }, [filterData.repo_status]);
 
   const handleClearAll = useCallback(() => {
     setFilterData({
@@ -239,13 +236,13 @@ function DeliveryListFilter(props) {
               id="filter-date"
               month={month}
               year={year}
-              onChange={({start})=>{filterChangeHandler("shipping_date",start)}}
+              onChange={({ start }) => { filterChangeHandler("shipping_date", start) }}
               onMonthChange={handleMonthChange}
               selected={filterData.shipping_date}
               allowRange={false}
             />
           </div>
-          
+
         ),
         onClearAll: () => { clearFilterItem("shipping_date") },
         shortcut: true,
@@ -264,7 +261,7 @@ function DeliveryListFilter(props) {
       //   shortcut: true,
       // },
     ]
-    , 
+    ,
     [providerRadios, warehouseRadios, month, year, handleMonthChange, filterData.shipping_date, repoStatusCheckboxMarkup, clearFilterItem, filterChangeHandler, clearAppliedFilter]
   )
 
@@ -298,14 +295,31 @@ function DeliveryListFilter(props) {
   },
     [])
 
+  const [pointer, setPointer] = useState(0);
+  useEffect(() => {
+    // use pointer to remove init triger filter onchange
+    setPointer(pointer + 1);
+    if (pointer > 0) {
+      const timer = setTimeout(() => {
+        onChange({
+          ...filter,
+          common_search
+        })
+      }, 1000);
+      return () => {
+        clearTimeout(timer)
+      }
+    }
+  }, [common_search]);
+
   return (
     <Filters
       queryPlaceholder="发货单号/SKU/中英文名称搜索"
-      queryValue={filterData.good_search}
+      queryValue={common_search}
       filters={filters}
       appliedFilters={appliedFilters}
-      onQueryChange={(val) => { filterChangeHandler("good_search", val) }}
-      onQueryClear={() => { filterChangeHandler("good_search", "") }}
+      onQueryChange={(val) => { setCommon_search(val) }}
+      onQueryClear={() => { setCommon_search("") }}
       onClearAll={handleClearAll}
     />
   );
