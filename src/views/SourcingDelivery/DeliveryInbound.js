@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-21 15:28:14
- * @LastEditTime: 2022-02-17 16:30:45
+ * @LastEditTime: 2022-02-17 17:56:07
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -164,7 +164,7 @@ function DeliveryInbound(props) {
 
   const inboundListMarkup = useMemo(() => {
     return inboundGoodsList.map(
-      ({ id, sku, po_no, shipping_num, goods }, index) => (
+      ({ id, sku, po_no, shipping_num, box_qty, goods }, index) => (
         <IndexTable.Row
           id={id}
           key={id}
@@ -175,7 +175,7 @@ function DeliveryInbound(props) {
             <Button
               plain
               monochrome
-              onClick={()=>{}}
+              onClick={() => { }}
             >
               <TextStyle variation="strong">{sku}</TextStyle>
             </Button>
@@ -185,7 +185,7 @@ function DeliveryInbound(props) {
           </IndexTable.Cell>
           <IndexTable.Cell>
             <div style={{ width: "5em", textAlign: "right" }}>
-              {shipping_num}
+              {box_qty || shipping_num}
             </div>
           </IndexTable.Cell>
 
@@ -309,17 +309,37 @@ function DeliveryInbound(props) {
         po_no,
         shipping_num: plan_qty,
         sku,
-        id: po_item_id
+        id: po_item_id,
+
+        box_no,
+        box_qty,
+        single_box_qty,
+
+        pallet_no,
+        pallet_qty,
+        single_pallet_qty,
       } = item;
+      let cardBoxInfo;
+      if (type === INBOUND_TYPE.BOX) {
+        cardBoxInfo = {
+          box_no,
+          box_qty,
+          single_box_qty,
+        }
+      } else if (type === INBOUND_TYPE.PALLET) {
+        cardBoxInfo = {
+          pallet_no,
+          pallet_qty,
+          single_pallet_qty,
+        }
+      }
       return {
         po_item_id,
         po_no,
-        shipping_no: shipping_code,
+        shipping_no: atob(shipping_code),
         sku,
         plan_qty,
-        box_no: (type === INBOUND_TYPE.PCS) ? null : setSelectedSku.value,
-        box_qty: (type === INBOUND_TYPE.PCS) ? null : boxCardCount,
-        single_box_qty: (type === INBOUND_TYPE.PCS) ? null : 1,
+        ... cardBoxInfo
       }
     })
     const data = {
@@ -329,8 +349,9 @@ function DeliveryInbound(props) {
       item_type: type,
       plan_total_qty: totalCount,
       inbound_item: keyTransed,
+
     }
-    console.log(data);
+    // console.log(selectedSku);
     inboundCommit(data)
       .then(res => {
         toastContext.toast({
@@ -339,7 +360,7 @@ function DeliveryInbound(props) {
           duration: 1000,
           onDismiss: () => {
             toastContext.toast({ active: false });
-            navigate(0)
+            navigate(-1)
           }
         })
       })
@@ -349,18 +370,8 @@ function DeliveryInbound(props) {
       })
 
 
-  }, [clientSelected, inboundGoodsList, navigate, shipping_code, type, warehouseSelected])
+  }, [boxCardCount, clientSelected, inboundGoodsList, navigate, selectedSku, shipping_code, type, warehouseSelected])
 
-  const confirmSave = useCallback(
-    () => {
-      if (type === INBOUND_TYPE.BOX || type === INBOUND_TYPE.PALLET) {
-        setInboundModalOpen(true);
-      } else {
-        saveInbound();
-      }
-    },
-    [saveInbound, type],
-  );
 
   useEffect(() => {
     loadingContext.loading(true);
@@ -403,7 +414,7 @@ function DeliveryInbound(props) {
           const optionsArr = [];
           const skuMap = new Map();
           list.map((skuItem) => {
-            const { id, sku,warehouse_sku, goods: { cn_name, en_name }, service_provider_name, client_account_name } = skuItem
+            const { id, sku, warehouse_sku, goods: { cn_name, en_name }, service_provider_name, client_account_name } = skuItem
             optionsArr.push({ id, value: warehouse_sku, label: `${warehouse_sku} | ${cn_name} ${service_provider_name} | ${client_account_name}` })
             skuMap.set(sku, skuItem);
           })
@@ -449,6 +460,42 @@ function DeliveryInbound(props) {
     }
   }, [clientSelected, inputSku, querySku]);
 
+  const moveToInboundTable = useCallback(
+    () => {
+      if (selectedResources.length < 1) return;
+      const _tempMap = new Map(inboundGoodsMap);
+      selectedResources.map((id) => {
+        const item = goodsMap.get(id);
+        let boxCardInfo = {};
+        switch (type) {
+          case INBOUND_TYPE.BOX:
+            boxCardInfo = {
+              box_no: selectedSku[0],
+              box_qty: boxCardCount,
+              single_box_qty: (item.shipping_num) / parseInt(boxCardCount)
+            }
+            break;
+          case INBOUND_TYPE.PALLET:
+            boxCardInfo = {
+              pallet_no: selectedSku[0],
+              pallet_qty: boxCardCount,
+              single_pallet_qty: (item.shipping_num) / parseInt(boxCardCount)
+            }
+            break;
+
+          default:
+            break;
+        }
+
+
+        _tempMap.set(id, { ...item, ...boxCardInfo });
+      })
+      setInboundGoodsMap(_tempMap)
+      clearSelectedResources();
+      setInboundModalOpen(false);
+    },
+    [boxCardCount, clearSelectedResources, goodsMap, inboundGoodsMap, selectedResources, selectedSku, type]
+  );
 
 
   useEffect(() => {
@@ -459,7 +506,7 @@ function DeliveryInbound(props) {
         saveAction: {
           content: "预报",
           onAction: () => {
-            confirmSave()
+            saveInbound();
           },
         },
         discardAction: {
@@ -473,7 +520,7 @@ function DeliveryInbound(props) {
                 content: "确认",
                 destructive: true,
                 onAction: () => {
-                  saveInbound();
+
                 },
               },
               secondaryActions: [
@@ -496,7 +543,20 @@ function DeliveryInbound(props) {
       })
     }
   },
-    [confirmSave])
+    [saveInbound])
+
+
+
+  const tableInboundActionHandler = useCallback(
+    () => {
+      if (type === INBOUND_TYPE.PCS) {
+        moveToInboundTable();
+      } else {
+        setInboundModalOpen(true);
+      }
+    },
+    [moveToInboundTable, type],
+  );
 
 
   const promotedBulkActions = useMemo(() => (
@@ -505,26 +565,20 @@ function DeliveryInbound(props) {
         content: '预报仓库',
         // onAction: () => setInboundModalOpen(true),
         onAction: () => {
-          if (selectedResources.length < 1) return;
-          const _tempMap = new Map(inboundGoodsMap);
-          selectedResources.map((id) => {
-            _tempMap.set(id, goodsMap.get(id));
-          })
-          setInboundGoodsMap(_tempMap)
-          clearSelectedResources();
+          tableInboundActionHandler()
         },
       },
     ]
   ),
-    [clearSelectedResources, goodsMap, inboundGoodsMap, selectedResources]);
-const typeText = useMemo(()=>{
-  const obj = {
-    [INBOUND_TYPE.PCS]: "pcs",
-    [INBOUND_TYPE.BOX]: "箱",
-    [INBOUND_TYPE.PALLET]: "卡板",
-  }
-  return obj[type]
-},[type])
+    [tableInboundActionHandler]);
+  const typeText = useMemo(() => {
+    const obj = {
+      [INBOUND_TYPE.PCS]: "pcs",
+      [INBOUND_TYPE.BOX]: "箱",
+      [INBOUND_TYPE.PALLET]: "卡板",
+    }
+    return obj[type]
+  }, [type])
   return (
     <Page
       breadcrumbs={[{ content: '采购实施列表', url: '/delivery' }]}
@@ -614,7 +668,7 @@ const typeText = useMemo(()=>{
         title={`按${typeText}入库`}
         primaryAction={{
           content: '确认',
-          onAction: saveInbound,
+          onAction: moveToInboundTable,
         }}
         secondaryActions={[
           {
