@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-02-16 19:21:51
+ * @LastEditTime: 2022-02-17 18:26:59
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -57,10 +57,11 @@ function RepositoryList(props) {
   const [filter, setFilter] = useState({
     provider_id: "",
     warehouse_code: "",
-    shipping_date: null,
+    create_date: null,
     common_search: "",
     client_account_code: "",
     warehouse_area: "",
+    
   });
 
   const [selectedTab, setSelectedTab] = useState(0);
@@ -166,6 +167,7 @@ function RepositoryList(props) {
     setListLoading(true)
     const data = {
       ...filter,
+      // create_date: filter.
       status,
       per_page: pageSize,
       page: pageIndex,
@@ -173,7 +175,10 @@ function RepositoryList(props) {
     getRepoTableList(
       data
     )
-      .then()
+      .then(res=>{
+        const { data: { list } } = res;
+        setTableList(list);
+      })
       .finally(() => {
         // loadingContext.loading(false)
         setListLoading(false)
