@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-02-15 19:08:00
+ * @LastEditTime: 2022-02-17 15:24:08
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -19,6 +19,7 @@ import { ToastContext } from "../../context/ToastContext";
 import { AUDIT_AUDITING, AUDIT_FAILURE, AUDIT_PASS, AUDIT_REVOKED, AUDIT_UNAUDITED, PAYMENT_STATUS_FAILURE, PO_STATUS_ALL, PO_STATUS_CANCEL, PO_STATUS_FINISH, PO_STATUS_PENDING } from "../../utils/StaticData";
 import { SourcingListFilter } from "./piece/SourcingListFilter";
 import moment from "moment";
+import { fstlnTool } from "../../utils/Tools";
 
 
 function SourcingList(props) {
@@ -231,9 +232,11 @@ function SourcingList(props) {
 
   const exportPdf = useCallback(() => {
     loadingContext.loading(true)
-    exportOrderPdf({ po_id: selectedResources[0] })
+    exportOrderPdf({ id: selectedResources[0] })
       .then(res => {
-
+        const name = sourcingListMap.get( selectedResources[0] ).po_no;
+        const fileName = `${name}.pdf`;
+        fstlnTool.downloadBlob( res, fileName );
       })
       .finally(() => {
         loadingContext.loading(false)
@@ -469,18 +472,7 @@ function SourcingList(props) {
             fileName = `采购单数据_all_${new Date().getTime()}`
             break;
         }
-        if ('download' in document.createElement('a')) { // 非IE下载
-          const elink = document.createElement('a')
-          elink.download = fileName
-          elink.style.display = 'none'
-          elink.href = URL.createObjectURL(blob)
-          document.body.appendChild(elink)
-          elink.click()
-          URL.revokeObjectURL(elink.href) // 释放URL 对象
-          document.body.removeChild(elink)
-        } else { // IE10+下载
-          navigator.msSaveBlob(blob, fileName)
-        }
+        fstlnTool.downloadBlob( blob, fileName );
         setActive( false );
         toastContext.toast({
           active: true,

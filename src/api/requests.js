@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2021-11-24 11:29:42
- * @LastEditTime: 2022-02-16 19:10:17
+ * @LastEditTime: 2022-02-17 15:19:16
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -64,7 +64,7 @@ export const cancelSourcingOrder = (id) => ax.put(`${REQUEST_URLS.CANCEL_SOURING
 export const deleteSourcingOrder = (id) => ax.delete(`${REQUEST_URLS.DELETE_SOURING_ORDER}`, { data: { id } })
 
 // 导出采购单 pdf
-export const exportOrderPdf = (data)=> ax.get(`${REQUEST_URLS.EXPORT_SOURING_ORDER_PDF}`, { params: data })
+export const exportOrderPdf = (data)=> ax.get(`${REQUEST_URLS.EXPORT_SOURING_ORDER_PDF}`, { responseType: "blob", params: data })
 
 // 导出采购单 excel
 export const exportOrderExcel = (params)=> ax.get(`${REQUEST_URLS.EXPORT_SOURING_ORDER_EXCEL}`,{ params,responseType: 'blob' })
@@ -98,8 +98,10 @@ export const getSkuOptionsList = (query) => ax.get(REQUEST_URLS.GET_SKU_OPTIONS,
 export const editShippingOrder = (body)=> ax.post(`${REQUEST_URLS.SAVE_SHIPPING_ORDER}`, { ...body })
 
 // 删除发货单
-export const deleteShippingOrder = ( id )=> ax.delete(`${REQUEST_URLS.DELETE_SHIPPING_ORDER}/${id}`);
+export const deleteShippingOrder = ( id )=> ax.delete(`${REQUEST_URLS.DELETE_SHIPPING_ORDER}`, { params: {id} });
 
+// 预报仓库
+export const inboundCommit = ( data )=> ax.post(`${REQUEST_URLS.INBOUND_COMMIT}`, data);
 
 /* 入库 */
 // 入库单表格

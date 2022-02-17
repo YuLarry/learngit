@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-24 17:49:30
- * @LastEditTime: 2022-02-11 17:23:31
+ * @LastEditTime: 2022-02-17 15:26:40
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -105,3 +105,10 @@ export const INBOUND_STATUS = new Map([
   [ INBOUND_STATUS_PORTION , "部分入库"],
   [ INBOUND_STATUS_FINISH  , "已入库"]
 ])
+
+
+export const INBOUND_TYPE = {
+  PCS: "item_type_pcs",
+  BOX: "item_type_box",
+  PALLET: "item_type_pallet",
+}

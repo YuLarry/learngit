@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-02-16 19:32:26
+ * @LastEditTime: 2022-02-17 15:27:52
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -10,11 +10,7 @@ import { Button, Card, IndexTable, Page, Pagination, Tabs, TextStyle, Thumbnail,
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { DeliveryListFilter } from "./piece/DeliveryListFilter";
-import { AUDIT_AUDITING, AUDIT_FAILURE, AUDIT_PASS, AUDIT_REVOKED, AUDIT_UNAUDITED, PAYMENT_STATUS_FAILURE, REPO_STATUS_ALL, REPO_STATUS_PENDING, REPO_STATUS_PORTION, REPO_STATUS_SUCCESS } from "../../utils/StaticData";
-import { BadgeAuditStatus } from "../../components/StatusBadges/BadgeAuditStatus";
-import { BadgePaymentStatus } from "../../components/StatusBadges/BadgePaymentStatus";
-import { BadgeDeliveryStatus } from "../../components/StatusBadges/BadgeDeliveryStatus";
-import { ProductInfoPopover } from "../../components/ProductInfoPopover/ProductInfoPopover";
+import { AUDIT_AUDITING, AUDIT_FAILURE, AUDIT_PASS, AUDIT_REVOKED, AUDIT_UNAUDITED, INBOUND_TYPE, PAYMENT_STATUS_FAILURE, REPO_STATUS_ALL, REPO_STATUS_PENDING, REPO_STATUS_PORTION, REPO_STATUS_SUCCESS } from "../../utils/StaticData";
 import { deleteShippingOrder, getShipingList } from "../../api/requests";
 import { BadgeRepoStatus } from "../../components/StatusBadges/BadgeRepoStatus";
 import { LoadingContext } from "../../context/LoadingContext";
@@ -31,6 +27,8 @@ function DeliveryList(props) {
   const loadingContext = useContext(LoadingContext);
   const toastContext = useContext(ToastContext);
 
+
+  const [refresh, setRefresh] = useState(0);
 
   const [pageIndex, setPageIndex] = useState(1);
   const pageSize = 20;
@@ -127,6 +125,20 @@ function DeliveryList(props) {
 
   const { selectedResources, allResourcesSelected, handleSelectionChange } = useIndexResourceState(deliveryList);
 
+
+  const clearSelectedResources = useCallback(()=>{
+    selectedResources.map((selectedItem)=>{
+      handleSelectionChange( "single", false, selectedItem )
+    })
+  },
+  [handleSelectionChange, selectedResources])
+  
+  const refreshTrigger = useCallback(()=>{
+    clearSelectedResources();
+    setRefresh( refresh + 1 )
+  },
+  [clearSelectedResources, refresh])
+  
   // audit enable control
   const auditEnable = useMemo(() => {
     const enableArr = [AUDIT_UNAUDITED, AUDIT_FAILURE, AUDIT_REVOKED];
@@ -177,31 +189,37 @@ function DeliveryList(props) {
       toastContext.toast({
         active: true,
         message: "删除成功",
-        duriation: 1000,
+        duration: 1000,
       })
+      refreshTrigger()
     })
     .finally(()=>{
       loadingContext.loading(false);
     })
-  },[])
+  },[refreshTrigger])
+
+
 
 
   const promotedBulkActions = useMemo(() => {
+    const code =  (deliveryListMap &&  selectedResources.length > 0) ? deliveryListMap.get(selectedResources[0]).shipping_no : "";
+    const codeBase64 = btoa(code);
+    
     return [
       {
         content: '按pcs入库',
-        onAction: () => { navigate("inbound/pcs") }
+        onAction: () => { navigate(`inbound?shipping_code=${codeBase64}&type=${INBOUND_TYPE.PCS}`) }
         // disabled: !auditEnable,
       },
       {
         content: '按箱入库',
-        onAction: () => console.log(navigate("payRequest")),
+        onAction: () => { navigate(`inbound?shipping_code=${codeBase64}&type=${INBOUND_TYPE.BOX}`) },
         // disabled: !applyPayEnable,
 
       },
       {
         content: "按卡板入库",
-        onAction: () => console.log('Todo: implement bulk remove tags'),
+        onAction: () => { navigate(`inbound?shipping_code=${codeBase64}&type=${INBOUND_TYPE.PALLET}`) },
         // disabled: !cancelEnable,
 
       },
@@ -214,7 +232,7 @@ function DeliveryList(props) {
 
       },
     ];
-  }, [applyPayEnable, auditEnable, cancelEnable, deleteEnable, exportEnable])
+  }, [deleteOrder, deliveryListMap, navigate, selectedResources])
 
   const goodsItemNode = useCallback((item, idx) => {
     if (!item) return null;
@@ -248,13 +266,13 @@ function DeliveryList(props) {
         position={index}
       >
         <IndexTable.Cell>
-          <Button
+          {/* <Button
             plain
             monochrome
             url={`detail/${id}`}
-          >
+          > */}
             <TextStyle variation="strong">{shipping_no}</TextStyle>
-          </Button>
+          {/* </Button> */}
         </IndexTable.Cell>
         <IndexTable.Cell>{business_name}</IndexTable.Cell>
         <IndexTable.Cell>{name}</IndexTable.Cell>
@@ -295,7 +313,7 @@ function DeliveryList(props) {
       .finally(() => {
         setListLoading(false)
       })
-  }, [filter, queryListStatus])
+  }, [filter, queryListStatus, refresh])
 
 
   return (

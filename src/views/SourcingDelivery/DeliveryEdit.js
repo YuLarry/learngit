@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-02-16 19:26:27
+ * @LastEditTime: 2022-02-17 11:40:12
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -28,10 +28,12 @@ import { ModalContext } from "../../context/ModalContext";
 import { ToastContext } from "../../context/ToastContext";
 import moment from "moment";
 import { FstlnLoading } from "../../components/FstlnLoading";
+import { useNavigate } from "react-router-dom";
 
 
 function DeliveryEdit(props) {
 
+  const navigate = useNavigate();
   const loadingContext = useContext(LoadingContext);
   const unsavedChangeContext = useContext(UnsavedChangeContext);
   const modalContext = useContext(ModalContext);
@@ -253,7 +255,15 @@ function DeliveryEdit(props) {
       warehouse_code: warehouse.code,
     })
       .then(res => {
-
+        toastContext.toast({
+          active: true,
+          message: "保存成功",
+          duration: 1000,
+          onDismiss: ()=>{
+            toastContext.toast({active: false});
+            navigate(-1)
+          }
+        })
       })
       .finally(() => {
         loadingContext.loading(false);

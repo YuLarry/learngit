@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 11:28:26
- * @LastEditTime: 2022-02-10 10:39:43
+ * @LastEditTime: 2022-02-17 11:02:30
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -19,7 +19,7 @@ function SourcingDelivery(props) {
       <Route index element={ <DeliveryList /> }></Route>
       <Route path="list" element={ <DeliveryList /> }></Route>
       <Route path="add" element={ <DeliveryEdit /> }></Route>
-      <Route path="inbound/:type" element={ <DeliveryInbound /> }></Route>
+      <Route path="inbound" element={ <DeliveryInbound /> }></Route>
     </Fragment>
   )
 }
