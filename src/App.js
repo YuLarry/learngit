@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2021-11-15 17:24:19
- * @LastEditTime: 2022-01-25 11:25:23
+ * @LastEditTime: 2022-02-18 14:44:51
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -20,26 +20,23 @@ import { loginRequest } from "./api/requests";
 
 function App() {
 
-  const token = fstlnTool.getToken();
+  // const token = fstlnTool.getToken();
+  // if( !token ){
 
-  if( !token ){
-
-    loginRequest()
-    .then(res=>{
-      console.log(res);
-      const { data:{data} } = res;
-      const token = data[0];
-      fstlnTool.saveToken(token);
-      
-    })
-    
-  }
+  //   loginRequest()
+  //   .then(res=>{
+  //     console.log(res);
+  //     const { data:{data} } = res;
+  //     const token = data[0];
+  //     fstlnTool.saveToken(token);
+  //   })
+  // }
 
   const theme = {
     logo: {
       width: 120,
       topBarSource: logo,
-      url: '/users',
+      url: '/sourcing',
       accessibilityLabel: 'PMS',
       contextualSaveBarSource: logo,
     },

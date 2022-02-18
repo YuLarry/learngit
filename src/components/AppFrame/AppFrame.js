@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2021-11-15 17:53:07
- * @LastEditTime: 2022-01-25 11:23:04
+ * @LastEditTime: 2022-02-18 14:17:52
  * @LastEditors: lijunwei
  * @Description: Fame component
  */
@@ -52,43 +52,43 @@ function AppFrame(props) {
   ax.defaults.headers.common["Authorization"] = `Bearer ${fstlnTool.getToken()}`
 
   return (
-    // <RequireAuth>
-    <Frame
-      topBar={<Header />}
-      navigation={<Menu />}
-    >
-      <div className="full-wid-hei">
-        {/* {
+    <RequireAuth>
+      <Frame
+        topBar={<Header />}
+        navigation={<Menu />}
+      >
+        <div className="full-wid-hei">
+          {/* {
               transitions((style, item) => {
                 return ( */}
-        <Suspense fallback={<FstlnSkeleton />}>
-          {/* <animated.div style={{ ...style, position: "absolute", width: "100%" }}> */}
+          <Suspense fallback={<FstlnSkeleton />}>
+            {/* <animated.div style={{ ...style, position: "absolute", width: "100%" }}> */}
 
-          <Routes>
-            {/* <Route path="Home" element={<Home />}></Route> */}
-            <Route path="">
-              {SourcingOrder()}
-            </Route>
-            <Route path="sourcing">
-              {SourcingOrder()}
-            </Route>
-            <Route path="delivery">
-              {SourcingDelivery()}
-            </Route>
-            <Route path="repository">
-              {SourcingRepository()}
-            </Route>
+            <Routes>
+              {/* <Route path="Home" element={<Home />}></Route> */}
+              <Route path="">
+                {SourcingOrder()}
+              </Route>
+              <Route path="sourcing">
+                {SourcingOrder()}
+              </Route>
+              <Route path="delivery">
+                {SourcingDelivery()}
+              </Route>
+              <Route path="repository">
+                {SourcingRepository()}
+              </Route>
 
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+              <Route path="*" element={<NotFound />} />
+            </Routes>
 
-          {/* </animated.div> */}
-        </Suspense>
+            {/* </animated.div> */}
+          </Suspense>
 
-      </div>
-      <Outlet />
-    </Frame>
-    // </RequireAuth>
+        </div>
+        <Outlet />
+      </Frame>
+    </RequireAuth>
   );
 }
 export { AppFrame }
