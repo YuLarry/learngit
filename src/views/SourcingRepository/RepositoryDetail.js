@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-24 15:50:14
- * @LastEditTime: 2022-02-17 18:50:08
+ * @LastEditTime: 2022-02-18 10:58:43
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -23,26 +23,6 @@ function RepositoryDetail(props) {
 
   const { id } = useParams();
   const [detail, setDetail] = useState(null);
-
-  const orderList = [
-    {
-      id: '3411',
-      url: 'customers/341',
-      name: 'Mae Jemison',
-      location: 'Decatur, USA',
-      orders: 20,
-      amountSpent: '$2,400',
-    },
-    {
-      id: '2561',
-      url: 'customers/256',
-      name: 'Ellen Ochoa',
-      location: 'Los Angeles, USA',
-      orders: 30,
-      amountSpent: '$140',
-    },
-  ];
-
 
 
   const rowMarkup = useMemo(() => {
@@ -96,7 +76,7 @@ function RepositoryDetail(props) {
 
   return (
     <Page
-      breadcrumbs={[{ content: '采购实施列表', url: '/repository' }]}
+      breadcrumbs={[{ content: '入库单列表', url: '/repository' }]}
       title={ id }
       titleMetadata={<BadgeInboundStatus status={ detail && detail.status } />}
       subtitle="2021-12-25 10:05:00 由xxxxxxxxx创建"

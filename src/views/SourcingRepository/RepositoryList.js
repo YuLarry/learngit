@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-02-17 18:26:59
+ * @LastEditTime: 2022-02-17 20:03:58
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -17,6 +17,7 @@ import { ToastContext } from "../../context/ToastContext";
 import { INBOUND_STATUS_ALL, INBOUND_STATUS_FINISH, INBOUND_STATUS_PENDING, INBOUND_STATUS_PORTION } from "../../utils/StaticData";
 import { InRepositoryManualModal } from "./piece/InRepositoryManualModal";
 import { RepositoryListFilter } from "./piece/RepositoryListFilter";
+import moment from "moment"
 
 
 function RepositoryList(props) {
@@ -57,7 +58,10 @@ function RepositoryList(props) {
   const [filter, setFilter] = useState({
     provider_id: "",
     warehouse_code: "",
-    create_date: null,
+    create_date: {
+      start: null,
+      end: null
+    },
     common_search: "",
     client_account_code: "",
     warehouse_area: "",
@@ -101,8 +105,8 @@ function RepositoryList(props) {
 
   const [tableList, setTableList] = useState([]);
   const resourceName = {
-    singular: 'customer',
-    plural: 'customers',
+    singular: '入库单',
+    plural: '入库单',
   };
 
   const { selectedResources, allResourcesSelected, handleSelectionChange } = useIndexResourceState(tableList);
@@ -167,7 +171,12 @@ function RepositoryList(props) {
     setListLoading(true)
     const data = {
       ...filter,
-      // create_date: filter.
+      create_date: (filter.create_date.start && filter.create_date.end ) ?
+      {
+        start: moment(filter.create_date.start).format("YYYY-MM-DD"),
+        end: moment(filter.create_date.end).format("YYYY-MM-DD"),
+      }: 
+      null,
       status,
       per_page: pageSize,
       page: pageIndex,
