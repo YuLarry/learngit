@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 15:00:29
- * @LastEditTime: 2022-02-17 20:03:04
+ * @LastEditTime: 2022-02-18 11:39:56
  * @LastEditors: lijunwei
  * @Description: s
  */
@@ -22,12 +22,13 @@ function RepositoryListFilter(props) {
       provider_id: "",
       warehouse_code: "",
       create_date: {
-        start: null,
-        end: null,
+        start: new Date(),
+        end: new Date(),
       },
       common_search: "",
       client_account_code: "",
       warehouse_area: "",
+      dateOn: false,
       // repo_status: new Set(),
     },
     onChange = () => { }
@@ -53,12 +54,12 @@ function RepositoryListFilter(props) {
 
   const [{ month, year }, setDate] = useState({ month: new Date().getMonth(), year: new Date().getFullYear() });
 
-  const [selectedDates, setSelectedDates] = useState({
-    start: new Date(),
-    end: new Date(),
-  });
-  const [dateOn, setDateOn] = useState(false);
-  
+  // const [selectedDates, setSelectedDates] = useState({
+  //   start: new Date(),
+  //   end: new Date(),
+  // });
+
+
 
   const [providerListMap, setProviderListMap] = useState(new Map());
   const [wareHouseListMap, setWareHouseListMap] = useState(new Map());
@@ -87,11 +88,8 @@ function RepositoryListFilter(props) {
   const [filterData, setFilterData] = useState(filter);
 
   useEffect(() => {
-    onChange({
-      ...filterData,
-      create_date: dateOn ? filterData.create_date : {start: null, end: null}
-    })
-  }, [dateOn, filterData]);
+    onChange(filterData)
+  }, [filterData, onChange]);
 
   const filterChangeHandler = useCallback(
     (key, value, checked) => {
@@ -182,7 +180,7 @@ function RepositoryListFilter(props) {
     const config = new Map();
     config.set("provider_id", { label: "供应商", type: "radio", dataPool: providerListMap, textKey: "business_name" });
     config.set("warehouse_code", { label: "收货仓库", type: "radio", dataPool: wareHouseListMap, textKey: "name" });
-    config.set("create_date", { label: "发货日期", type: "date" });
+    config.set("create_date", { label: "创建时间", type: "date" });
     config.set("client_account_code", { label: "货主", type: "radio", dataPool: clientListMap, textKey: null });
     config.set("warehouse_area", { label: "货区", type: "radio", dataPool: warehouseAreaMap, textKey: null });
 
@@ -202,12 +200,14 @@ function RepositoryListFilter(props) {
         clearObject = {
           [filterKey]: new Set()
         }
-      }else if( type === "date" ){
+      } else if (type === "date") {
         clearObject = {
-          start: new Date(),
-          end: new Date(),
+          [filterKey]: {
+            start: new Date(),
+            end: new Date(),
+          },
+          dateOn: false,
         }
-        setDateOn(false);
       }
       setFilterData(Object.assign({}, filterData, clearObject))
     },
@@ -218,17 +218,17 @@ function RepositoryListFilter(props) {
     const filters = [];
     for (const key of filterConfig.keys()) {
       const { type, label, dataPool } = filterConfig.get(key);
-      if (type === "date" && dateOn && filterData[key]) {
-        console.log(filterData[key])
-        const data  = filterData[key];
-        if( data.start && data.end ){
+      if (type === "date" && filterData.dateOn && filterData[key]) {
+        // console.log(filterData[key])
+        const data = filterData[key];
+        if (data.start && data.end) {
           filters.push({
             key: key,
             label: `${label}: ${moment(filterData[key].start).format("YYYY-MM-DD")}-${moment(filterData[key].end).format("YYYY-MM-DD")}`,
             onRemove: () => { clearAppliedFilter(key) }
           })
         }
-        
+
       }
       else if (type === "radio" && filterData[key]) {
         const { textKey } = filterConfig.get(key);
@@ -252,7 +252,7 @@ function RepositoryListFilter(props) {
 
     }
     return filters;
-  }, [clearAppliedFilter, dateOn, filterConfig, filterData])
+  }, [clearAppliedFilter, filterConfig, filterData])
 
 
   const clearFilterItem = useCallback((key) => {
@@ -272,7 +272,10 @@ function RepositoryListFilter(props) {
     setFilterData({
       provider_id: "",
       warehouse_code: "",
-      create_date: null,
+      create_date: {
+        start: new Date(),
+        end: new Date(),
+      },
       // repo_status: new Set(),
     })
   }, []);
@@ -312,16 +315,19 @@ function RepositoryListFilter(props) {
               id="filter-date"
               month={month}
               year={year}
-              onChange={(date)=>{ 
-                setDateOn(true);
-                // filterChangeHandler("create_date", date)
-                setSelectedDates( date );
+              onChange={
+                (date) => {
+                  setFilterData({
+                    ...filterData,
+                    create_date: date,
+                    dateOn: true,
+                  })
                 }
               }
               onMonthChange={handleMonthChange}
-              selected={selectedDates}
+              selected={filter.create_date}
               allowRange
-              />
+            />
           </div>
 
         ),
@@ -356,7 +362,7 @@ function RepositoryListFilter(props) {
 
     ]
     ,
-    [providerRadios, warehouseRadios, month, year, handleMonthChange, selectedDates, clientRadios, warehouseAreaRadios, clearFilterItem]
+    [providerRadios, warehouseRadios, month, year, handleMonthChange, filter.create_date, clientRadios, warehouseAreaRadios, clearFilterItem, filterData]
   )
 
   useEffect(() => {

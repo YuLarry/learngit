@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-02-17 20:03:58
+ * @LastEditTime: 2022-02-18 11:41:55
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -59,13 +59,13 @@ function RepositoryList(props) {
     provider_id: "",
     warehouse_code: "",
     create_date: {
-      start: null,
-      end: null
+      start: new Date(),
+      end: new Date(),
     },
     common_search: "",
     client_account_code: "",
     warehouse_area: "",
-    
+    dateOn: false,
   });
 
   const [selectedTab, setSelectedTab] = useState(0);
@@ -169,14 +169,13 @@ function RepositoryList(props) {
   useEffect(() => {
     // loadingContext.loading(true)
     setListLoading(true)
+    const { dateOn, create_date: { start, end } } = filter;
     const data = {
       ...filter,
-      create_date: (filter.create_date.start && filter.create_date.end ) ?
-      {
-        start: moment(filter.create_date.start).format("YYYY-MM-DD"),
-        end: moment(filter.create_date.end).format("YYYY-MM-DD"),
-      }: 
-      null,
+      create_date: dateOn ? [
+        moment(start).format("YYYY-MM-DD"),
+        moment(end).format("YYYY-MM-DD")
+      ]: [], 
       status,
       per_page: pageSize,
       page: pageIndex,

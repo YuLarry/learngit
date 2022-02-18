@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-02-17 15:27:52
+ * @LastEditTime: 2022-02-18 12:11:31
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -16,6 +16,7 @@ import { BadgeRepoStatus } from "../../components/StatusBadges/BadgeRepoStatus";
 import { LoadingContext } from "../../context/LoadingContext";
 import { ToastContext } from "../../context/ToastContext";
 import { useContext } from "react";
+import moment from "moment";
 
 
 
@@ -39,7 +40,11 @@ function DeliveryList(props) {
   const [filter, setFilter] = useState({
     provider_id: "",
     warehouse_code: "",
-    shipping_date: null,
+    shipping_date: {
+      start: new Date(),
+      end: new Date(),
+    },
+    dateOn: false,
     common_search: "",
     repo_status: new Set(),
   });
@@ -82,7 +87,7 @@ function DeliveryList(props) {
     (selectedTabIndex) => {
       setSelectedTab(selectedTabIndex);
       setQueryListStatus(tabs[selectedTabIndex].id)
-    }, []
+    }, [tabs]
   );
 
 
@@ -126,19 +131,19 @@ function DeliveryList(props) {
   const { selectedResources, allResourcesSelected, handleSelectionChange } = useIndexResourceState(deliveryList);
 
 
-  const clearSelectedResources = useCallback(()=>{
-    selectedResources.map((selectedItem)=>{
-      handleSelectionChange( "single", false, selectedItem )
+  const clearSelectedResources = useCallback(() => {
+    selectedResources.map((selectedItem) => {
+      handleSelectionChange("single", false, selectedItem)
     })
   },
-  [handleSelectionChange, selectedResources])
-  
-  const refreshTrigger = useCallback(()=>{
+    [handleSelectionChange, selectedResources])
+
+  const refreshTrigger = useCallback(() => {
     clearSelectedResources();
-    setRefresh( refresh + 1 )
+    setRefresh(refresh + 1)
   },
-  [clearSelectedResources, refresh])
-  
+    [clearSelectedResources, refresh])
+
   // audit enable control
   const auditEnable = useMemo(() => {
     const enableArr = [AUDIT_UNAUDITED, AUDIT_FAILURE, AUDIT_REVOKED];
@@ -182,29 +187,29 @@ function DeliveryList(props) {
 
   }, [selectedResources, deliveryListMap])
 
-  const deleteOrder = useCallback((id)=>{
+  const deleteOrder = useCallback((id) => {
     loadingContext.loading(true);
-    deleteShippingOrder( id )
-    .then(res=>{
-      toastContext.toast({
-        active: true,
-        message: "删除成功",
-        duration: 1000,
+    deleteShippingOrder(id)
+      .then(res => {
+        toastContext.toast({
+          active: true,
+          message: "删除成功",
+          duration: 1000,
+        })
+        refreshTrigger()
       })
-      refreshTrigger()
-    })
-    .finally(()=>{
-      loadingContext.loading(false);
-    })
-  },[refreshTrigger])
+      .finally(() => {
+        loadingContext.loading(false);
+      })
+  }, [refreshTrigger])
 
 
 
 
   const promotedBulkActions = useMemo(() => {
-    const code =  (deliveryListMap &&  selectedResources.length > 0) ? deliveryListMap.get(selectedResources[0]).shipping_no : "";
+    const code = (deliveryListMap && selectedResources.length > 0) ? deliveryListMap.get(selectedResources[0]).shipping_no : "";
     const codeBase64 = btoa(code);
-    
+
     return [
       {
         content: '按pcs入库',
@@ -271,7 +276,7 @@ function DeliveryList(props) {
             monochrome
             url={`detail/${id}`}
           > */}
-            <TextStyle variation="strong">{shipping_no}</TextStyle>
+          <TextStyle variation="strong">{shipping_no}</TextStyle>
           {/* </Button> */}
         </IndexTable.Cell>
         <IndexTable.Cell>{business_name}</IndexTable.Cell>
@@ -290,16 +295,21 @@ function DeliveryList(props) {
 
   useEffect(() => {
     setListLoading(true);
-    const {
-      provider_id = "",
-      warehouse_code = "",
-      shipping_date = null,
-      common_search = "",
-      repo_status = new Set(),
-    } = filter;
+    const { dateOn, shipping_date: { start, end } } = filter;
+    console.log(1);
     getShipingList(
       {
         ...filter,
+        shipping_date: (
+          dateOn
+            ?
+            [
+              moment(start).format("YYYY-MM-DD"),
+              moment(end).format("YYYY-MM-DD")
+            ]
+            :
+            []
+        ),
         per_page: pageSize,
         page: pageIndex,
         status: queryListStatus,
@@ -313,7 +323,7 @@ function DeliveryList(props) {
       .finally(() => {
         setListLoading(false)
       })
-  }, [filter, queryListStatus, refresh])
+  }, [filter, pageIndex, queryListStatus])
 
 
   return (

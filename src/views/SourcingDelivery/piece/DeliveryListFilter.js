@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 15:00:29
- * @LastEditTime: 2022-02-16 14:34:46
+ * @LastEditTime: 2022-02-18 12:12:13
  * @LastEditors: lijunwei
  * @Description: s
  */
@@ -11,7 +11,7 @@ import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { getProviderList, getWarehouseList } from "../../../api/requests";
 import { ToastContext } from "../../../context/ToastContext";
 import { REPO_STATUS } from "../../../utils/StaticData";
-
+import moment from "moment";
 
 function DeliveryListFilter(props) {
 
@@ -20,9 +20,14 @@ function DeliveryListFilter(props) {
     filter = {
       provider_id: "",
       warehouse_code: "",
-      shipping_date: null,
+      shipping_date: {
+        start: new Date(),
+        end: new Date(),
+      },
+      dateOn: false,
       common_search: "",
       repo_status: new Set(),
+
     },
     onChange = () => { }
   } = props
@@ -40,7 +45,7 @@ function DeliveryListFilter(props) {
 
   useEffect(() => {
     onChange(filterData)
-  }, [filterData]);
+  }, [filterData, onChange]);
 
   const filterChangeHandler = useCallback(
     (key, value, checked) => {
@@ -129,13 +134,21 @@ function DeliveryListFilter(props) {
     (filterKey) => {
       const { type } = filterConfig.get(filterKey);
       let clearObject;
-      if (type === "radio" || type === "date") {
+      if (type === "radio") {
         clearObject = {
           [filterKey]: null
         }
       } else if (type === "checkbox") {
         clearObject = {
           [filterKey]: new Set()
+        }
+      }else if (type === "date") {
+        clearObject = {
+          [filterKey]: {
+            start: new Date(),
+            end: new Date(),
+          },
+          dateOn: false,
         }
       }
       setFilterData(Object.assign({}, filterData, clearObject))
@@ -147,14 +160,18 @@ function DeliveryListFilter(props) {
     const filters = [];
     for (const key of filterConfig.keys()) {
       const { type, label, dataPool } = filterConfig.get(key);
-      if (type === "date" && filterData[key]) {
-        filters.push({
-          key: key,
-          label: `${label}: ${filterData[key]}`,
-          onRemove: () => { clearAppliedFilter(key) }
-        })
-      }
-      else if (type === "radio" && filterData[key]) {
+      if (type === "date" && filterData.dateOn && filterData[key]) {
+        // console.log(filterData[key])
+        const data = filterData[key];
+        if (data.start && data.end) {
+          filters.push({
+            key: key,
+            label: `${label}: ${moment(filterData[key].start).format("YYYY-MM-DD")}-${moment(filterData[key].end).format("YYYY-MM-DD")}`,
+            onRemove: () => { clearAppliedFilter(key) }
+          })
+        }
+
+      }else if (type === "radio" && filterData[key]) {
         const { textKey } = filterConfig.get(key);
 
         const _temObj = dataPool.get(filterData[key]);
@@ -196,7 +213,11 @@ function DeliveryListFilter(props) {
     setFilterData({
       provider_id: "",
       warehouse_code: "",
-      shipping_date: null,
+      shipping_date: {
+        start: new Date(),
+        end: new Date(),
+      },
+      dateOn: false,
       repo_status: new Set(),
     })
   }, []);
@@ -236,10 +257,18 @@ function DeliveryListFilter(props) {
               id="filter-date"
               month={month}
               year={year}
-              onChange={({ start }) => { filterChangeHandler("shipping_date", start) }}
+              onChange={
+                (date) => {
+                  setFilterData({
+                    ...filterData,
+                    shipping_date: date,
+                    dateOn: true,
+                  })
+                }
+              }
               onMonthChange={handleMonthChange}
               selected={filterData.shipping_date}
-              allowRange={false}
+              allowRange
             />
           </div>
 
@@ -262,7 +291,7 @@ function DeliveryListFilter(props) {
       // },
     ]
     ,
-    [providerRadios, warehouseRadios, month, year, handleMonthChange, filterData.shipping_date, repoStatusCheckboxMarkup, clearFilterItem, filterChangeHandler, clearAppliedFilter]
+    [providerRadios, warehouseRadios, month, year, handleMonthChange, filterData, clearFilterItem]
   )
 
   useEffect(() => {
