@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-20 16:16:03
- * @LastEditTime: 2022-02-15 18:21:05
+ * @LastEditTime: 2022-02-18 15:07:44
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -169,7 +169,7 @@ function SourcingDetail(props) {
             <Card.Section>
               <FstlnTimeline
                 dateKey="created_at"
-                timeline={order ? order.operation_record : []}
+                timeline={order ? order.operation_record.reverse() : []}
               />
 
             </Card.Section>

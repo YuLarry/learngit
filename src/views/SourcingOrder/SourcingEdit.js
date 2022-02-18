@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-02-16 14:20:05
+ * @LastEditTime: 2022-02-18 15:07:05
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -218,7 +218,10 @@ function SourcingEdit(props) {
                 content: "确认",
                 destructive: true,
                 onAction: () => {
-
+                  modalContext.modal({
+                    active: false,
+                  })
+                  navigate(-1)
                 },
               },
               secondaryActions: [
