@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-02-18 14:18:39
- * @LastEditTime: 2022-02-18 14:47:26
+ * @LastEditTime: 2022-02-18 15:23:45
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -19,6 +19,9 @@ function TokenErrorPage(props) {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const token = searchParams.get( "token" );
+
+  // const LOGIN_ADDRESS = "http://192.168.8.32:56002/admin/auth/login";
+  const LOGIN_ADDRESS = "http://192.168.8.32:56002/admin/auth/login";
 
   useEffect(()=>{
     if( token ){
@@ -42,8 +45,8 @@ function TokenErrorPage(props) {
 
   return (
     <div style={{ textAlign: "center", fontSize: "18px", marginTop: "200px" }}>
-      {/* <div>Token验证失败 <a href=""> 重新登录 </a></div> */}
-      <div>Token验证失败 <a href="javascritp:;" onClick={ requestToken }> 重新登录 </a></div>
+      <div>Token验证失败 <a href={LOGIN_ADDRESS}> 重新登录 </a></div>
+      {/* <div>Token验证失败 <a href="javascritp:;" onClick={ requestToken }> 重新登录 </a></div> */}
     </div>
   );
 }

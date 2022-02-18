@@ -1,13 +1,14 @@
 /*
  * @Author: lijunwei
  * @Date: 2021-11-16 14:52:47
- * @LastEditTime: 2022-01-25 11:26:31
+ * @LastEditTime: 2022-02-18 15:28:25
  * @LastEditors: lijunwei
  * @Description: AppFrame Header
  */
 
 import { TopBar } from "@shopify/polaris";
 import { ArrowLeftMinor } from "@shopify/polaris-icons";
+import { useMemo } from "react";
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { fstlnTool } from "../../utils/Tools";
@@ -24,7 +25,7 @@ function Header(props) {
     [],
   );
   const logoutUser = useCallback(
-    ()=>{window.localStorage.removeItem("token"); navigate("/login")},
+    () => { window.localStorage.removeItem("token"); navigate("/login") },
     []
   )
 
@@ -35,25 +36,27 @@ function Header(props) {
     // setUserName(username);
   }, []);
 
-  const userMarkup = (
-    <TopBar.UserMenu
-      actions={[
-        {
-          items: [{content: 'Logout', icon: ArrowLeftMinor,onAction: logoutUser}],
-        },
-        
-      ]}
-      name={ userName }
-      // detail={ userName }
-      initials={ userName && userName[0].toUpperCase() || "A" }
-      open={isUserMenuOpen}
-      onToggle={toggleIsUserMenuOpen}
-    />
+  const userMarkup = useMemo(() =>null
+  // (
+  //   <TopBar.UserMenu
+  //     actions={[
+  //       // {
+  //       //   items: [{content: 'Logout', icon: ArrowLeftMinor,onAction: logoutUser}],
+  //       // },
+
+  //     ]}
+  //     name={userName}
+  //     // detail={ userName }
+  //     initials={userName && userName[0].toUpperCase() || "A"}
+  //     open={isUserMenuOpen}
+  //     onToggle={toggleIsUserMenuOpen}
+  //   />
+  // )
   );
 
   return (
-    <TopBar 
-      userMenu={ userMarkup }
+    <TopBar
+      userMenu={userMarkup}
     />
   );
 }
