@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2021-11-23 19:45:00
- * @LastEditTime: 2022-02-17 15:15:00
+ * @LastEditTime: 2022-02-18 16:57:47
  * @LastEditors: lijunwei
  * @Description: request urls config
  */
@@ -40,6 +40,8 @@ export const INBOUND_COMMIT        = "/inbound/prediction-warehouse"  // 预报�
 
 export const GET_SKU_OPTIONS = "/shipping/get-warehouse-relation" // 获取sku下拉选项
 
-export const GET_REPO_TABLE_LIST = "/inbound/list"      // 获取入库列表
-export const GET_INBOUND_DETAIL = "/inbound/detail"    // 获取入库单详情
+export const GET_REPO_TABLE_LIST = "/inbound/list"             // 获取入库列表
+export const GET_INBOUND_DETAIL  = "/inbound/detail"           // 获取入库单详情
+export const COMMIT_REPO_SKUS    = "/inbound/confirm_inbound"  // 手动入库
+
 

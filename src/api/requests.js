@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2021-11-24 11:29:42
- * @LastEditTime: 2022-02-17 15:19:16
+ * @LastEditTime: 2022-02-18 16:59:12
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -109,7 +109,7 @@ export const getRepoTableList = (query) => ax.get(REQUEST_URLS.GET_REPO_TABLE_LI
 
 export const getInboundDetail = (id) => ax.get(`${REQUEST_URLS.GET_INBOUND_DETAIL}/${id}`);
 
-
+export const confirmInbound = ( data ) => ax.post(`${REQUEST_URLS.COMMIT_REPO_SKUS}`, data)
 
 
 

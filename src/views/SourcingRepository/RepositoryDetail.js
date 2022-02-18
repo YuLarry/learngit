@@ -1,28 +1,34 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-24 15:50:14
- * @LastEditTime: 2022-02-18 10:58:43
+ * @LastEditTime: 2022-02-18 17:22:27
  * @LastEditors: lijunwei
  * @Description: 
  */
 
 import { Badge, Card, IndexTable, Layout, Page, Thumbnail } from "@shopify/polaris";
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
-import { getInboundDetail } from "../../api/requests";
+import { confirmInbound, getInboundDetail } from "../../api/requests";
 import { FstlnTimeline } from "../../components/FstlnTimeline/FstlnTimeline";
 import { ProductInfoPopover } from "../../components/ProductInfoPopover/ProductInfoPopover";
 import { SourcingCardSection } from "../../components/SecondaryCard/SourcingCardSection";
 import { BadgeInboundStatus } from "../../components/StatusBadges/BadgeInboundStatus";
 import { LoadingContext } from "../../context/LoadingContext";
+import { ModalContext } from "../../context/ModalContext";
+import { ToastContext } from "../../context/ToastContext";
 import { InRepositoryManualModal } from "./piece/InRepositoryManualModal";
 
 function RepositoryDetail(props) {
 
   const loadingContext = useContext(LoadingContext);
+  const modalContext = useContext(ModalContext);
+  const toastContext = useContext(ToastContext);
 
   const { id } = useParams();
   const [detail, setDetail] = useState(null);
+  const [refresh, setRefresh] = useState(0);
+  
 
 
   const rowMarkup = useMemo(() => {
@@ -72,7 +78,39 @@ function RepositoryDetail(props) {
         loadingContext.loading(false);
 
       })
-  }, [id]);
+  }, [id, refresh]);
+
+
+  const [modalSkuList, setModalSkuList] = useState([]);
+  const [modalOpen, setModalOpen] = useState(false);
+
+  const commitModal = useCallback(
+    () => {
+      const inbound_item = modalSkuList.map(({po_item_id, inbound_qty})=>({po_item_id, inbound_qty: parseInt(inbound_qty)}))
+      const data = {
+        inbound_no: detail.inbound_no,
+        inbound_item ,
+      }
+      loadingContext.loading(true);
+      confirmInbound( data )
+      .then(res=>{
+        setModalOpen(false);
+        toastContext.toast({
+          active: true,
+          message: "手动入库成功",
+          duration: 1000,
+        })
+        setRefresh( refresh + 1 )
+      })
+      .finally(()=>{
+      loadingContext.loading(false);
+        
+      })
+    },
+    [detail, modalSkuList],
+  );
+
+
 
   return (
     <Page
@@ -80,6 +118,15 @@ function RepositoryDetail(props) {
       title={ id }
       titleMetadata={<BadgeInboundStatus status={ detail && detail.status } />}
       subtitle="2021-12-25 10:05:00 由xxxxxxxxx创建"
+      secondaryActions={[
+        {
+          content: '手动确定入库',
+          onAction: () => {
+            setModalSkuList( detail.item )
+            setModalOpen(true)
+          },
+        },
+      ]}
     >
       <Layout>
         <Layout.Section>
@@ -115,7 +162,7 @@ function RepositoryDetail(props) {
             <Card.Section>
 
               <FstlnTimeline
-                timeline={detail && detail.operation_record || []}
+                timeline={detail && detail.operation_record.reverse() || []}
                 dateKey="created_at"
 
               />
@@ -141,7 +188,13 @@ function RepositoryDetail(props) {
       </Layout>
 
 
-      <InRepositoryManualModal />
+      <InRepositoryManualModal 
+        modalOpen={modalOpen}
+        modalOpenChange={(openStatus) => { setModalOpen(openStatus) }}
+        tableList={modalSkuList}
+        tableListChange={(list) => { setModalSkuList(list) }}
+        onCommit={ ( list )=>{ console.log(list);commitModal() } }
+      />
     </Page>
   );
 }
