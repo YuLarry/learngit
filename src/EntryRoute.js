@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2021-12-20 16:40:04
- * @LastEditTime: 2022-02-18 14:41:02
+ * @LastEditTime: 2022-02-18 17:39:34
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -15,7 +15,6 @@ import { FstlnLoading } from "./components/FstlnLoading";
 import { ToastContext } from "./context/ToastContext";
 import { ax } from "./utils/FstlnAxios";
 import { fstlnTool } from "./utils/Tools";
-import { Login } from "./views/Login/Login";
 import { TokenErrorPage } from "./views/Login/TokenErrorPage";
 
 
@@ -49,11 +48,12 @@ function EntryRoute() {
 
       toastContext.toast({ active: true, message: _msg, error: true });
       
-      fstlnTool.clearToken();
+      if( message === "Unauthenticated." ){
+        fstlnTool.clearToken();
+        window.location.reload();
+      }
 
       return Promise.reject(err)
-
-
     })
   ax['_INTERCEPTOR_SETTED_'] = true;
 

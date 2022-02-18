@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-21 15:28:14
- * @LastEditTime: 2022-02-17 17:56:07
+ * @LastEditTime: 2022-02-18 17:48:05
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -309,7 +309,7 @@ function DeliveryInbound(props) {
         po_no,
         shipping_num: plan_qty,
         sku,
-        id: po_item_id,
+        po_item_id,
 
         box_no,
         box_qty,
