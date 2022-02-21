@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2021-11-15 17:24:19
- * @LastEditTime: 2022-02-18 14:44:51
+ * @LastEditTime: 2022-02-21 10:59:13
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -19,18 +19,6 @@ import { loginRequest } from "./api/requests";
 
 
 function App() {
-
-  // const token = fstlnTool.getToken();
-  // if( !token ){
-
-  //   loginRequest()
-  //   .then(res=>{
-  //     console.log(res);
-  //     const { data:{data} } = res;
-  //     const token = data[0];
-  //     fstlnTool.saveToken(token);
-  //   })
-  // }
 
   const theme = {
     logo: {

@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2021-11-16 18:54:39
- * @LastEditTime: 2022-02-18 14:41:28
+ * @LastEditTime: 2022-02-21 10:57:58
  * @LastEditors: lijunwei
  * @Description: RequireAuth component
  */
@@ -19,7 +19,6 @@ function RequireAuth({children}) {
   useEffect(()=>{
     if( !authed ){
       navigate("/login");
-      // navigate("/tokeError");
     }
   },[])
   
