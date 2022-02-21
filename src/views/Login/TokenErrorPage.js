@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-02-18 14:18:39
- * @LastEditTime: 2022-02-18 15:23:45
+ * @LastEditTime: 2022-02-21 11:19:57
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -21,7 +21,8 @@ function TokenErrorPage(props) {
   const token = searchParams.get( "token" );
 
   // const LOGIN_ADDRESS = "http://192.168.8.32:56002/admin/auth/login";
-  const LOGIN_ADDRESS = "http://192.168.8.32:56002/admin/auth/login";
+  const LOGIN_ADDRESS = `${process.env.REACT_APP_API_ORIGIN}/admin/auth/login`
+
 
   useEffect(()=>{
     if( token ){
