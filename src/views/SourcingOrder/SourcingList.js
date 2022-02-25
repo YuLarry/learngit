@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-02-25 14:06:14
+ * @LastEditTime: 2022-02-25 18:11:38
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -121,40 +121,43 @@ function SourcingList(props) {
 
   const { selectedResources, allResourcesSelected, handleSelectionChange } = useIndexResourceState(sourcingList);
 
-  const clearSelectedResources = useCallback(()=>{
-    selectedResources.map((selectedItem)=>{
-      handleSelectionChange( "single", false, selectedItem )
+  const clearSelectedResources = useCallback(() => {
+    selectedResources.map((selectedItem) => {
+      handleSelectionChange("single", false, selectedItem)
     })
   },
-  [handleSelectionChange, selectedResources])
-  
-  const refreshTrigger = useCallback(()=>{
+    [handleSelectionChange, selectedResources])
+
+  const refreshTrigger = useCallback(() => {
     clearSelectedResources();
-    setRefresh( refresh + 1 )
+    setRefresh(refresh + 1)
   },
-  [clearSelectedResources, refresh])
+    [clearSelectedResources, refresh])
 
   // audit enable control
   const auditEnable = useMemo(() => {
+    if (selectedResources.length !== 1) { return false };
     const enableArr = [AUDIT_UNAUDITED, AUDIT_FAILURE, AUDIT_REVOKED];
-    const index = selectedResources.findIndex((item) => (enableArr.indexOf(sourcingListMap.get(item).audit_status) === -1))
-    return index === -1
+    const selectedKey = selectedResources[0];
+    return enableArr.indexOf(sourcingListMap.get(selectedKey).audit_status) !== -1
 
   }, [selectedResources, sourcingListMap])
 
   // apply payment control
   const applyPayEnable = useMemo(() => {
-    if (selectedResources.length > 1) { return false };
-
-    const index = selectedResources.findIndex((item) => (sourcingListMap.get(item).audit_status === AUDIT_PASS && sourcingListMap.get(item).payment_status === PAYMENT_STATUS_FAILURE))
-    // const index = selectedResources.findIndex((item)=>() )
-    return index === -1
+    if (selectedResources.length !== 1) { return false };
+    const selectedKey = selectedResources[0];
+    const item = sourcingListMap.get(selectedKey);
+    return item.audit_status === AUDIT_PASS || item.payment_status === PAYMENT_STATUS_FAILURE
   }, [selectedResources, sourcingListMap])
 
   // cancel enable control
   const cancelEnable = useMemo(() => {
     const enableArr = [AUDIT_UNAUDITED, AUDIT_FAILURE, AUDIT_REVOKED];
-    const index = selectedResources.findIndex((item) => (enableArr.indexOf(sourcingListMap.get(item).audit_status) === -1))
+    const index = selectedResources.findIndex(
+      (item) =>
+        (enableArr.indexOf(sourcingListMap.get(item).audit_status) === -1)
+    );
     return index === -1
 
   }, [selectedResources, sourcingListMap])
@@ -162,7 +165,10 @@ function SourcingList(props) {
   // delete enable control
   const deleteEnable = useMemo(() => {
     const enableArr = [AUDIT_UNAUDITED];
-    const index = selectedResources.findIndex((item) => (enableArr.indexOf(sourcingListMap.get(item).audit_status) === -1))
+    const index = selectedResources.findIndex(
+      (item) =>
+        (enableArr.indexOf(sourcingListMap.get(item).audit_status) === -1)
+    );
     return index === -1
 
   }, [selectedResources, sourcingListMap])
@@ -170,8 +176,9 @@ function SourcingList(props) {
   // export enable control
   const exportEnable = useMemo(() => {
     const enableArr = [AUDIT_AUDITING, AUDIT_PASS];
-    const index = selectedResources.findIndex((item) => (enableArr.indexOf(sourcingListMap.get(item).audit_status) === -1))
-
+    const index = selectedResources.findIndex(
+      (item) => (enableArr.indexOf(sourcingListMap.get(item).audit_status) === -1)
+      )
     return index === -1
 
   }, [selectedResources, sourcingListMap])
@@ -234,9 +241,9 @@ function SourcingList(props) {
     loadingContext.loading(true)
     exportOrderPdf({ id: selectedResources[0] })
       .then(res => {
-        const name = sourcingListMap.get( selectedResources[0] ).po_no;
+        const name = sourcingListMap.get(selectedResources[0]).po_no;
         const fileName = `${name}.pdf`;
-        fstlnTool.downloadBlob( res, fileName );
+        fstlnTool.downloadBlob(res, fileName);
       })
       .finally(() => {
         loadingContext.loading(false)
@@ -253,11 +260,11 @@ function SourcingList(props) {
       },
       {
         content: '申请付款',
-        onAction: () => { 
+        onAction: () => {
           const { po_no } = sourcingListMap.get(selectedResources[0]);
-          
-          navigate(`payRequest/${ btoa(po_no) }`)
-         },
+
+          navigate(`payRequest/${btoa(po_no)}`)
+        },
         disabled: !applyPayEnable,
 
       },
@@ -472,8 +479,8 @@ function SourcingList(props) {
             fileName = `采购单数据_all_${new Date().getTime()}`
             break;
         }
-        fstlnTool.downloadBlob( blob, fileName );
-        setActive( false );
+        fstlnTool.downloadBlob(blob, fileName);
+        setActive(false);
         toastContext.toast({
           active: true,
           message: "导出成功"
@@ -514,7 +521,7 @@ function SourcingList(props) {
           selectedItemsCount={
             allResourcesSelected ? 'All' : selectedResources.length
           }
-          onSelectionChange={(a, b,c  )=>{ console.log(a,b,c) ;handleSelectionChange(a,b,c) }}
+          onSelectionChange={(a, b, c) => { console.log(a, b, c); handleSelectionChange(a, b, c) }}
           promotedBulkActions={promotedBulkActions}
           headings={[
             { title: "采购单号" },
