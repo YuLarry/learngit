@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2021-11-15 17:53:07
- * @LastEditTime: 2022-02-21 11:01:23
+ * @LastEditTime: 2022-02-25 12:21:19
  * @LastEditors: lijunwei
  * @Description: Fame component
  */
@@ -66,9 +66,9 @@ function AppFrame(props) {
 
             <Routes>
               {/* <Route path="Home" element={<Home />}></Route> */}
-              <Route path="">
+              {/* <Route path="">
                 {SourcingOrder()}
-              </Route>
+              </Route> */}
               <Route path="sourcing">
                 {SourcingOrder()}
               </Route>

@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2021-12-20 16:40:04
- * @LastEditTime: 2022-02-21 11:06:16
+ * @LastEditTime: 2022-02-25 11:00:48
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -43,12 +43,11 @@ function EntryRoute() {
     },
     (err) => {
       // console.dir(err);
-      const { data: { message } } = err.response;
+      const { data: { message }, status } = err.response;
       const _msg = message ? message : err.message;
 
       toastContext.toast({ active: true, message: _msg, error: true });
-      
-      if( message === "Unauthenticated." ){
+      if( status === 401 || message === "Unauthorized" ){
         fstlnTool.clearToken();
         window.location.reload();
       }

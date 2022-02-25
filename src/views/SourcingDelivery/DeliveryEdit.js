@@ -1,14 +1,15 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-02-17 11:40:12
+ * @LastEditTime: 2022-02-25 14:33:17
  * @LastEditors: lijunwei
  * @Description: 
  */
 
 import { Button, Card, DatePicker, Form, FormLayout, Icon, IndexTable, Layout, Modal, Page, Popover, Select, TextField, TextStyle, Thumbnail, useIndexResourceState } from "@shopify/polaris";
 import {
-  SearchMinor
+  SearchMinor,
+  DeleteMinor,
 } from '@shopify/polaris-icons';
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { editShippingOrder, getPoItemList } from "../../api/requests";
@@ -66,22 +67,32 @@ function DeliveryEdit(props) {
   const { selectedResources, allResourcesSelected, handleSelectionChange } =
     useIndexResourceState(selectedGoods, { resourceIDResolver: (goods) => goods.sku });
 
-  const promotedBulkActions = [
-    {
-      content: '移除',
-      onAction: () => {
-        console.log(selectedResources)
+  const handleDeleteGoods = useCallback((id) => {
+    const tempMap = new Map(goodsTableDataMap);
+    tempMap.delete(id);
+    setGoodsTableDataMap(tempMap);
+  }
+    , [goodsTableDataMap])
 
-        const tempMap = new Map(goodsTableDataMap);
+  const promotedBulkActions = useMemo(() => (
+    [
+      {
+        content: '移除',
+        onAction: () => {
+          console.log(selectedResources)
 
-        selectedResources.map((sku) => {
-          tempMap.delete(sku);
-          handleSelectionChange("single", false, sku);
-        })
-        setGoodsTableDataMap(tempMap);
+          const tempMap = new Map(goodsTableDataMap);
+
+          selectedResources.map((sku) => {
+            tempMap.delete(sku);
+            handleSelectionChange("single", false, sku);
+          })
+          setGoodsTableDataMap(tempMap);
+        },
       },
-    },
-  ];
+    ]
+  )
+    , []);
 
   const goodsFormChangeHandler = useCallback(
     (sku, val, key) => {
@@ -139,6 +150,12 @@ function DeliveryEdit(props) {
             />
           </div>
         </IndexTable.Cell>
+        <IndexTable.Cell>
+          <Button
+            icon={DeleteMinor}
+            onClick={() => { handleDeleteGoods(id) }}
+          ></Button>
+        </IndexTable.Cell>
       </IndexTable.Row>
     ))
     ,
@@ -188,18 +205,18 @@ function DeliveryEdit(props) {
     [goodsTableDataMap, selectGoodsMapTemp],
   );
 
-  const selectedPoItemInfo = useMemo(()=>{
-    if( goodsTableDataMap && goodsTableDataMap.size > 0 ){
+  const selectedPoItemInfo = useMemo(() => {
+    if (goodsTableDataMap && goodsTableDataMap.size > 0) {
       const { headKey } = goodsTableDataMap.values().next().value;
       console.log(tree[headKey])
       return tree[headKey];
-    }else{
+    } else {
       return undefined
     }
-  },[goodsTableDataMap, tree])
+  }, [goodsTableDataMap, tree])
 
-  const provider = useMemo(()=>(selectedPoItemInfo && selectedPoItemInfo.provider),[selectedPoItemInfo])
-  const warehouse = useMemo(()=>(selectedPoItemInfo && selectedPoItemInfo.warehouse),[selectedPoItemInfo])
+  const provider = useMemo(() => (selectedPoItemInfo && selectedPoItemInfo.provider), [selectedPoItemInfo])
+  const warehouse = useMemo(() => (selectedPoItemInfo && selectedPoItemInfo.warehouse), [selectedPoItemInfo])
 
 
   const [searchKey, setSearchKey] = useState("provider_name");
@@ -207,7 +224,7 @@ function DeliveryEdit(props) {
   const [querying, setQuerying] = useState(false);
 
   useEffect(() => {
-    if( !active ) return;
+    if (!active) return;
     const timer = setTimeout(() => {
       setQuerying(true)
       getPoItemList({
@@ -259,8 +276,8 @@ function DeliveryEdit(props) {
           active: true,
           message: "保存成功",
           duration: 1000,
-          onDismiss: ()=>{
-            toastContext.toast({active: false});
+          onDismiss: () => {
+            toastContext.toast({ active: false });
             navigate(-1)
           }
         })
@@ -395,7 +412,9 @@ function DeliveryEdit(props) {
                 { title: '采购单号' },
                 { title: '系统SKU' },
                 { title: '本次发货数量' },
+                { title: '' },
               ]}
+              selectable={false}
             >
               {rowMarkup}
             </IndexTable>
@@ -483,8 +502,8 @@ function DeliveryEdit(props) {
         </Layout.Section>
         <Layout.Section secondary>
 
-          <SourcingProviCard provInfo={ provider } />
-          <SourcingRepoCard wareInfo={ warehouse } />
+          <SourcingProviCard provInfo={provider} />
+          <SourcingRepoCard wareInfo={warehouse} />
           <SourcingRemarkCard />
 
         </Layout.Section>
@@ -522,7 +541,7 @@ function DeliveryEdit(props) {
               }
               connectedLeft={
                 <Select
-                  value={ searchKey }
+                  value={searchKey}
                   onChange={(val) => { setSearchKey(val) }}
                   options={[
                     { label: "供应商", value: "provider_name" },

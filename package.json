@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@shopify/polaris": "^8.0.0",
+    "@shopify/polaris": "^8.2.2",
     "@testing-library/jest-dom": "^5.16.1",
     "@testing-library/react": "^12.1.2",
     "@testing-library/user-event": "^13.5.0",
@@ -29,17 +29,14 @@
   },
   "browserslist": {
     "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
+      "extends @shopify/browserslist-config"
     ],
     "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
+      "extends @shopify/browserslist-config"
     ]
   },
   "devDependencies": {
+    "@shopify/browserslist-config": "^3.0.0",
     "sass": "^1.47.0"
   }
 }

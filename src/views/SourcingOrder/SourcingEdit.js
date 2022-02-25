@@ -1,17 +1,18 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-02-18 15:07:05
+ * @LastEditTime: 2022-02-25 15:00:43
  * @LastEditors: lijunwei
  * @Description: 
  */
 
 import { Button, Card, Form, FormLayout, Icon, IndexTable, Layout, Modal, Page, Select, TextField, TextStyle, useIndexResourceState } from "@shopify/polaris";
 import {
-  SearchMinor
+  SearchMinor,
+  DeleteMinor
 } from '@shopify/polaris-icons';
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { editSourcingOrder, getBrandList, getGoodsQuery, getProviderDetail, getProviderList, getSubjectList, getWarehouseList } from "../../api/requests";
 import { FstlnLoading } from "../../components/FstlnLoading";
 import { FstlnSelectTree } from "../../components/FstlnSelectTree/FstlnSelectTree";
@@ -29,7 +30,7 @@ import "./style/sourcingEdit.scss";
 
 
 function SourcingEdit(props) {
-
+  const { id } = useParams();
   const navigate = useNavigate();
 
   const [brandList, setBrandList] = useState([]);
@@ -95,9 +96,9 @@ function SourcingEdit(props) {
 
   const saveOrder = useCallback(
     () => {
-      const selectedGoodsFormat = selectedGoods.map(goods=>({
+      const selectedGoodsFormat = selectedGoods.map(goods => ({
         ...goods,
-        purchase_currency : currency,
+        purchase_currency: currency,
         purchase_price: goods.price,
       }))
       const data = {
@@ -107,33 +108,33 @@ function SourcingEdit(props) {
       }
       loadingContext.loading(true);
       editSourcingOrder(data)
-      .then(res=>{
-        const { code, message } = res;
-        if( code === 200 ){
-          toastContext.toast({
-            active: true,
-            message: "保存采购单成功！",
-            onDismiss: ()=>{
-              toastContext.toast({active: false});
-              navigate(-1)
-            }
-          })
-        }else{
-          toastContext.toast({
-            active: true,
-            message,
-            error: true
-          })
+        .then(res => {
+          const { code, message } = res;
+          if (code === 200) {
+            toastContext.toast({
+              active: true,
+              message: "保存采购单成功！",
+              onDismiss: () => {
+                toastContext.toast({ active: false });
+                navigate(-1)
+              }
+            })
+          } else {
+            toastContext.toast({
+              active: true,
+              message,
+              error: true
+            })
 
-        }
-      })
-      .finally(()=>{
-        loadingContext.loading(false);
-      })
+          }
+        })
+        .finally(() => {
+          loadingContext.loading(false);
+        })
     },
     [currency, selectedGoods, sourcingOrderForm],
   );
-  
+
 
   useEffect(() => {
     loadingContext.loading(true)
@@ -238,13 +239,13 @@ function SourcingEdit(props) {
         }
       },
     });
-    return ()=>{
+    return () => {
       unsavedChangeContext.remind({
         active: false,
       })
     }
   },
-  [saveOrder])
+    [saveOrder])
 
 
   useEffect(() => {
@@ -263,7 +264,7 @@ function SourcingEdit(props) {
       getProviderDetail(provider_id)
         .then(res => {
           const { data } = res;
-          const options = data.map( ({ bank_card_number,currency, id }) => ({ id, label: bank_card_number, value: id, currency }));
+          const options = data.map(({ bank_card_number, currency, id }) => ({ id, label: bank_card_number, value: id, currency }));
           const newMap = new Map(providerDetailMap);
           newMap.set(provider_id, options)
           setproviderDetailMap(newMap)
@@ -287,7 +288,7 @@ function SourcingEdit(props) {
 
   // update currencty
   useEffect(() => {
-    const accountInfo = accountList.find((account)=>account.id === sourcingOrderForm.account_id)
+    const accountInfo = accountList.find((account) => account.id === sourcingOrderForm.account_id)
     accountInfo && setCurrency(accountInfo.currency);
   }, [sourcingOrderForm.account_id]);
 
@@ -304,22 +305,32 @@ function SourcingEdit(props) {
 
   const { selectedResources, allResourcesSelected, handleSelectionChange } = useIndexResourceState(selectedGoods, { resourceIDResolver: (goods) => goods.sku });
 
-  const promotedBulkActions = [
-    {
-      content: '移除',
-      onAction: () => {
-        console.log(selectedResources)
 
-        const tempMap = new Map(goodsTableDataMap);
+  const handleDeleteGoods = useCallback((id) => {
+    const tempMap = new Map(goodsTableDataMap);
+    tempMap.delete(id);
+    setGoodsTableDataMap(tempMap);
+  }
+    , [goodsTableDataMap])
 
-        selectedResources.map((sku) => {
-          tempMap.delete(sku);
-          handleSelectionChange("single", false, sku);
-        })
-        setGoodsTableDataMap(tempMap);
+  const promotedBulkActions = useMemo(() => (
+    [
+      {
+        content: '移除',
+        onAction: () => {
+          console.log(selectedResources)
+
+          const tempMap = new Map(goodsTableDataMap);
+
+          selectedResources.map((sku) => {
+            tempMap.delete(sku);
+            handleSelectionChange("single", false, sku);
+          })
+          setGoodsTableDataMap(tempMap);
+        },
       },
-    },
-  ];
+    ]
+  ));
 
   const goodsFormChangeHandler = useCallback(
     (sku, val, key) => {
@@ -361,16 +372,23 @@ function SourcingEdit(props) {
             onChange={(v) => { goodsFormChangeHandler(id, v, "price") }}
           />
         </IndexTable.Cell>
+        <IndexTable.Cell>
+          <Button
+            icon={DeleteMinor}
+            onClick={() => { handleDeleteGoods(id) }}
+          ></Button>
+        </IndexTable.Cell>
+
       </IndexTable.Row>
     ))
     ,
-    [goodsFormChangeHandler, selectedGoods, selectedResources]
+    [goodsFormChangeHandler, handleDeleteGoods, selectedGoods, selectedResources]
   )
 
 
   const [treeLoading, setTreeLoading] = useState(false);
   const [treeQueryForm, setTreeQueryForm] = useState({
-    type: "1",
+    type: "goods_sku",
     query: ""
   });
 
@@ -419,10 +437,14 @@ function SourcingEdit(props) {
   useEffect(() => {
     if (active === false) return;
     setTreeLoading(true);
+    const { type , query } = treeQueryForm;
     getGoodsQuery({
-      // ...treeQueryForm,
+      goods_sku: "",
+      brand_name: "",
+      goods_name: "",
       provider_id,
       currency: "USD",
+      [type]: query,
     })
       .then(res => {
         const { data } = res;
@@ -439,8 +461,8 @@ function SourcingEdit(props) {
   return (
     <Page
       breadcrumbs={[{ content: '采购实施列表', url: '/sourcing' }]}
-      title="这是编辑"
-      subtitle="2021-12-25 10:05:00 由xxxxxxxxx创建"
+      title={ id ? id : "创建采购单" }
+      subtitle={ id ? "2021-12-25 10:05:00 由xxxxxxxxx创建" : "" }
     >
       <Layout>
         <Layout.Section>
@@ -530,10 +552,12 @@ function SourcingEdit(props) {
                 { title: '系统SKU' },
                 { title: '采购数量' },
                 { title: '采购价格' },
+                { title: '' },
               ]}
               emptyState={`商品为空`}
+              selectable={false}
             >
-              { rowMarkup }
+              {rowMarkup}
             </IndexTable>
             <div style={{ textAlign: "center" }}>
               <Button onClick={() => { setActive(true) }}>添加商品</Button>
@@ -589,14 +613,15 @@ function SourcingEdit(props) {
               />
               }
               connectedLeft={
-                <div style={{ width: "8em" }}>
+                <div style={{ width: "12em" }}>
                   <Select
                     onChange={treeQueryFormChangeHandler}
                     id="type"
                     value={treeQueryForm.type}
                     options={[
-                      { label: "商品SKU ", value: "1" },
-                      { label: "品牌", value: "2" },
+                      { label: "商品SKU ", value: "goods_sku" },
+                      { label: "商品中英文名称", value: "goods_name" },
+                      { label: "品牌", value: "brand_name" },
                     ]}
                   />
                 </div>
@@ -610,11 +635,11 @@ function SourcingEdit(props) {
               <FstlnLoading />
               :
               <FstlnSelectTree
-                treeData={ tree }
+                treeData={tree}
                 treeHeadRender={treeHeadRender}
                 treeRowRender={treeRowRender}
                 onTreeSelectChange={treeSelectChange}
-                identifier={ (item=>item.id) }
+                identifier={(item => item.id)}
               />
           }
 
