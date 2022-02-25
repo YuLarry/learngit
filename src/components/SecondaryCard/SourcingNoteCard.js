@@ -17,7 +17,7 @@ function SourcingRemarkCard(props) {
         {
           readOnly
           ?
-          remark
+          <p style={{ wordBreak: "break-all" }} >{ remark }</p>
           :
           <TextField
           value={ remark }

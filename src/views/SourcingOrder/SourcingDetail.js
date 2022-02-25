@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-20 16:16:03
- * @LastEditTime: 2022-02-18 15:07:44
+ * @LastEditTime: 2022-02-25 16:09:58
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -137,7 +137,7 @@ function SourcingDetail(props) {
       breadcrumbs={[{ content: '采购实施列表', url: '/sourcing' }]}
       title={idURIDecode}
       titleMetadata={badgesMarkup}
-      subtitle="2021-12-25 10:05:00 由xxxxxxxxx创建"
+      subtitle={ order && order.create_message || "" }
     >
       <Layout>
         <Layout.Section>

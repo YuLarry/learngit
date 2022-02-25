@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-02-25 15:00:43
+ * @LastEditTime: 2022-02-25 16:08:46
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -53,6 +53,7 @@ function SourcingEdit(props) {
   const modalContext = useContext(ModalContext);
   const toastContext = useContext(ToastContext);
 
+  const [detail, setDetail] = useState(null);
 
   const [sourcingOrderForm, setSourcingOrderForm] = useState({
     remark: "",
@@ -396,7 +397,7 @@ function SourcingEdit(props) {
     (val, id) => {
       setTreeQueryForm({ ...treeQueryForm, [id]: val })
     },
-    [],
+    [treeQueryForm],
   );
 
   const treeHeadRender = (rowItem, itemDetail, children) => {
@@ -434,35 +435,50 @@ function SourcingEdit(props) {
     [goodsTableDataMap, selectGoodsMapTemp],
   );
 
+  const queryGoodsRequest = useCallback(
+    () => {
+      const { type, query } = treeQueryForm;
+      setTreeLoading(true);
+      getGoodsQuery({
+        goods_sku: "",
+        brand_name: "",
+        goods_name: "",
+        provider_id,
+        currency: "USD",
+        [type]: query,
+      })
+        .then(res => {
+          const { data } = res;
+          setTree(data);
+
+        })
+        .finally(() => {
+          setTreeLoading(false)
+        })
+    },
+    [provider_id, treeQueryForm],
+  );
+
+
   useEffect(() => {
     if (active === false) return;
-    setTreeLoading(true);
-    const { type , query } = treeQueryForm;
-    getGoodsQuery({
-      goods_sku: "",
-      brand_name: "",
-      goods_name: "",
-      provider_id,
-      currency: "USD",
-      [type]: query,
-    })
-      .then(res => {
-        const { data } = res;
-        setTree(data);
-
-      })
-      .finally(() => {
-        setTreeLoading(false)
-      })
+    const timer = setTimeout(() => {
+      queryGoodsRequest();
+    }, 1000);
+    return ()=>{
+      clearTimeout( timer );
+    }
   },
-    [active, treeQueryForm, provider_id]
+    [active, queryGoodsRequest]
   );
+
+
 
   return (
     <Page
       breadcrumbs={[{ content: '采购实施列表', url: '/sourcing' }]}
-      title={ id ? id : "创建采购单" }
-      subtitle={ id ? "2021-12-25 10:05:00 由xxxxxxxxx创建" : "" }
+      title={id ? id : "创建采购单"}
+      subtitle={id ? "2021-12-25 10:05:00 由xxxxxxxxx创建" : (detail && detail.create_message) }
     >
       <Layout>
         <Layout.Section>

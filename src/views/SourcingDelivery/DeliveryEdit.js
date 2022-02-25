@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-02-25 14:33:17
+ * @LastEditTime: 2022-02-25 16:12:48
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -29,11 +29,11 @@ import { ModalContext } from "../../context/ModalContext";
 import { ToastContext } from "../../context/ToastContext";
 import moment from "moment";
 import { FstlnLoading } from "../../components/FstlnLoading";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 
 function DeliveryEdit(props) {
-
+  const { id } = useParams();
   const navigate = useNavigate();
   const loadingContext = useContext(LoadingContext);
   const unsavedChangeContext = useContext(UnsavedChangeContext);
@@ -106,6 +106,8 @@ function DeliveryEdit(props) {
     [goodsTableDataMap],
   );
 
+
+  const [detail, setDetail] = useState(null);
 
   const [formObject, setFormObject] = useState({
     shipping_date: new Date(),
@@ -311,7 +313,7 @@ function DeliveryEdit(props) {
                 content: "确认",
                 destructive: true,
                 onAction: () => {
-
+                  modalContext.modal({active: false})
                 },
               },
               secondaryActions: [
@@ -391,8 +393,8 @@ function DeliveryEdit(props) {
   return (
     <Page
       breadcrumbs={[{ content: '采购实施列表', url: '/delivery' }]}
-      title="xxxxf发货单"
-      subtitle="2021-12-25 10:05:00 由xxxxxxxxx创建"
+      title={ id ? id : "新建发货单" }
+      subtitle={ detail && detail.create_message || "" }
     >
       <Layout>
         <Layout.Section>
