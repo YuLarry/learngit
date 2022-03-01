@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-02-25 16:12:48
+ * @LastEditTime: 2022-03-01 15:49:37
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -30,6 +30,7 @@ import { ToastContext } from "../../context/ToastContext";
 import moment from "moment";
 import { FstlnLoading } from "../../components/FstlnLoading";
 import { useNavigate, useParams } from "react-router-dom";
+import { fstlnTool } from "../../utils/Tools";
 
 
 function DeliveryEdit(props) {
@@ -96,6 +97,7 @@ function DeliveryEdit(props) {
 
   const goodsFormChangeHandler = useCallback(
     (sku, val, key) => {
+      if( val && !fstlnTool.INT_MORE_THAN_ZERO_REG.test(val) ) return;
       const _tempGoodItem = goodsTableDataMap.get(sku);
       _tempGoodItem[key] = val
       const tempMap = new Map(goodsTableDataMap);
@@ -116,7 +118,7 @@ function DeliveryEdit(props) {
     tracking_no: "",
     tracking_service: "",
     shipping_price: "",
-    shipping_currency: "USD",
+    shipping_currency: "",
     // currency: "USD",
     binning_no: "",
     remark: ""
@@ -129,7 +131,7 @@ function DeliveryEdit(props) {
     [formObject],
   );
   const rowMarkup = useMemo(() =>
-    selectedGoods.map(({ id, sku, purchase_num, goods_name, headKey, count = "0" }, index) => (
+    selectedGoods.map(({ id, sku, purchase_num, goods_name, headKey, count = "" }, index) => (
       <IndexTable.Row
         id={id}
         key={sku}
@@ -482,6 +484,7 @@ function DeliveryEdit(props) {
                     id="shipping_currency"
                     onChange={handleFormObjectChange}
                     options={[
+                      { label: "", value: "" },
                       { label: "USD", value: "USD" },
                       { label: "RMB", value: "RMB" },
                     ]}

@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-19 17:05:46
- * @LastEditTime: 2022-02-16 15:48:33
+ * @LastEditTime: 2022-03-01 15:51:58
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -24,6 +24,7 @@ import { UnsavedChangeContext } from "../../context/UnsavedChangeContext";
 import { ModalContext } from "../../context/ModalContext";
 import moment from "moment"
 import { ToastContext } from "../../context/ToastContext";
+import { fstlnTool } from "../../utils/Tools";
 
 
 function PayRequest(props) {
@@ -41,7 +42,7 @@ function PayRequest(props) {
   const [order, setOrder] = useState(null);
 
   const [invoice, setInvoice] = useState([{
-    price: "",
+    price: "0.00",
     date: new Date(),
     file: null
   }]);
@@ -50,7 +51,7 @@ function PayRequest(props) {
     () => {
       const _invoice = [...invoice];
       _invoice.push({
-        price: "",
+        price: "0.00",
         date: new Date(),
         file: null
       })
@@ -70,7 +71,7 @@ function PayRequest(props) {
 
   const invoiceChangeHandler = useCallback(
     (idx, name, val) => {
-
+      if( val && name === "price" && !fstlnTool.FLOAT_MORE_THAN_ZERO_REG.test(val) ) return;
       setInvoice([
         ...invoice.slice(0, idx),
         { ...invoice[idx], [name]: val },
@@ -165,8 +166,8 @@ function PayRequest(props) {
                 <div style={{ width: "50px", height: "50px" }}>
                   <DropZone
                     id={`file-${index}`}
-                    accept="image/*"
-                    type="image"
+                    // accept="image/*"
+                    // type="image"
                     allowMultiple={false}
                     onDropAccepted={(files) => { console.dir(files[0]); invoiceChangeHandler(index, 'file', files[0]) }}
                   >
@@ -271,7 +272,8 @@ function PayRequest(props) {
                 content: "确认",
                 destructive: true,
                 onAction: () => {
-
+                  modalContext.modal({ active: false });
+                  navigate(-1)
                 },
               },
               secondaryActions: [

@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2021-11-17 16:46:47
- * @LastEditTime: 2021-11-17 17:03:31
+ * @LastEditTime: 2022-03-01 15:34:53
  * @LastEditors: lijunwei
  * @Description: 
  *  Customed Link component. 
@@ -13,7 +13,6 @@ import { Link } from "react-router-dom";
 
 
 function FstlnLink( {children, url = '', external, ref, ...rest} ) {
-  
   const IS_EXTERNAL_LINK_REGEX = /^(?:[a-z][a-z\d+.-]*:|\/\/)/;
 
   if (external || IS_EXTERNAL_LINK_REGEX.test(url)) {

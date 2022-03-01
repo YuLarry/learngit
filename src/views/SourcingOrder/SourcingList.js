@@ -1,12 +1,12 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-02-25 18:11:38
+ * @LastEditTime: 2022-03-01 15:33:18
  * @LastEditors: lijunwei
  * @Description: 
  */
 
-import { Button, Card, DatePicker, IndexTable, Modal, Page, Pagination, RadioButton, Select, Stack, Tabs, TextStyle, Thumbnail, useIndexResourceState } from "@shopify/polaris";
+import { Button, Card, DatePicker, IndexTable, Link, Modal, Page, Pagination, RadioButton, Select, Stack, Tabs, TextStyle, Thumbnail, useIndexResourceState } from "@shopify/polaris";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { cancelSourcingOrder, commitApproval, deleteSourcingOrder, exportOrderExcel, exportOrderPdf, getBrandList, querySourcingList } from "../../api/requests";
@@ -20,9 +20,12 @@ import { AUDIT_AUDITING, AUDIT_FAILURE, AUDIT_PASS, AUDIT_REVOKED, AUDIT_UNAUDIT
 import { SourcingListFilter } from "./piece/SourcingListFilter";
 import moment from "moment";
 import { fstlnTool } from "../../utils/Tools";
+import { BACKEND_GOODS_DETAIL } from "../../api/apiUrl";
 
 
 function SourcingList(props) {
+
+  // console.log( BACKEND_GOODS_DETAIL );
 
   const navigate = useNavigate();
   const loadingContext = useContext(LoadingContext);
@@ -134,6 +137,15 @@ function SourcingList(props) {
   },
     [clearSelectedResources, refresh])
 
+
+  const editEdable = useMemo(() => {
+    if (selectedResources.length !== 1) { return false };
+    const enableArr = [AUDIT_UNAUDITED, AUDIT_FAILURE, AUDIT_REVOKED];
+    const selectedKey = selectedResources[0];
+    return enableArr.indexOf(sourcingListMap.get(selectedKey).audit_status) !== -1
+  },
+    [selectedResources])
+
   // audit enable control
   const auditEnable = useMemo(() => {
     if (selectedResources.length !== 1) { return false };
@@ -153,6 +165,7 @@ function SourcingList(props) {
 
   // cancel enable control
   const cancelEnable = useMemo(() => {
+    if (selectedResources.length !== 1) { return false };
     const enableArr = [AUDIT_UNAUDITED, AUDIT_FAILURE, AUDIT_REVOKED];
     const index = selectedResources.findIndex(
       (item) =>
@@ -164,6 +177,7 @@ function SourcingList(props) {
 
   // delete enable control
   const deleteEnable = useMemo(() => {
+    if (selectedResources.length !== 1) { return false };
     const enableArr = [AUDIT_UNAUDITED];
     const index = selectedResources.findIndex(
       (item) =>
@@ -175,13 +189,25 @@ function SourcingList(props) {
 
   // export enable control
   const exportEnable = useMemo(() => {
+    if (selectedResources.length !== 1) { return false };
     const enableArr = [AUDIT_AUDITING, AUDIT_PASS];
     const index = selectedResources.findIndex(
       (item) => (enableArr.indexOf(sourcingListMap.get(item).audit_status) === -1)
-      )
+    )
     return index === -1
 
   }, [selectedResources, sourcingListMap])
+
+
+  const actionEditAudit = useCallback(() => {
+    const selectedKey = selectedResources[0];
+    const item = sourcingListMap.get(selectedKey);
+    // console.log(selectedKey);
+    const { po_no } = item;
+    const poBase64 = window.btoa(encodeURIComponent(po_no));
+    navigate(`edit/${poBase64}`);
+  }
+    , [navigate, selectedResources, sourcingListMap])
 
   const actionCommitAudit = useCallback(
     () => {
@@ -254,6 +280,11 @@ function SourcingList(props) {
   const promotedBulkActions = useMemo(() => {
     return [
       {
+        content: '编辑采购单',
+        onAction: actionEditAudit,
+        disabled: !editEdable,
+      },
+      {
         content: '提交审批',
         onAction: actionCommitAudit,
         disabled: !auditEnable,
@@ -292,7 +323,7 @@ function SourcingList(props) {
   const goodsItemNode = useCallback((item, idx) => {
     if (!item) return null;
     const { sku, purchase_num, goods } = item;
-    const { image_url = "", en_name = "" } = goods || {}
+    const { image_url = "", en_name = "", id } = goods || {}
     return (
       <div className="product-container" key={idx} style={{ maxWidth: "400px", display: "flex", alignItems: "flex-start" }}>
 
@@ -302,7 +333,15 @@ function SourcingList(props) {
           size="small"
         />
         <div style={{ flex: 1, marginLeft: "1em" }}>
-          <Button plain>{sku}</Button>
+          <Link
+            onClick={
+              (e) => {
+                e.stopPropagation();
+                window.open(`${BACKEND_GOODS_DETAIL}/${id}`);
+              }
+            }
+
+          >{sku}</Link>
           <p>{purchase_num}</p>
         </div>
       </div>
@@ -349,15 +388,6 @@ function SourcingList(props) {
     }
   )
     , [goodsItemNode, selectedResources, sourcingList]);
-
-
-  const exportHandler = useCallback(
-    () => {
-      console.log("export");
-    },
-    [],
-  );
-
 
 
   useEffect(() => {

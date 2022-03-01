@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-02-25 16:08:46
+ * @LastEditTime: 2022-03-01 14:38:02
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -13,7 +13,7 @@ import {
 } from '@shopify/polaris-icons';
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { editSourcingOrder, getBrandList, getGoodsQuery, getProviderDetail, getProviderList, getSubjectList, getWarehouseList } from "../../api/requests";
+import { editSourcingOrder, getBrandList, getGoodsQuery, getProviderDetail, getProviderList, getSourcingOrderDetail, getSubjectList, getWarehouseList } from "../../api/requests";
 import { FstlnLoading } from "../../components/FstlnLoading";
 import { FstlnSelectTree } from "../../components/FstlnSelectTree/FstlnSelectTree";
 import { SourcingCardSection } from "../../components/SecondaryCard/SourcingCardSection";
@@ -25,13 +25,17 @@ import { ModalContext } from "../../context/ModalContext";
 import { ToastContext } from "../../context/ToastContext";
 import { UnsavedChangeContext } from "../../context/UnsavedChangeContext";
 import { BUSINESS_TYPE, DEPARTMENT_LIST, PLATFORM_LIST } from "../../utils/StaticData";
+import { fstlnTool } from "../../utils/Tools";
 import "./style/sourcingEdit.scss";
 
 
 
 function SourcingEdit(props) {
   const { id } = useParams();
+  const idDecode = id && atob(id);
+  const idURIDecode = idDecode && decodeURIComponent(idDecode);
   const navigate = useNavigate();
+  
 
   const [brandList, setBrandList] = useState([]);
   const [provList, setProvList] = useState([]);
@@ -53,7 +57,7 @@ function SourcingEdit(props) {
   const modalContext = useContext(ModalContext);
   const toastContext = useContext(ToastContext);
 
-  const [detail, setDetail] = useState(null);
+  const [order, setOrder] = useState(null);
 
   const [sourcingOrderForm, setSourcingOrderForm] = useState({
     remark: "",
@@ -73,6 +77,16 @@ function SourcingEdit(props) {
   const [currency, setCurrency] = useState("");
 
   const [provider_id, setProvider_id] = useState("");
+
+  const accountBankNum = useMemo(() => {
+    const detailItem = accountList.find(item => item.id.toString() === sourcingOrderForm.account_id.toString())
+    let numText = "";
+    if (detailItem) {
+      numText = detailItem.label
+    }
+    return numText;
+  }
+    , [accountList, sourcingOrderForm])
 
   const formChangeHandler = useCallback(
     (value, id) => {
@@ -188,9 +202,7 @@ function SourcingEdit(props) {
 
         })
         setProvider_id(provListArr[0].value)
-
-
-
+        
       })
       .finally(() => {
         loadingContext.loading(false);
@@ -258,9 +270,6 @@ function SourcingEdit(props) {
     const opt = providerDetailMap.get(provider_id);
     if (opt) {
       setAccountList(opt)
-      // set initial account
-      // setSourcingOrderForm({ ...sourcingOrderForm, account_id: opt[0].value })
-
     } else {
       getProviderDetail(provider_id)
         .then(res => {
@@ -270,8 +279,6 @@ function SourcingEdit(props) {
           newMap.set(provider_id, options)
           setproviderDetailMap(newMap)
           setAccountList(options)
-          // set initial account
-          // setSourcingOrderForm({ ...sourcingOrderForm, account_id: options[0].value })
 
         })
     }
@@ -293,7 +300,19 @@ function SourcingEdit(props) {
     accountInfo && setCurrency(accountInfo.currency);
   }, [sourcingOrderForm.account_id]);
 
+  useEffect(() => {
+    if (!id) return;
+    loadingContext.loading(true);
+    getSourcingOrderDetail(idDecode)
+      .then(res => {
+        // console.log(res);
+        setOrder(res.data)
+      })
+      .finally(() => {
+        loadingContext.loading(false);
+      })
 
+  }, []);
 
   const [active, setActive] = useState(false);
   const handleChange = useCallback(() => setActive(!active), [active]);
@@ -335,7 +354,8 @@ function SourcingEdit(props) {
 
   const goodsFormChangeHandler = useCallback(
     (sku, val, key) => {
-
+      if( val && key === "purchase_num" && !fstlnTool.INT_MORE_THAN_ZERO_REG.test(val) ) return;
+      if( val && key === "price" && !fstlnTool.FLOAT_MORE_THAN_ZERO_REG.test(val) ) return;
       const _tempGoodItem = goodsTableDataMap.get(sku);
       _tempGoodItem[key] = val
       const tempMap = new Map(goodsTableDataMap);
@@ -465,8 +485,8 @@ function SourcingEdit(props) {
     const timer = setTimeout(() => {
       queryGoodsRequest();
     }, 1000);
-    return ()=>{
-      clearTimeout( timer );
+    return () => {
+      clearTimeout(timer);
     }
   },
     [active, queryGoodsRequest]
@@ -476,9 +496,16 @@ function SourcingEdit(props) {
 
   return (
     <Page
-      breadcrumbs={[{ content: '采购实施列表', url: '/sourcing' }]}
-      title={id ? id : "创建采购单"}
-      subtitle={id ? "2021-12-25 10:05:00 由xxxxxxxxx创建" : (detail && detail.create_message) }
+      breadcrumbs={[
+        {
+          onAction: ()=>{
+            navigate(-1);
+          }
+        }
+      ]}
+      title={id ? idURIDecode : "创建采购单"}
+      subtitle={ order && order.create_message || "" }
+
     >
       <Layout>
         <Layout.Section>
@@ -589,7 +616,7 @@ function SourcingEdit(props) {
             <SourcingCardSection title="采购数量" text="text 文字" />
 
           </Card>
-          <SourcingProviCard provInfo={provMap.get(provider_id)} />
+          <SourcingProviCard provInfo={{ ...provMap.get(provider_id), account_id: accountBankNum }} />
           <SourcingRepoCard wareInfo={wareMap.get(sourcingOrderForm.warehouse_code)} />
           <SourcingRemarkCard remark={sourcingOrderForm.remark} onChange={(val) => { formChangeHandler(val, "remark") }} />
 

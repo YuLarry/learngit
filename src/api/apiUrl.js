@@ -1,13 +1,15 @@
 /*
  * @Author: lijunwei
  * @Date: 2021-11-23 19:45:00
- * @LastEditTime: 2022-02-18 16:57:47
+ * @LastEditTime: 2022-03-01 15:02:42
  * @LastEditors: lijunwei
  * @Description: request urls config
  */
 
 
 export const LOGIN    = `/login`;
+
+export const BACKEND_GOODS_DETAIL = `${process.env.REACT_APP_API_ORIGIN}/admin/goods/list`
 
 
 // public apis

@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-21 15:28:14
- * @LastEditTime: 2022-02-18 17:48:05
+ * @LastEditTime: 2022-03-01 15:56:43
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -520,7 +520,8 @@ function DeliveryInbound(props) {
                 content: "确认",
                 destructive: true,
                 onAction: () => {
-
+                  modalContext.modal({ active: false });
+                  navigate(-1);
                 },
               },
               secondaryActions: [

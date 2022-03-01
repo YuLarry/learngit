@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2021-12-14 11:11:31
- * @LastEditTime: 2022-02-17 15:20:59
+ * @LastEditTime: 2022-03-01 14:37:03
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -20,10 +20,12 @@ export const fstlnTool = {
     return window.localStorage.removeItem("token");
   },
 
-  EMAIL_REG: /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/
-
+  EMAIL_REG: /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/,
   
-  ,downloadBlob: ( blob, fileName )=>{
+  INT_MORE_THAN_ZERO_REG: /^[+]{0,1}(\d+)$/,
+  FLOAT_MORE_THAN_ZERO_REG: /^[+]{0,1}(\d+)$|^[+]{0,1}(\d+\.\d+)$/,
+  
+  downloadBlob: ( blob, fileName )=>{
     if ('download' in document.createElement('a')) { // 非IE下载
       const elink = document.createElement('a')
       elink.download = fileName

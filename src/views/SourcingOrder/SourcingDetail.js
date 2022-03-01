@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-20 16:16:03
- * @LastEditTime: 2022-02-25 16:09:58
+ * @LastEditTime: 2022-03-01 14:06:48
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -9,7 +9,7 @@
 import { Badge, Card, IndexTable, Layout, Page, Thumbnail } from "@shopify/polaris";
 import { useContext } from "react";
 import { useEffect, useMemo, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { getSourcingOrderDetail } from "../../api/requests";
 import { FstlnTimeline } from "../../components/FstlnTimeline/FstlnTimeline";
 import { ProductInfoPopover } from "../../components/ProductInfoPopover/ProductInfoPopover";
@@ -23,33 +23,15 @@ import { BadgePaymentStatus } from "../../components/StatusBadges/BadgePaymentSt
 import { LoadingContext } from "../../context/LoadingContext";
 
 function SourcingDetail(props) {
+  const navigate = useNavigate();
   const { id } = useParams();
 
-  const idDecode = atob(id);
-  const idURIDecode = decodeURIComponent(idDecode);
+  const idDecode = id && atob(id);
+  const idURIDecode = idDecode && decodeURIComponent(idDecode);
 
   const loadingContext = useContext(LoadingContext);
 
   const [order, setOrder] = useState(null);
-
-  const orderList = [
-    {
-      id: '3411',
-      url: 'customers/341',
-      name: 'Mae Jemison',
-      location: 'Decatur, USA',
-      orders: 20,
-      amountSpent: '$2,400',
-    },
-    {
-      id: '2561',
-      url: 'customers/256',
-      name: 'Ellen Ochoa',
-      location: 'Los Angeles, USA',
-      orders: 30,
-      amountSpent: '$140',
-    },
-  ];
 
 
   const productInfo = ( goodsItem ) => {
@@ -134,7 +116,21 @@ function SourcingDetail(props) {
 
   return (
     <Page
-      breadcrumbs={[{ content: '采购实施列表', url: '/sourcing' }]}
+      breadcrumbs={[
+        {
+          onAction: ()=>{
+            navigate(-1);
+          }
+        }
+      ]}
+      secondaryActions={[
+        {
+          content: "编辑采购单",
+          onAction: ()=>{
+            navigate( `/sourcing/edit/${id}` )
+          } 
+        }
+      ]}
       title={idURIDecode}
       titleMetadata={badgesMarkup}
       subtitle={ order && order.create_message || "" }
@@ -146,7 +142,7 @@ function SourcingDetail(props) {
           >
             <div>
               <IndexTable
-                itemCount={orderList.length}
+                itemCount={ order && order.item.length || 0}
                 headings={[
                   { title: '系统SKU' },
                   { title: '采购数量' },
