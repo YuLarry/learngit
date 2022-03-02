@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2021-11-23 19:45:00
- * @LastEditTime: 2022-03-01 15:02:42
+ * @LastEditTime: 2022-03-02 14:35:47
  * @LastEditors: lijunwei
  * @Description: request urls config
  */
@@ -16,10 +16,13 @@ export const BACKEND_GOODS_DETAIL = `${process.env.REACT_APP_API_ORIGIN}/admin/g
 export const GET_PROVIDER_LIST       = "/select-provider";       //  供应商
 export const GET_WAREHOUSE_LIST      = "/select-warehouse";      //  仓库
 export const GET_SUBJECT_LIST        = "/select-subject";        //  采购方
-export const GET_BRAND_LIST        = "/select-brand"           //  项目列表
+export const GET_BRAND_LIST          = "/select-brand"           //  项目列表
 export const GET_PROVIDER_DETAIL     = "/provider-account"       // 供应商详情
 export const GET_CLIENT_ACCOUNT_LIST = "/select-client-account"  // 货主选项
 export const GET_WAREHOUSE_AREA      = "/select-warehouse-area"  // 货区选项
+export const GET_PLATFORM_LIST       = "/select-platform"        //获取平台列表
+export const GET_BUSINESS_TYPE_LIST  = "/select-business"        // 获取业务类型
+export const GET_DEPARTMENT_LIST     = "/select-division"        // 获取部门
 
 export const QUERY_SOURCING_ORDER_LIST  = "/po/list";
 export const COMMIT_APPROVAL            = "/po/po_approval";     // 提交审批
@@ -45,5 +48,6 @@ export const GET_SKU_OPTIONS = "/shipping/get-warehouse-relation" // 获取sku�
 export const GET_REPO_TABLE_LIST = "/inbound/list"             // 获取入库列表
 export const GET_INBOUND_DETAIL  = "/inbound/detail"           // 获取入库单详情
 export const COMMIT_REPO_SKUS    = "/inbound/confirm_inbound"  // 手动入库
+
 
 

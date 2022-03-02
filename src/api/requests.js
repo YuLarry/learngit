@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2021-11-24 11:29:42
- * @LastEditTime: 2022-02-18 16:59:12
+ * @LastEditTime: 2022-03-02 14:50:14
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -42,7 +42,14 @@ export const getClientAccount = ()=> ax.get(REQUEST_URLS.GET_CLIENT_ACCOUNT_LIST
 // 获取货区列表
 export const getWarehouseArea = ()=> ax.get(REQUEST_URLS.GET_WAREHOUSE_AREA);
 
+// 获取平台列表
+export const getPlatformList = ()=> ax.get(REQUEST_URLS.GET_PLATFORM_LIST);
 
+// 获取业务类型
+export const getBusinessTypeList = ()=> ax.get(REQUEST_URLS.GET_BUSINESS_TYPE_LIST);
+
+// 获取部门列表
+export const getDepartmentList = ()=> ax.get( REQUEST_URLS.GET_DEPARTMENT_LIST );
 
 
 // 获取采购单列表

@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-24 17:49:30
- * @LastEditTime: 2022-02-17 15:26:40
+ * @LastEditTime: 2022-03-02 14:51:07
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -89,7 +89,6 @@ export const DEPARTMENT_LIST = [
   {label: "总部", value: "总部"},
   {label: "日本", value: "日本"},
   {label: "韩国", value: "韩国"},
-
 ]
 
 

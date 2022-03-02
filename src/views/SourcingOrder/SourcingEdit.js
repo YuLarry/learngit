@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-03-01 14:38:02
+ * @LastEditTime: 2022-03-02 15:26:24
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -13,7 +13,7 @@ import {
 } from '@shopify/polaris-icons';
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { editSourcingOrder, getBrandList, getGoodsQuery, getProviderDetail, getProviderList, getSourcingOrderDetail, getSubjectList, getWarehouseList } from "../../api/requests";
+import { editSourcingOrder, getBrandList, getBusinessTypeList, getDepartmentList, getGoodsQuery, getPlatformList, getProviderDetail, getProviderList, getSourcingOrderDetail, getSubjectList, getWarehouseList } from "../../api/requests";
 import { FstlnLoading } from "../../components/FstlnLoading";
 import { FstlnSelectTree } from "../../components/FstlnSelectTree/FstlnSelectTree";
 import { SourcingCardSection } from "../../components/SecondaryCard/SourcingCardSection";
@@ -56,6 +56,11 @@ function SourcingEdit(props) {
   const unsavedChangeContext = useContext(UnsavedChangeContext);
   const modalContext = useContext(ModalContext);
   const toastContext = useContext(ToastContext);
+
+  const [departmentList, setDepartmentList] = useState([]);
+  const [businessTypeList, setBusinessTypeList] = useState([]);
+  const [platformList, setPlatformList] = useState([]);
+
 
   const [order, setOrder] = useState(null);
 
@@ -159,8 +164,12 @@ function SourcingEdit(props) {
       getSubjectList(),
       getWarehouseList(),
 
+      getPlatformList(),
+      getBusinessTypeList(),
+      getDepartmentList(),
+
     ])
-      .then(([resBrand, resProv, resSubj, resWare]) => {
+      .then(([resBrand, resProv, resSubj, resWare, resPlatform, resBusinessType, resDepartment]) => {
         const { data } = resBrand;
         const brandListArr = Object.keys(data).map((key) => ({ label: data[key], value: key }))
         setBrandList(brandListArr);
@@ -188,6 +197,26 @@ function SourcingEdit(props) {
         setWareList(wareListArr)
         setWareMap(wareDataMap);
 
+        const { data: resPlat } = resPlatform;
+        const platArr = [{label: "", value: ""}];
+        for (const k in resPlat) {
+          platArr.push({ label: resPlat[k], value: k })
+        }
+        setPlatformList( platArr )
+
+        const { data: resBusin } = resBusinessType;
+        const busiArr = [{label: "", value: ""}];
+        for (const ke in resBusin) {
+          busiArr.push({ label: resBusin[ke], value: ke })
+        }
+        setBusinessTypeList( busiArr )
+
+        const { data: resDepa } = resDepartment;
+        const depaArr = [{label: "", value: ""}];
+        for (const key in resDepa) {
+          depaArr.push({ label: resDepa[key], value: key })
+        }
+        setDepartmentList( depaArr )
 
         // set initial form value
         setSourcingOrderForm({
@@ -201,8 +230,8 @@ function SourcingEdit(props) {
           platform: PLATFORM_LIST[0].value,
 
         })
-        setProvider_id(provListArr[0].value)
-        
+        setProvider_id(provListArr[0].value);
+
       })
       .finally(() => {
         loadingContext.loading(false);
@@ -554,7 +583,7 @@ function SourcingEdit(props) {
                   />
                   <Select
                     label="事业部"
-                    options={DEPARTMENT_LIST}
+                    options={departmentList}
                     value={sourcingOrderForm.division}
                     id="division"
                     onChange={formChangeHandler}
@@ -563,14 +592,14 @@ function SourcingEdit(props) {
                 <FormLayout.Group>
                   <Select
                     label="业务类型"
-                    options={BUSINESS_TYPE}
+                    options={businessTypeList}
                     value={sourcingOrderForm.business_type}
                     id="business_type"
                     onChange={formChangeHandler}
                   />
                   <Select
                     label="平台"
-                    options={PLATFORM_LIST}
+                    options={platformList}
                     value={sourcingOrderForm.platform}
                     id="platform"
                     onChange={formChangeHandler}

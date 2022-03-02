@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-03-01 15:49:37
+ * @LastEditTime: 2022-03-02 15:11:10
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -130,6 +130,8 @@ function DeliveryEdit(props) {
     },
     [formObject],
   );
+
+
   const rowMarkup = useMemo(() =>
     selectedGoods.map(({ id, sku, purchase_num, goods_name, headKey, count = "" }, index) => (
       <IndexTable.Row
@@ -165,8 +167,6 @@ function DeliveryEdit(props) {
     ,
     [goodsFormChangeHandler, selectedGoods, selectedResources]
   )
-
-
 
   const treeHeadRender = (rowItem, itemDetail, children) => {
     const { po_no, warehouse_name, brand_name, purchase_qty } = itemDetail
@@ -245,7 +245,6 @@ function DeliveryEdit(props) {
         })
         .finally(() => {
           setQuerying(false)
-
         })
     }, 1000);
     return () => {
@@ -292,6 +291,8 @@ function DeliveryEdit(props) {
 
   },
     [formObject, goodsTableDataMap, active])
+
+
 
   useEffect(() => {
     unsavedChangeContext.remind({
