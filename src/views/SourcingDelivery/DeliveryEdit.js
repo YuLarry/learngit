@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-03-02 15:11:10
+ * @LastEditTime: 2022-03-02 16:52:42
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -130,6 +130,21 @@ function DeliveryEdit(props) {
     },
     [formObject],
   );
+
+  const currenctyOpts = useMemo(()=>{
+    let arr = [
+      { label: "USD", value: "USD" },
+      { label: "RMB", value: "RMB" },
+    ];
+    if( !formObject.shipping_price ){
+      arr = [
+        { label: "", value: "" },
+        ...arr
+      ]
+    }
+    return arr;
+  }
+  ,[formObject])
 
 
   const rowMarkup = useMemo(() =>
@@ -484,11 +499,7 @@ function DeliveryEdit(props) {
                     name="shipping_currency"
                     id="shipping_currency"
                     onChange={handleFormObjectChange}
-                    options={[
-                      { label: "", value: "" },
-                      { label: "USD", value: "USD" },
-                      { label: "RMB", value: "RMB" },
-                    ]}
+                    options={ currenctyOpts }
                   />
                   <TextField
                     label="入仓号"

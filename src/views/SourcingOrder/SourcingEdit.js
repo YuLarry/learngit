@@ -1,12 +1,12 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-03-02 15:26:24
+ * @LastEditTime: 2022-03-02 17:26:11
  * @LastEditors: lijunwei
  * @Description: 
  */
 
-import { Button, Card, Form, FormLayout, Icon, IndexTable, Layout, Modal, Page, Select, TextField, TextStyle, useIndexResourceState } from "@shopify/polaris";
+import { Button, Card, Form, FormLayout, Icon, IndexTable, Layout, Modal, Page, Select, TextField, useIndexResourceState } from "@shopify/polaris";
 import {
   SearchMinor,
   DeleteMinor
@@ -84,7 +84,7 @@ function SourcingEdit(props) {
   const [provider_id, setProvider_id] = useState("");
 
   const accountBankNum = useMemo(() => {
-    const detailItem = accountList.find(item => item.id.toString() === sourcingOrderForm.account_id.toString())
+    const detailItem = accountList.find(item => item.id.toString() === sourcingOrderForm.account_id && sourcingOrderForm.account_id.toString() || "")
     let numText = "";
     if (detailItem) {
       numText = detailItem.label
@@ -95,7 +95,7 @@ function SourcingEdit(props) {
 
   const formChangeHandler = useCallback(
     (value, id) => {
-      // console.log(id, value);
+      console.log(id, value);
       const newForm = { ...sourcingOrderForm, [id]: value };
       setSourcingOrderForm(newForm);
     },
@@ -205,14 +205,14 @@ function SourcingEdit(props) {
         setPlatformList( platArr )
 
         const { data: resBusin } = resBusinessType;
-        const busiArr = [{label: "", value: ""}];
+        const busiArr = [];
         for (const ke in resBusin) {
           busiArr.push({ label: resBusin[ke], value: ke })
         }
         setBusinessTypeList( busiArr )
 
         const { data: resDepa } = resDepartment;
-        const depaArr = [{label: "", value: ""}];
+        const depaArr = [];
         for (const key in resDepa) {
           depaArr.push({ label: resDepa[key], value: key })
         }
@@ -289,26 +289,22 @@ function SourcingEdit(props) {
   },
     [saveOrder])
 
-
-  useEffect(() => {
-    accountList.length > 0 && setSourcingOrderForm({ ...sourcingOrderForm, account_id: accountList[0].value });
-  }, [accountList]);
-
   useEffect(() => {
     if (!provider_id) return;
     const opt = providerDetailMap.get(provider_id);
     if (opt) {
       setAccountList(opt)
+      formChangeHandler(  opt[0].value.toString(),"account_id" )
     } else {
       getProviderDetail(provider_id)
         .then(res => {
           const { data } = res;
-          const options = data.map(({ bank_card_number, currency, id }) => ({ id, label: bank_card_number, value: id, currency }));
+          const options = data.map(({ bank_card_number, currency, id }) => ({ id, label: bank_card_number, value: id.toString(), currency }));
           const newMap = new Map(providerDetailMap);
           newMap.set(provider_id, options)
           setproviderDetailMap(newMap)
           setAccountList(options)
-
+          formChangeHandler( options[0].value, "account_id" )
         })
     }
 
@@ -325,7 +321,7 @@ function SourcingEdit(props) {
 
   // update currencty
   useEffect(() => {
-    const accountInfo = accountList.find((account) => account.id === sourcingOrderForm.account_id)
+    const accountInfo = accountList.find((account) => account.value === sourcingOrderForm.account_id)
     accountInfo && setCurrency(accountInfo.currency);
   }, [sourcingOrderForm.account_id]);
 
@@ -336,6 +332,8 @@ function SourcingEdit(props) {
       .then(res => {
         // console.log(res);
         setOrder(res.data)
+        setSourcingOrderForm( res.data );
+        setProvider_id( res.data && res.data.provider && res.data.provider.id )
       })
       .finally(() => {
         loadingContext.loading(false);
@@ -561,7 +559,7 @@ function SourcingEdit(props) {
                   <Select
                     label="供应商"
                     options={provList}
-                    value={provider_id}
+                    value={provider_id.toString()}
                     id="provider_id"
                     onChange={(value) => { setProvider_id(value) }}
                   />
@@ -646,8 +644,8 @@ function SourcingEdit(props) {
 
           </Card>
           <SourcingProviCard provInfo={{ ...provMap.get(provider_id), account_id: accountBankNum }} />
-          <SourcingRepoCard wareInfo={wareMap.get(sourcingOrderForm.warehouse_code)} />
-          <SourcingRemarkCard remark={sourcingOrderForm.remark} onChange={(val) => { formChangeHandler(val, "remark") }} />
+          <SourcingRepoCard wareInfo={ wareMap.get(sourcingOrderForm.warehouse_code) } />
+          <SourcingRemarkCard remark={sourcingOrderForm.remark || ""} onChange={(val) => { formChangeHandler(val, "remark") }} />
 
 
         </Layout.Section>
