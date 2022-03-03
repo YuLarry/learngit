@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-20 14:31:27
- * @LastEditTime: 2022-01-27 17:02:47
+ * @LastEditTime: 2022-03-03 12:21:49
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -33,9 +33,7 @@ function ProductInfoPopover(props) {
       }}
     >
       <div className="text">
-
         <div>{tableCellText}</div>
-
       </div>
       <Icon 
         source={CaretDownMinor}

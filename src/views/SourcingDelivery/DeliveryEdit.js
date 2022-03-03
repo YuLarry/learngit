@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-03-02 16:52:42
+ * @LastEditTime: 2022-03-03 12:17:49
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -184,11 +184,11 @@ function DeliveryEdit(props) {
   )
 
   const treeHeadRender = (rowItem, itemDetail, children) => {
-    const { po_no, warehouse_name, brand_name, purchase_qty } = itemDetail
+    const { po_no, warehouse_name, brand_name, purchase_qty, provider: { business_name } } = itemDetail
     return (
       <div className="tree-row">
         <div>{po_no}</div>
-        <div>{brand_name}</div>
+        <div>{business_name}</div>
         <div>{warehouse_name}</div>
         <div>{purchase_qty}</div>
       </div>
@@ -227,7 +227,7 @@ function DeliveryEdit(props) {
   const selectedPoItemInfo = useMemo(() => {
     if (goodsTableDataMap && goodsTableDataMap.size > 0) {
       const { headKey } = goodsTableDataMap.values().next().value;
-      console.log(tree[headKey])
+      // console.log(tree[headKey])
       return tree[headKey];
     } else {
       return undefined

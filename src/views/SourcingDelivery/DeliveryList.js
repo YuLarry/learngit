@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-02-18 12:11:31
+ * @LastEditTime: 2022-03-03 12:30:53
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -145,47 +145,24 @@ function DeliveryList(props) {
     [clearSelectedResources, refresh])
 
   // audit enable control
-  const auditEnable = useMemo(() => {
-    const enableArr = [AUDIT_UNAUDITED, AUDIT_FAILURE, AUDIT_REVOKED];
-    const index = selectedResources.findIndex((item) => (enableArr.indexOf(deliveryListMap.get(item).audit_status) === -1))
+  const inboundEnable = useMemo(() => {
+    if (selectedResources.length !== 1) { return false };
+    const enableArr = [REPO_STATUS_PENDING, REPO_STATUS_PORTION];
+    const index = selectedResources.findIndex((item) => (enableArr.indexOf(deliveryListMap.get(item).status) === -1))
     return index === -1
 
   }, [selectedResources, deliveryListMap])
 
-  // apply payment control
-  const applyPayEnable = useMemo(() => {
-    // console.log(1);
-    if (selectedResources.length > 1) { return false };
-
-    const index = selectedResources.findIndex((item) => (deliveryListMap.get(item).audit_status === AUDIT_PASS && deliveryListMap.get(item).payment_status === PAYMENT_STATUS_FAILURE))
-    // const index = selectedResources.findIndex((item)=>() )
-    return index === -1
-  }, [selectedResources, deliveryListMap])
-
-  // cancel enable control
-  const cancelEnable = useMemo(() => {
-    const enableArr = [AUDIT_UNAUDITED, AUDIT_FAILURE, AUDIT_REVOKED];
-    const index = selectedResources.findIndex((item) => (enableArr.indexOf(deliveryListMap.get(item).audit_status) === -1))
-    return index === -1
-
-  }, [selectedResources, deliveryListMap])
-
+  
   // delete enable control
   const deleteEnable = useMemo(() => {
-    const enableArr = [AUDIT_UNAUDITED];
-    const index = selectedResources.findIndex((item) => (enableArr.indexOf(deliveryListMap.get(item).audit_status) === -1))
+    if (selectedResources.length !== 1) { return false };
+    const enableArr = [REPO_STATUS_PENDING];
+    const index = selectedResources.findIndex((item) => (enableArr.indexOf(deliveryListMap.get(item).status) === -1))
     return index === -1
 
   }, [selectedResources, deliveryListMap])
 
-  // export enable control
-  const exportEnable = useMemo(() => {
-    const enableArr = [AUDIT_AUDITING, AUDIT_PASS];
-    const index = selectedResources.findIndex((item) => (enableArr.indexOf(deliveryListMap.get(item).audit_status) === -1))
-
-    return index === -1
-
-  }, [selectedResources, deliveryListMap])
 
   const deleteOrder = useCallback((id) => {
     loadingContext.loading(true);
@@ -213,31 +190,28 @@ function DeliveryList(props) {
     return [
       {
         content: '按pcs入库',
-        onAction: () => { navigate(`inbound?shipping_code=${codeBase64}&type=${INBOUND_TYPE.PCS}`) }
-        // disabled: !auditEnable,
+        onAction: () => { navigate(`inbound?shipping_code=${codeBase64}&type=${INBOUND_TYPE.PCS}`) },
+        disabled: !inboundEnable,
       },
       {
         content: '按箱入库',
         onAction: () => { navigate(`inbound?shipping_code=${codeBase64}&type=${INBOUND_TYPE.BOX}`) },
-        // disabled: !applyPayEnable,
-
+        disabled: !inboundEnable,
       },
       {
         content: "按卡板入库",
         onAction: () => { navigate(`inbound?shipping_code=${codeBase64}&type=${INBOUND_TYPE.PALLET}`) },
-        // disabled: !cancelEnable,
-
+        disabled: !inboundEnable,
       },
       {
         content: "删除发货单",
         onAction: () => {
           deleteOrder(selectedResources[0])
         },
-        // disabled: !deleteEnable,
-
+        disabled: !deleteEnable,
       },
     ];
-  }, [deleteOrder, deliveryListMap, navigate, selectedResources])
+  }, [deleteEnable, deleteOrder, deliveryListMap, inboundEnable, navigate, selectedResources])
 
   const goodsItemNode = useCallback((item, idx) => {
     if (!item) return null;
