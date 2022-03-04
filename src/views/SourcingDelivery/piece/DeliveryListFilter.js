@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 15:00:29
- * @LastEditTime: 2022-03-04 12:20:34
+ * @LastEditTime: 2022-03-04 15:40:35
  * @LastEditors: lijunwei
  * @Description: s
  */
@@ -43,13 +43,12 @@ function DeliveryListFilter(props) {
 
 
   useEffect(() => {
-    onChange(filterData)
+    onChange(filterData);
   }, [filterData]);
 
   const filterChangeHandler = useCallback(
     (key, value, checked) => {
       let _value;
-
       if (checked !== undefined) {
         _value = filterData[key];
         checked ? _value.add(value) : _value.delete(value)
@@ -58,8 +57,6 @@ function DeliveryListFilter(props) {
       }
 
       setFilterData({ ...filterData, [key]: _value })
-
-      // console.log(filterData);
     },
     [filterData],
   );
@@ -67,29 +64,30 @@ function DeliveryListFilter(props) {
   // provider radio
   const providerRadios = useMemo(() =>
     providerList.map((provider => {
-      const { id, business_name } = provider
-      return (<RadioButton
-        key={id}
-        label={business_name}
-        checked={filterData.provider_id === id}
-        id={id}
-        name="provider"
-        onChange={(checked, id) => { filterChangeHandler("provider_id", id) }}
-      />)
+      const { id, business_name } = provider;
+      return (
+        <RadioButton
+          key={`prov-${id}`}
+          label={business_name}
+          checked={filterData.provider_id === id}
+          id={`prov-${id}`}
+          name="provider"
+          onChange={(checked, _id) => { filterChangeHandler("provider_id", id) }}
+        />)
     }
     ))
-    , [filterChangeHandler, filterData.provider_id, providerList])
+    , [filterChangeHandler, filterData, providerList])
 
 
   // soucingCom radio
   const warehouseRadios = useMemo(() =>
     wareHouseList.map((warehouse => {
-      const { code, name } = warehouse
+      const { code, name } = warehouse;
       return (<RadioButton
-        key={code}
+        key={`ware-${code}`}
         label={name}
         checked={filterData.warehouse_code === code}
-        id={code}
+        id={`ware-${code}`}
         name="warehouse"
         onChange={(checked, id) => { filterChangeHandler("warehouse_code", code) }}
       />)
@@ -104,10 +102,10 @@ function DeliveryListFilter(props) {
     REPO_STATUS.forEach((statusLabel, entry) => {
       checkBoxes.push(
         (<Checkbox
-          key={entry}
+          key={`stat-${entry}`}
           label={statusLabel}
           checked={filterData.repo_status.has(entry)}
-          id={entry}
+          id={`stat-${entry}`}
           name="paymentStatus"
           onChange={(checked) => { filterChangeHandler("repo_status", entry, checked) }}
         />)
@@ -141,7 +139,7 @@ function DeliveryListFilter(props) {
         clearObject = {
           [filterKey]: new Set()
         }
-      }else if (type === "date") {
+      } else if (type === "date") {
         clearObject = {
           [filterKey]: {
             start: new Date(),
@@ -160,7 +158,6 @@ function DeliveryListFilter(props) {
     for (const key of filterConfig.keys()) {
       const { type, label, dataPool } = filterConfig.get(key);
       if (type === "date" && filterData.dateOn && filterData[key]) {
-        // console.log(filterData[key])
         const data = filterData[key];
         if (data.start && data.end) {
           filters.push({
@@ -170,7 +167,7 @@ function DeliveryListFilter(props) {
           })
         }
 
-      }else if (type === "radio" && filterData[key]) {
+      } else if (type === "radio" && filterData[key]) {
         const { textKey } = filterConfig.get(key);
 
         const _temObj = dataPool.get(filterData[key]);

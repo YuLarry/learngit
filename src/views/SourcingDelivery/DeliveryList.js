@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-03-04 12:21:25
+ * @LastEditTime: 2022-03-04 15:40:19
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -315,8 +315,7 @@ function DeliveryList(props) {
             <DeliveryListFilter
               filter={filter}
               onChange={(filter) => {
-                console.log(filter);
-                // setFilter(filter);
+                setFilter(filter);
               }}
 
             />
@@ -330,7 +329,7 @@ function DeliveryList(props) {
             allResourcesSelected ? 'All' : selectedResources.length
           }
           // onSelectionChange={handleSelectionChange}
-          onSelectionChange={()=>{}}
+          onSelectionChange={(a,b,c)=>{ handleSelectionChange( a, b , c ) }}
           promotedBulkActions={promotedBulkActions}
           headings={[
             { title: "发货单号" },

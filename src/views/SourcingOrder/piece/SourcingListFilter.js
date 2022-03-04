@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 15:00:29
- * @LastEditTime: 2022-02-15 19:30:29
+ * @LastEditTime: 2022-03-04 15:39:27
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -63,12 +63,12 @@ function SourcingListFilter(props) {
     providerList.map((provider => {
       const { id, business_name } = provider
       return (<RadioButton
-        key={id}
+        key={`prov-${id}`}
         label={business_name}
         checked={filterData.provider_id === id}
-        id={id}
+        id={`prov-${id}`}
         name="provider"
-        onChange={(checked, id) => { filterChangeHandler("provider_id", id) }}
+        onChange={(checked) => { filterChangeHandler("provider_id", id) }}
       />)
     }
     ))
@@ -79,12 +79,12 @@ function SourcingListFilter(props) {
     subjectList.map((compay => {
       const { key, name } = compay
       return (<RadioButton
-        key={key}
+        key={`comp-${key}`}
         label={name}
         checked={filterData.subject_code === key}
-        id={key}
+        id={`comp-${key}`}
         name="subject"
-        onChange={(checked, id) => { filterChangeHandler("subject_code", id) }}
+        onChange={(checked) => { filterChangeHandler("subject_code", key) }}
       />)
     }
     ))
@@ -95,12 +95,12 @@ function SourcingListFilter(props) {
     wareHouseList.map((warehouse => {
       const { code, name } = warehouse
       return (<RadioButton
-        key={code}
+        key={`ware-${code}`}
         label={name}
         checked={filterData.warehouse_code === code}
-        id={code}
+        id={`ware-${code}`}
         name="warehouse"
-        onChange={(checked, id) => { filterChangeHandler("warehouse_code", code) }}
+        onChange={(checked) => { filterChangeHandler("warehouse_code", code) }}
       />)
     }
     ))
@@ -113,10 +113,10 @@ function SourcingListFilter(props) {
     AUDIT_STATUS.forEach((statusLabel, entry) => {
       checkBoxes.push(
         (<Checkbox
-          key={entry}
+          key={`stat-${entry}`}
           label={statusLabel}
           checked={filterData.audit_status.has(entry)}
-          id={entry}
+          id={`stat-${entry}`}
           name="paymentStatus"
           onChange={(checked) => { filterChangeHandler("audit_status", entry, checked) }}
         />)
@@ -131,10 +131,10 @@ function SourcingListFilter(props) {
     PAYMENT_STATUS.forEach((statusLabel, entry) => {
       checkBoxes.push(
         (<Checkbox
-          key={entry}
+          key={`stat-pay-${entry}`}
           label={statusLabel}
           checked={filterData.payment_status.has(entry)}
-          id={entry}
+          id={`stat-pay-${entry}`}
           name="paymentStatus"
           onChange={(checked) => { filterChangeHandler("payment_status", entry, checked) }}
         />)
@@ -149,10 +149,10 @@ function SourcingListFilter(props) {
     DELIVERY_STATUS.forEach((statusLabel, entry) => {
       checkBoxes.push(
         (<Checkbox
-          key={entry}
+          key={`stat-dly-${entry}`}
           label={statusLabel}
           checked={filterData.delivery_status.has(entry)}
-          id={entry}
+          id={`stat-dly-${entry}`}
           name="deliveryStatus"
           onChange={(checked) => { filterChangeHandler("delivery_status", entry, checked) }}
         />)

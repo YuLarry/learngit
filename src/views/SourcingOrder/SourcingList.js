@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-03-01 15:33:18
+ * @LastEditTime: 2022-03-04 15:41:27
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -551,7 +551,7 @@ function SourcingList(props) {
           selectedItemsCount={
             allResourcesSelected ? 'All' : selectedResources.length
           }
-          onSelectionChange={(a, b, c) => { console.log(a, b, c); handleSelectionChange(a, b, c) }}
+          onSelectionChange={(a, b, c) => { handleSelectionChange(a, b, c) }}
           promotedBulkActions={promotedBulkActions}
           headings={[
             { title: "采购单号" },

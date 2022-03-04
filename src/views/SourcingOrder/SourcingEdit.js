@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-03-04 11:28:05
+ * @LastEditTime: 2022-03-04 15:36:14
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -24,7 +24,6 @@ import { LoadingContext } from "../../context/LoadingContext";
 import { ModalContext } from "../../context/ModalContext";
 import { ToastContext } from "../../context/ToastContext";
 import { UnsavedChangeContext } from "../../context/UnsavedChangeContext";
-import { BUSINESS_TYPE, DEPARTMENT_LIST, PLATFORM_LIST } from "../../utils/StaticData";
 import { fstlnTool } from "../../utils/Tools";
 import "./style/sourcingEdit.scss";
 
@@ -81,8 +80,6 @@ function SourcingEdit(props) {
   });
 
   useEffect(()=>{
-    console.log("xxx");
-
     if( accountList.length !== 0 && order ){
       const idx = accountList.findIndex( (item)=>(item.id.toString() === order.account_id) );
       if( idx === -1 ){
@@ -108,7 +105,7 @@ function SourcingEdit(props) {
   const [provider_id, setProvider_id] = useState("");
 
   useEffect(() => {
-    if( !id || !provider_id ){
+    if( !id && !provider_id ){
       provList.length > 0 && setProvider_id( provList[0].value )
     }
   }, [id, provList, provider_id]);
@@ -363,7 +360,16 @@ function SourcingEdit(props) {
         // console.log(res);
         const { data } = res;
         const provider_account = data && data.provider_account;
-        setOrder( {...data, account_id: provider_account.id.toString()} );
+        const { 
+          warehouse,
+
+
+        } = data || {};
+        setOrder( {
+          ...data, 
+          account_id: provider_account.id.toString(),
+
+        } );
         setSourcingOrderForm( {
           ...data, 
           account_id: provider_account.id.toString(),
@@ -371,7 +377,7 @@ function SourcingEdit(props) {
           business_type: "",
           division: "",
           subject_code: "",
-          warehouse_code: "",
+          warehouse_code: warehouse.id.toString(),
         } );
         setProvider_id( res.data && res.data.provider && res.data.provider.id.toString() )
 
@@ -612,7 +618,7 @@ function SourcingEdit(props) {
                     options={provList}
                     value={provider_id.toString()}
                     id="provider_id"
-                    onChange={(value) => { setProvider_id(value) }}
+                    onChange={(value) => { console.log(value);setProvider_id(value) }}
                     disabled={ order }
                   />
                   <Select
