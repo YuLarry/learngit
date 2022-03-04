@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 15:00:29
- * @LastEditTime: 2022-02-18 12:12:13
+ * @LastEditTime: 2022-03-04 12:20:34
  * @LastEditors: lijunwei
  * @Description: s
  */
@@ -14,7 +14,6 @@ import { REPO_STATUS } from "../../../utils/StaticData";
 import moment from "moment";
 
 function DeliveryListFilter(props) {
-
 
   const {
     filter = {
@@ -45,7 +44,7 @@ function DeliveryListFilter(props) {
 
   useEffect(() => {
     onChange(filterData)
-  }, [filterData, onChange]);
+  }, [filterData]);
 
   const filterChangeHandler = useCallback(
     (key, value, checked) => {

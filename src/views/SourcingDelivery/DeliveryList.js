@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-03-03 12:30:53
+ * @LastEditTime: 2022-03-04 12:21:25
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -153,7 +153,7 @@ function DeliveryList(props) {
 
   }, [selectedResources, deliveryListMap])
 
-  
+
   // delete enable control
   const deleteEnable = useMemo(() => {
     if (selectedResources.length !== 1) { return false };
@@ -269,8 +269,8 @@ function DeliveryList(props) {
 
   useEffect(() => {
     setListLoading(true);
+    clearSelectedResources();
     const { dateOn, shipping_date: { start, end } } = filter;
-    console.log(1);
     getShipingList(
       {
         ...filter,
@@ -305,16 +305,21 @@ function DeliveryList(props) {
       title="发货单列表"
       fullWidth
       primaryAction={{ content: '新建发货单', onAction: () => { navigate("add") } }}
-
-
     >
       <Card>
         <Tabs
-          tabs={tabs} selected={selectedTab} onSelect={handleTabChange}
+          tabs={ tabs} selected={ selectedTab } onSelect={handleTabChange}
         ></Tabs>
         <div style={{ padding: '16px', display: 'flex' }}>
           <div style={{ flex: 1 }}>
-            <DeliveryListFilter filter={filter} onChange={(filter) => { setFilter(filter) }} />
+            <DeliveryListFilter
+              filter={filter}
+              onChange={(filter) => {
+                console.log(filter);
+                // setFilter(filter);
+              }}
+
+            />
           </div>
         </div>
         <IndexTable
@@ -324,7 +329,8 @@ function DeliveryList(props) {
           selectedItemsCount={
             allResourcesSelected ? 'All' : selectedResources.length
           }
-          onSelectionChange={handleSelectionChange}
+          // onSelectionChange={handleSelectionChange}
+          onSelectionChange={()=>{}}
           promotedBulkActions={promotedBulkActions}
           headings={[
             { title: "发货单号" },
