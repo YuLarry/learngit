@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-21 15:28:14
- * @LastEditTime: 2022-03-01 15:56:43
+ * @LastEditTime: 2022-03-04 15:56:47
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -16,6 +16,7 @@ import { ModalContext } from "../../context/ModalContext";
 import { ToastContext } from "../../context/ToastContext";
 import { UnsavedChangeContext } from "../../context/UnsavedChangeContext";
 import { INBOUND_TYPE } from "../../utils/StaticData";
+import { fstlnTool } from "../../utils/Tools";
 
 function DeliveryInbound(props) {
   const navigate = useNavigate();
@@ -580,10 +581,19 @@ function DeliveryInbound(props) {
     }
     return obj[type]
   }, [type])
+
+  const boxCountHandler = useCallback(
+    (val) => {
+      if( val === "" || fstlnTool.INT_MORE_THAN_ZERO_REG.test( val ) ){
+        setBoxCardCount(val)
+      }
+    },
+  );
+
   return (
     <Page
       breadcrumbs={[{ content: '采购实施列表', url: '/delivery' }]}
-      title="预报仓库-xxx"
+      title={ `${atob(shipping_code)}[按${typeText}预报仓库]` }
       narrowWidth
     >
       <Card title="仓库信息" sectioned>
@@ -691,7 +701,7 @@ function DeliveryInbound(props) {
                 type="number"
                 label="预报数量"
                 value={boxCardCount}
-                onChange={(val) => setBoxCardCount(val)}
+                onChange={ boxCountHandler }
               />
             </FormLayout>
 
