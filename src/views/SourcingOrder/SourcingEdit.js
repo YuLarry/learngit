@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-03-04 10:57:06
+ * @LastEditTime: 2022-03-04 11:28:05
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -42,9 +42,6 @@ function SourcingEdit(props) {
   const [subjList, setSubjList] = useState([]);
   const [wareList, setWareList] = useState([]);
 
-
-
-
   const [provMap, setProvMap] = useState(new Map());
   const [wareMap, setWareMap] = useState(new Map());
 
@@ -84,13 +81,17 @@ function SourcingEdit(props) {
   });
 
   useEffect(()=>{
-    if( accountList.length === 0 || !order ) return;
-    const idx = accountList.findIndex( (item)=>(item.id.toString() === order.account_id) );
-    if( idx === -1 ){
+    console.log("xxx");
+
+    if( accountList.length !== 0 && order ){
+      const idx = accountList.findIndex( (item)=>(item.id.toString() === order.account_id) );
+      if( idx === -1 ){
+        setSourcingOrderForm({ ...sourcingOrderForm, account_id: accountList[0].id.toString() })
+      }
+    }else if( accountList.length !== 0 ){
       setSourcingOrderForm({ ...sourcingOrderForm, account_id: accountList[0].id.toString() })
-    }else{
-      setSourcingOrderForm({ ...sourcingOrderForm, account_id: accountList[idx].id.toString() })
     }
+    
   }
   ,[accountList, order])
 
@@ -105,6 +106,12 @@ function SourcingEdit(props) {
   const [currency, setCurrency] = useState("");
 
   const [provider_id, setProvider_id] = useState("");
+
+  useEffect(() => {
+    if( !id || !provider_id ){
+      provList.length > 0 && setProvider_id( provList[0].value )
+    }
+  }, [id, provList, provider_id]);
 
   const accountBankNum = useMemo(() => {
     const detailItem = accountList.find(item => item.id.toString() === sourcingOrderForm.account_id && sourcingOrderForm.account_id.toString() || "")
@@ -253,7 +260,7 @@ function SourcingEdit(props) {
           platform: platArr[0].value,
 
         })
-        setProvider_id(provListArr[0].value);
+        // setProvider_id(provListArr[0].value);
 
       })
       .finally(() => {
@@ -316,8 +323,7 @@ function SourcingEdit(props) {
     if (!provider_id) return;
     const opt = providerDetailMap.get(provider_id);
     if (opt) {
-      setAccountList(opt)
-      
+      setAccountList(opt)     
     } else {
       getProviderDetail(provider_id)
         .then(res => {
@@ -332,7 +338,7 @@ function SourcingEdit(props) {
         })
     }
 
-  }, [provider_id])
+  }, [providerDetailMap, provider_id])
 
   // set provMap account card info
   useEffect(() => {
@@ -347,7 +353,7 @@ function SourcingEdit(props) {
   useEffect(() => {
     const accountInfo = accountList.find((account) => account.value === sourcingOrderForm.account_id)
     accountInfo && setCurrency(accountInfo.currency);
-  }, [sourcingOrderForm.account_id]);
+  }, [sourcingOrderForm]);
 
   useEffect(() => {
     if (!id) return;
@@ -358,8 +364,16 @@ function SourcingEdit(props) {
         const { data } = res;
         const provider_account = data && data.provider_account;
         setOrder( {...data, account_id: provider_account.id.toString()} );
-        setSourcingOrderForm( {...data, account_id: provider_account.id.toString()} );
-        setProvider_id( res.data && res.data.provider && res.data.provider.id )
+        setSourcingOrderForm( {
+          ...data, 
+          account_id: provider_account.id.toString(),
+          brand_code: "",
+          business_type: "",
+          division: "",
+          subject_code: "",
+          warehouse_code: "",
+        } );
+        setProvider_id( res.data && res.data.provider && res.data.provider.id.toString() )
 
         const _goodsMap = new Map();
         data.item.map((it)=>{
@@ -367,6 +381,7 @@ function SourcingEdit(props) {
           _goodsMap.set( goods.id, {...it, id: goods.id} );
         })
         setGoodsTableDataMap( _goodsMap );
+
       })
       .finally(() => {
         loadingContext.loading(false);
