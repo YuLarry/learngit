@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-03-02 17:26:11
+ * @LastEditTime: 2022-03-04 10:57:06
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -43,10 +43,14 @@ function SourcingEdit(props) {
   const [wareList, setWareList] = useState([]);
 
 
+
+
   const [provMap, setProvMap] = useState(new Map());
   const [wareMap, setWareMap] = useState(new Map());
 
   const [accountList, setAccountList] = useState([]);
+
+
 
   const [tree, setTree] = useState({});
   const [selectGoodsMapTemp, setSelectGoodsMapTemp] = useState(new Map());
@@ -78,6 +82,25 @@ function SourcingEdit(props) {
     po_item: [],
 
   });
+
+  useEffect(()=>{
+    if( accountList.length === 0 || !order ) return;
+    const idx = accountList.findIndex( (item)=>(item.id.toString() === order.account_id) );
+    if( idx === -1 ){
+      setSourcingOrderForm({ ...sourcingOrderForm, account_id: accountList[0].id.toString() })
+    }else{
+      setSourcingOrderForm({ ...sourcingOrderForm, account_id: accountList[idx].id.toString() })
+    }
+  }
+  ,[accountList, order])
+
+  useEffect(() => {
+    setSourcingOrderForm({ ...sourcingOrderForm, warehouse_code: wareList.length > 0 && wareList[0].value })
+  }, [wareList]);
+
+  useEffect(() => {
+    setSourcingOrderForm({ ...sourcingOrderForm, business_type: businessTypeList.length > 0 && businessTypeList[0].value })
+  }, [businessTypeList]);
 
   const [currency, setCurrency] = useState("");
 
@@ -225,9 +248,9 @@ function SourcingEdit(props) {
           // provider_id: provListArr[0].value,
           warehouse_code: wareListArr[0].value,
           subject_code: subjListArr[0].value,
-          division: DEPARTMENT_LIST[0].value,
-          business_type: BUSINESS_TYPE[0].value,
-          platform: PLATFORM_LIST[0].value,
+          division: depaArr[0].value,
+          business_type: busiArr[0].value,
+          platform: platArr[0].value,
 
         })
         setProvider_id(provListArr[0].value);
@@ -294,17 +317,18 @@ function SourcingEdit(props) {
     const opt = providerDetailMap.get(provider_id);
     if (opt) {
       setAccountList(opt)
-      formChangeHandler(  opt[0].value.toString(),"account_id" )
+      
     } else {
       getProviderDetail(provider_id)
         .then(res => {
           const { data } = res;
           const options = data.map(({ bank_card_number, currency, id }) => ({ id, label: bank_card_number, value: id.toString(), currency }));
           const newMap = new Map(providerDetailMap);
-          newMap.set(provider_id, options)
-          setproviderDetailMap(newMap)
-          setAccountList(options)
-          formChangeHandler( options[0].value, "account_id" )
+          newMap.set(provider_id, options);
+
+          setproviderDetailMap(newMap);
+          setAccountList(options);
+          
         })
     }
 
@@ -331,9 +355,18 @@ function SourcingEdit(props) {
     getSourcingOrderDetail(idDecode)
       .then(res => {
         // console.log(res);
-        setOrder(res.data)
-        setSourcingOrderForm( res.data );
+        const { data } = res;
+        const provider_account = data && data.provider_account;
+        setOrder( {...data, account_id: provider_account.id.toString()} );
+        setSourcingOrderForm( {...data, account_id: provider_account.id.toString()} );
         setProvider_id( res.data && res.data.provider && res.data.provider.id )
+
+        const _goodsMap = new Map();
+        data.item.map((it)=>{
+          const { goods } = it;
+          _goodsMap.set( goods.id, {...it, id: goods.id} );
+        })
+        setGoodsTableDataMap( _goodsMap );
       })
       .finally(() => {
         loadingContext.loading(false);
@@ -395,7 +428,7 @@ function SourcingEdit(props) {
 
 
   const rowMarkup = useMemo(() =>
-    selectedGoods.map(({ id, cn_name, en_name, price, sku, purchase_num = 0 }, index) => (
+    selectedGoods.map(({ id, cn_name, en_name, price, sku, purchase_num = 0,purchase_price }, index) => (
       <IndexTable.Row
         id={id}
         key={id}
@@ -408,14 +441,14 @@ function SourcingEdit(props) {
         <IndexTable.Cell>
           <TextField
             type="number"
-            value={purchase_num}
+            value={purchase_num.toString()}
             onChange={(v) => { goodsFormChangeHandler(id, v, "purchase_num") }}
           />
         </IndexTable.Cell>
         <IndexTable.Cell>
           <TextField
             type="number"
-            value={price}
+            value={price || purchase_price}
             prefix="$"
             onChange={(v) => { goodsFormChangeHandler(id, v, "price") }}
           />
@@ -467,6 +500,7 @@ function SourcingEdit(props) {
 
   const treeSelectChange = useCallback(
     (selectsMap) => {
+      console.log(selectsMap);
       setSelectGoodsMapTemp(selectsMap);
     },
     [],
@@ -546,6 +580,7 @@ function SourcingEdit(props) {
                     value={sourcingOrderForm.brand_code}
                     id="brand_code"
                     onChange={formChangeHandler}
+                    disabled={ order }
                   />
                   <Select
                     label="采购方"
@@ -553,6 +588,7 @@ function SourcingEdit(props) {
                     value={sourcingOrderForm.subject_code}
                     id="subject_code"
                     onChange={formChangeHandler}
+                    disabled={ order }
                   />
                 </FormLayout.Group>
                 <FormLayout.Group>
@@ -562,6 +598,7 @@ function SourcingEdit(props) {
                     value={provider_id.toString()}
                     id="provider_id"
                     onChange={(value) => { setProvider_id(value) }}
+                    disabled={ order }
                   />
                   <Select
                     label="收款账户"
@@ -569,6 +606,7 @@ function SourcingEdit(props) {
                     value={sourcingOrderForm.account_id}
                     id="account_id"
                     onChange={formChangeHandler}
+                    disabled={ order }
                   />
                 </FormLayout.Group>
                 <FormLayout.Group>
@@ -578,6 +616,7 @@ function SourcingEdit(props) {
                     value={sourcingOrderForm.warehouse_code}
                     id="warehouse_code"
                     onChange={formChangeHandler}
+                    disabled={ order }
                   />
                   <Select
                     label="事业部"
@@ -585,6 +624,7 @@ function SourcingEdit(props) {
                     value={sourcingOrderForm.division}
                     id="division"
                     onChange={formChangeHandler}
+                    disabled={ order }
                   />
                 </FormLayout.Group>
                 <FormLayout.Group>
@@ -594,6 +634,7 @@ function SourcingEdit(props) {
                     value={sourcingOrderForm.business_type}
                     id="business_type"
                     onChange={formChangeHandler}
+                    disabled={ order }
                   />
                   <Select
                     label="平台"
@@ -601,6 +642,7 @@ function SourcingEdit(props) {
                     value={sourcingOrderForm.platform}
                     id="platform"
                     onChange={formChangeHandler}
+                    disabled={ order }
                   />
                 </FormLayout.Group>
 
