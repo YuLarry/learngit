@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-21 15:28:14
- * @LastEditTime: 2022-03-07 16:50:07
+ * @LastEditTime: 2022-03-07 17:06:36
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -9,7 +9,7 @@
 import { Autocomplete, Button, Card, Form, FormLayout, IndexTable, Modal, Page, Select, TextField, TextStyle, Thumbnail, useIndexResourceState } from "@shopify/polaris";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { getClientAccount, getShippingDetail, getSkuOptionsList, getWarehouseArea, inboundCommit } from "../../api/requests";
+import { getClientAccount, getShippingDetail, getSkuOptionsList, getWaitShippingList, getWarehouseArea, inboundCommit } from "../../api/requests";
 import { ProductInfoPopover } from "../../components/ProductInfoPopover/ProductInfoPopover";
 import { LoadingContext } from "../../context/LoadingContext";
 import { ModalContext } from "../../context/ModalContext";
@@ -385,10 +385,11 @@ function DeliveryInbound(props) {
     Promise.all([
       getClientAccount(),
       getWarehouseArea(),
-      getShippingDetail(atob(shipping_code))
+      getShippingDetail(atob(shipping_code)),
+      getWaitShippingList( atob(shipping_code) ),
     ])
 
-      .then(([clientRes, warehouseRes, detailRes]) => {
+      .then(([clientRes, warehouseRes, detailRes, waitRes]) => {
         const { data: clients } = clientRes;
         const clientsMap = new Map(Object.entries(clients));
         setClientList(clientsMap)
@@ -399,7 +400,11 @@ function DeliveryInbound(props) {
 
         const { data: detail } = detailRes;
         setDetail(detail);
-        const dataArrWidthKey = detail.item.map((goods) => [goods.id, goods])
+        // const dataArrWidthKey = detail.item.map((goods) => [goods.id, goods])
+        // setGoodsMap(new Map(dataArrWidthKey));
+
+        const { data: { list } } = waitRes;
+        const dataArrWidthKey = list.map((goods) => [goods.id, goods]);
         setGoodsMap(new Map(dataArrWidthKey));
 
       })
