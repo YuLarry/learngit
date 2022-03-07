@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-21 15:28:14
- * @LastEditTime: 2022-03-07 16:41:52
+ * @LastEditTime: 2022-03-07 16:50:07
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -539,10 +539,13 @@ function DeliveryInbound(props) {
       if (type === INBOUND_TYPE.PCS) {
         moveToInboundTable();
       } else {
+        const { shipping_num } = goodsMap.get(selectedResources[0]);
+        // console.log( item );
+        setBoxCardCount( shipping_num.toString() );
         setInboundModalOpen(true);
       }
     },
-    [moveToInboundTable, type],
+    [goodsMap, moveToInboundTable, selectedResources, type],
   );
 
 
