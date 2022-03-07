@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-20 16:16:03
- * @LastEditTime: 2022-03-07 11:48:22
+ * @LastEditTime: 2022-03-07 15:42:54
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -65,9 +65,9 @@ function SourcingDetail(props) {
           <IndexTable.Cell>
             <ProductInfoPopover
               popoverNode={productInfo(goods)}
-              tableCellText={sku}
-
-            />
+            >
+            { sku }
+            </ProductInfoPopover>
 
           </IndexTable.Cell>
           <IndexTable.Cell>

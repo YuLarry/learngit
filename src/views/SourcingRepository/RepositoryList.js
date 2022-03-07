@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-02-18 17:21:43
+ * @LastEditTime: 2022-03-07 15:28:41
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -90,7 +90,7 @@ function RepositoryList(props) {
             monochrome
             url={`detail/${inbound_no}`}
           >
-            <TextStyle variation="">{inbound_no}</TextStyle>
+            <TextStyle variation="strong">{inbound_no}</TextStyle>
           </Button>
         </IndexTable.Cell>
         <IndexTable.Cell>{client_account_code}</IndexTable.Cell>

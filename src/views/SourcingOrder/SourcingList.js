@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-03-04 15:41:27
+ * @LastEditTime: 2022-03-07 15:43:43
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -382,9 +382,13 @@ function SourcingList(props) {
           {<BadgeDeliveryStatus status={delivery_status} />}
         </IndexTable.Cell>
         <IndexTable.Cell>
-          <ProductInfoPopover popoverNode={item.length > 0 ? prodNod : null} tableCellText={`${item.length}商品`} />
+          <ProductInfoPopover
+            popoverNode={item.length > 0 ? prodNod : null}
+          >
+            {`${item.length}商品`}
+          </ProductInfoPopover>
         </IndexTable.Cell>
-      </IndexTable.Row>)
+      </IndexTable.Row >)
     }
   )
     , [goodsItemNode, selectedResources, sourcingList]);

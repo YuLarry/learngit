@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-20 14:31:27
- * @LastEditTime: 2022-03-03 12:21:49
+ * @LastEditTime: 2022-03-07 15:36:08
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -15,7 +15,7 @@ import {
 
 function ProductInfoPopover(props) {
 
-  const { popoverNode, tableCellText } = props
+  const { popoverNode, tableCellText, children } = props
 
   const [popoverActive, setPopoverActive] = useState(false);
   const togglePopoverActive = useCallback(
@@ -33,7 +33,7 @@ function ProductInfoPopover(props) {
       }}
     >
       <div className="text">
-        <div>{tableCellText}</div>
+        {children}
       </div>
       <Icon 
         source={CaretDownMinor}
@@ -42,7 +42,7 @@ function ProductInfoPopover(props) {
     </div>
     
   ),
-  [tableCellText, togglePopoverActive]
+  [children, togglePopoverActive]
   );
 
 

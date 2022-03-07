@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-21 15:28:14
- * @LastEditTime: 2022-03-04 15:56:47
+ * @LastEditTime: 2022-03-07 15:42:21
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -138,7 +138,9 @@ function DeliveryInbound(props) {
             {sku}
           </IndexTable.Cell>
           <IndexTable.Cell>
-            <ProductInfoPopover popoverNode={productInfo(goods)} tableCellText={goods.cn_name} />
+            <ProductInfoPopover popoverNode={productInfo(goods)}>
+              {goods.cn_name}
+            </ProductInfoPopover>
           </IndexTable.Cell>
           <IndexTable.Cell>
             <div style={{ width: "5em", textAlign: "right" }}>
@@ -182,7 +184,9 @@ function DeliveryInbound(props) {
             </Button>
           </IndexTable.Cell>
           <IndexTable.Cell>
-            <ProductInfoPopover popoverNode={productInfo(goods)} tableCellText={goods.cn_name} />
+            <ProductInfoPopover popoverNode={productInfo(goods)}>
+            {goods.cn_name}
+            </ProductInfoPopover>
           </IndexTable.Cell>
           <IndexTable.Cell>
             <div style={{ width: "5em", textAlign: "right" }}>
@@ -222,9 +226,11 @@ function DeliveryInbound(props) {
             <TextStyle variation="strong">{name}</TextStyle>
           </IndexTable.Cell>
           <IndexTable.Cell>
-            {/* <ProductInfoPopover popoverNode={productInfo()} tableCellText={"商品信息"} /> */}
-            ZTE Watch Live Black<br />
-            ZTE 手表 黑
+            <ProductInfoPopover popoverNode={productInfo()}>
+              {"商品信息"}
+            </ProductInfoPopover>
+            {/* ZTE Watch Live Black<br />
+            ZTE 手表 黑 */}
           </IndexTable.Cell>
           <IndexTable.Cell>
             {orders}

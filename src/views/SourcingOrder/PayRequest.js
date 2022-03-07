@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-19 17:05:46
- * @LastEditTime: 2022-03-07 12:17:20
+ * @LastEditTime: 2022-03-07 15:42:38
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -120,7 +120,9 @@ function PayRequest(props) {
             key={sku}
           >
             <IndexTable.Cell>
-              <ProductInfoPopover popoverNode={productInfo} tableCellText={sku} />
+              <ProductInfoPopover popoverNode={productInfo}>
+              {sku}
+              </ProductInfoPopover>
             </IndexTable.Cell>
             {/* <IndexTable.Cell>{location}</IndexTable.Cell> */}
             <IndexTable.Cell>{purchase_num}</IndexTable.Cell>

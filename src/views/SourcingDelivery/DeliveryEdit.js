@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-03-07 15:22:12
+ * @LastEditTime: 2022-03-07 15:28:03
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -62,7 +62,6 @@ function DeliveryEdit(props) {
     }
     return arr;
   }, [goodsTableDataMap]);
-
 
   const resourceName = {
     singular: '商品',
@@ -163,7 +162,7 @@ function DeliveryEdit(props) {
           {headKey}
         </IndexTable.Cell>
         <IndexTable.Cell>
-          <ProductInfoPopover tableCellText={sku} />
+          <ProductInfoPopover>{sku}</ProductInfoPopover>
         </IndexTable.Cell>
         <IndexTable.Cell>
           <div style={{ width: "8em" }}>

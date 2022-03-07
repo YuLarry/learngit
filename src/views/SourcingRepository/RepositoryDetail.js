@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-24 15:50:14
- * @LastEditTime: 2022-02-18 17:22:27
+ * @LastEditTime: 2022-03-07 15:44:08
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -28,39 +28,63 @@ function RepositoryDetail(props) {
   const { id } = useParams();
   const [detail, setDetail] = useState(null);
   const [refresh, setRefresh] = useState(0);
-  
 
+  const productInfo = (product) => {
+    if (!product) return null;
+    const { cn_name, en_name, image_url, id, price, sku } = product;
+    return (
+      <div className="product-container" style={{ maxWidth: "400px", display: "flex", alignItems: "flex-start" }}>
+
+        <Thumbnail
+          source={image_url || ""}
+          alt={en_name}
+          size="small"
+        />
+        <div style={{ flex: 1, marginLeft: "1em" }}>
+          <h4>{en_name}</h4>
+          <h4>{cn_name}</h4>
+          <span>{price}</span>
+        </div>
+      </div>
+    )
+  }
 
   const rowMarkup = useMemo(() => {
     if (!detail) return;
     return detail.item.map(
-      ({ sku, po_no, goods, plan_qty, actual_qty, shipping_no }, index) => (
-        <IndexTable.Row
-          id={index}
-          key={index}
-          position={index}
-        >
-          <IndexTable.Cell>
-            {sku}
-
-          </IndexTable.Cell>
-          <IndexTable.Cell>
-            {sku}
-          </IndexTable.Cell>
-          <IndexTable.Cell>
-            {plan_qty}
-          </IndexTable.Cell>
-          <IndexTable.Cell>
-            {actual_qty}
-          </IndexTable.Cell>
-          <IndexTable.Cell>
-            {po_no}
-          </IndexTable.Cell>
-          <IndexTable.Cell>
-            {shipping_no}
-          </IndexTable.Cell>
-        </IndexTable.Row>
-      ),
+      ({ sku, po_no, goods, plan_qty, actual_qty, shipping_no }, index) => {
+        const { cn_name, en_name } = goods || {};
+        return (
+          <IndexTable.Row
+            id={index}
+            key={index}
+            position={index}
+          >
+            <IndexTable.Cell>
+              {sku}
+            </IndexTable.Cell>
+            <IndexTable.Cell>
+              <ProductInfoPopover
+                popoverNode={productInfo(goods)}
+              >
+                <div>{cn_name}</div>
+              </ProductInfoPopover>
+            </IndexTable.Cell>
+            <IndexTable.Cell>
+              {plan_qty}
+            </IndexTable.Cell>
+            <IndexTable.Cell>
+              {actual_qty}
+            </IndexTable.Cell>
+            <IndexTable.Cell>
+              {po_no}
+            </IndexTable.Cell>
+            <IndexTable.Cell>
+              {shipping_no}
+            </IndexTable.Cell>
+          </IndexTable.Row>
+        )
+      }
     )
   },
     [detail]
@@ -86,43 +110,41 @@ function RepositoryDetail(props) {
 
   const commitModal = useCallback(
     () => {
-      const inbound_item = modalSkuList.map(({po_item_id, inbound_qty})=>({po_item_id, inbound_qty: parseInt(inbound_qty)}))
+      const inbound_item = modalSkuList.map(({ po_item_id, inbound_qty }) => ({ po_item_id, inbound_qty: parseInt(inbound_qty) }))
       const data = {
         inbound_no: detail.inbound_no,
-        inbound_item ,
+        inbound_item,
       }
       loadingContext.loading(true);
-      confirmInbound( data )
-      .then(res=>{
-        setModalOpen(false);
-        toastContext.toast({
-          active: true,
-          message: "手动入库成功",
-          duration: 1000,
+      confirmInbound(data)
+        .then(res => {
+          setModalOpen(false);
+          toastContext.toast({
+            active: true,
+            message: "手动入库成功",
+            duration: 1000,
+          })
+          setRefresh(refresh + 1)
         })
-        setRefresh( refresh + 1 )
-      })
-      .finally(()=>{
-      loadingContext.loading(false);
-        
-      })
+        .finally(() => {
+          loadingContext.loading(false);
+
+        })
     },
     [detail, modalSkuList],
   );
 
-
-
   return (
     <Page
       breadcrumbs={[{ content: '入库单列表', url: '/repository' }]}
-      title={ id }
-      titleMetadata={<BadgeInboundStatus status={ detail && detail.status } />}
-      subtitle="2021-12-25 10:05:00 由xxxxxxxxx创建"
+      title={id}
+      titleMetadata={<BadgeInboundStatus status={detail && detail.status} />}
+      subtitle={detail && detail.create_message || ""}
       secondaryActions={[
         {
           content: '手动确定入库',
           onAction: () => {
-            setModalSkuList( detail.item )
+            setModalSkuList(detail.item)
             setModalOpen(true)
           },
         },
@@ -173,27 +195,27 @@ function RepositoryDetail(props) {
         </Layout.Section>
         <Layout.Section secondary>
           <Card title="基本信息">
-            <SourcingCardSection title="入库单号" text={ detail && detail.inbound_no } />
-            <SourcingCardSection title="单据类型" text={ detail && detail.type }/>
-            <SourcingCardSection title="货主" text={ detail && detail.provider_name }/>
-            <SourcingCardSection title="货区" text={ detail && detail.warehouse_area }/>
-            <SourcingCardSection title="供应商" text={ detail && detail.provider_name }/>
-            <SourcingCardSection title="收货仓库" text={ detail && detail.warehouse_name }/>
-            <SourcingCardSection title="第三方仓库" text={ detail && detail.third_warehouse || "" }/>
+            <SourcingCardSection title="入库单号" text={detail && detail.inbound_no} />
+            <SourcingCardSection title="单据类型" text={detail && detail.type} />
+            <SourcingCardSection title="货主" text={detail && detail.provider_name} />
+            <SourcingCardSection title="货区" text={detail && detail.warehouse_area} />
+            <SourcingCardSection title="供应商" text={detail && detail.provider_name} />
+            <SourcingCardSection title="收货仓库" text={detail && detail.warehouse_name} />
+            <SourcingCardSection title="第三方仓库" text={detail && detail.third_warehouse || ""} />
           </Card>
           <Card title="费用信息">
-            <SourcingCardSection title="运费" text={ detail && detail.shipping_price }/>
+            <SourcingCardSection title="运费" text={detail && detail.shipping_price} />
           </Card>
         </Layout.Section>
       </Layout>
 
 
-      <InRepositoryManualModal 
+      <InRepositoryManualModal
         modalOpen={modalOpen}
         modalOpenChange={(openStatus) => { setModalOpen(openStatus) }}
         tableList={modalSkuList}
         tableListChange={(list) => { setModalSkuList(list) }}
-        onCommit={ ( list )=>{ console.log(list);commitModal() } }
+        onCommit={(list) => { console.log(list); commitModal() }}
       />
     </Page>
   );
