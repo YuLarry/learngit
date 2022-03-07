@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-03-07 17:20:25
+ * @LastEditTime: 2022-03-07 17:29:50
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -154,7 +154,7 @@ function DeliveryEdit(props) {
     selectedGoods.map(({ id, sku, purchase_num, shipping_num, count = "", goods_name, headKey, }, index) => (
       <IndexTable.Row
         id={id}
-        key={sku}
+        key={index}
         selected={selectedResources.includes(sku)}
         position={index}
       >
@@ -250,7 +250,11 @@ function DeliveryEdit(props) {
 
   const handleConfirmAddGoods = useCallback(
     () => {
-      setGoodsTableDataMap(new Map([...goodsTableDataMap, ...selectGoodsMapTemp]))
+      const arr = [];
+      selectGoodsMapTemp.forEach((valueItem)=>{
+        arr.push( [ Symbol(), valueItem] )
+      })
+      setGoodsTableDataMap(new Map([...goodsTableDataMap, ...arr]))
       setSelectGoodsMapTemp( new Map() );
       setActive(false);
     },
