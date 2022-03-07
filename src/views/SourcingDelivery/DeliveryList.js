@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-03-04 15:40:19
+ * @LastEditTime: 2022-03-04 16:05:56
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -245,13 +245,13 @@ function DeliveryList(props) {
         position={index}
       >
         <IndexTable.Cell>
-          {/* <Button
+          <Button
             plain
             monochrome
             url={`detail/${id}`}
-          > */}
+          >
           <TextStyle variation="strong">{shipping_no}</TextStyle>
-          {/* </Button> */}
+          </Button>
         </IndexTable.Cell>
         <IndexTable.Cell>{business_name}</IndexTable.Cell>
         <IndexTable.Cell>{name}</IndexTable.Cell>

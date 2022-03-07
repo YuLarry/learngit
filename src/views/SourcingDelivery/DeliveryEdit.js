@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-03-03 12:17:49
+ * @LastEditTime: 2022-03-04 17:08:22
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -29,12 +29,15 @@ import { ModalContext } from "../../context/ModalContext";
 import { ToastContext } from "../../context/ToastContext";
 import moment from "moment";
 import { FstlnLoading } from "../../components/FstlnLoading";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { fstlnTool } from "../../utils/Tools";
 
 
 function DeliveryEdit(props) {
   const { id } = useParams();
+  const location = useLocation();
+  
+
   const navigate = useNavigate();
   const loadingContext = useContext(LoadingContext);
   const unsavedChangeContext = useContext(UnsavedChangeContext);
