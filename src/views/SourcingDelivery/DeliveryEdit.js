@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-03-07 17:29:50
+ * @LastEditTime: 2022-03-07 19:52:10
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -37,7 +37,7 @@ import { duration } from "moment";
 function DeliveryEdit(props) {
   const { id } = useParams();
   const location = useLocation();
-  
+
 
   const navigate = useNavigate();
   const loadingContext = useContext(LoadingContext);
@@ -58,7 +58,7 @@ function DeliveryEdit(props) {
   const selectedGoods = useMemo(() => {
     const arr = [];
     for (const [key, goods] of goodsTableDataMap) {
-      arr.push({...goods, count: (goods.purchase_num - goods.shipping_num).toString() });
+      arr.push({ ...goods, count: goods.count === undefined ? (goods.purchase_num - goods.shipping_num).toString() : goods.count, symb: key });
     }
     return arr;
   }, [goodsTableDataMap]);
@@ -96,15 +96,15 @@ function DeliveryEdit(props) {
       },
     ]
   )
-    , []);
+    , [goodsTableDataMap, handleSelectionChange, selectedResources]);
 
   const goodsFormChangeHandler = useCallback(
-    (sku, val, key) => {
-      if( val && !fstlnTool.INT_MORE_THAN_ZERO_REG.test(val) ) return;
-      const _tempGoodItem = goodsTableDataMap.get(sku);
+    (syml, val, key) => {
+      if (val && !fstlnTool.INT_MORE_THAN_ZERO_REG.test(val)) return;
+      const _tempGoodItem = goodsTableDataMap.get(syml);
       _tempGoodItem[key] = val
       const tempMap = new Map(goodsTableDataMap);
-      tempMap.set(sku, _tempGoodItem);
+      tempMap.set(syml, _tempGoodItem);
       setGoodsTableDataMap(tempMap);
 
     },
@@ -134,12 +134,19 @@ function DeliveryEdit(props) {
     [formObject],
   );
 
-  const currenctyOpts = useMemo(()=>{
+  const [form_currency, setForm_currency] = useState("");
+
+  const currenctyOpts = useMemo(() => {
     let arr = [
+      { label: "CNY", value: "CNY" },
+      { label: "CNH", value: "CNH" },
       { label: "USD", value: "USD" },
-      { label: "RMB", value: "RMB" },
+      { label: "HKD", value: "HKD" },
+      { label: "EUR", value: "EUR" },
+      { label: "GBP", value: "GBP" },
+      { label: "JPY", value: "JPY" },
     ];
-    if( !formObject.shipping_price ){
+    if (!formObject.shipping_price) {
       arr = [
         { label: "", value: "" },
         ...arr
@@ -147,43 +154,51 @@ function DeliveryEdit(props) {
     }
     return arr;
   }
-  ,[formObject])
+    , [formObject])
+
+  useEffect(()=>{
+    if( !form_currency ){
+      setForm_currency(currenctyOpts[0].value)
+    }
+  },
+  [currenctyOpts])  
 
 
   const rowMarkup = useMemo(() =>
-    selectedGoods.map(({ id, sku, purchase_num, shipping_num, count = "", goods_name, headKey, }, index) => (
-      <IndexTable.Row
-        id={id}
-        key={index}
-        selected={selectedResources.includes(sku)}
-        position={index}
-      >
-        <IndexTable.Cell>
-          {headKey}
-        </IndexTable.Cell>
-        <IndexTable.Cell>
-          <ProductInfoPopover>{sku}</ProductInfoPopover>
-        </IndexTable.Cell>
-        <IndexTable.Cell>
-          <div style={{ width: "8em" }}>
-            <TextField
-              type="number"
-              value={count}
-              prefix=""
-              onChange={(v) => { goodsFormChangeHandler(id, v, "count") }}
-            />
-          </div>
-        </IndexTable.Cell>
-        <IndexTable.Cell>
-          <Button
-            icon={DeleteMinor}
-            onClick={() => { handleDeleteGoods(id) }}
-          ></Button>
-        </IndexTable.Cell>
-      </IndexTable.Row>
-    ))
+    selectedGoods.map(({ id, sku, count = "", goods_name, headKey, symb}, index) => {
+      return (
+        <IndexTable.Row
+          id={id}
+          key={index}
+          position={index}
+        >
+          <IndexTable.Cell>
+            {headKey}
+          </IndexTable.Cell>
+          <IndexTable.Cell>
+            <ProductInfoPopover>{sku}</ProductInfoPopover>
+          </IndexTable.Cell>
+          <IndexTable.Cell>
+            <div style={{ width: "8em" }}>
+              <TextField
+                type="number"
+                value={count}
+                prefix=""
+                onChange={(v) => { goodsFormChangeHandler(symb, v, "count") }}
+              />
+            </div>
+          </IndexTable.Cell>
+          <IndexTable.Cell>
+            <Button
+              icon={DeleteMinor}
+              onClick={() => { handleDeleteGoods(symb) }}
+            ></Button>
+          </IndexTable.Cell>
+        </IndexTable.Row>
+      )
+    })
     ,
-    [goodsFormChangeHandler, selectedGoods, selectedResources]
+    [goodsFormChangeHandler, handleDeleteGoods, selectedGoods]
   )
 
   const treeHeadRender = (rowItem, itemDetail, children) => {
@@ -218,13 +233,13 @@ function DeliveryEdit(props) {
     [],
   );
 
-  const selectValidtor = useCallback(( selectsMap )=>{
-    if( selectsMap.size === 0 ){
+  const selectValidtor = useCallback((selectsMap) => {
+    if (selectsMap.size === 0) {
       return true;
-    }else if( selectsMap.size > 1 ){
+    } else if (selectsMap.size > 1) {
       const last = [...selectsMap.values()][selectsMap.size - 1];
       const second_last = [...selectsMap.values()][selectsMap.size - 2];
-      if( second_last.provider.id !== last.provider.id || second_last.warehouse.id !== last.warehouse.id ){
+      if (second_last.provider.id !== last.provider.id || second_last.warehouse.id !== last.warehouse.id) {
         toastContext.toast({
           active: true,
           message: `选择的商品与已选择的供应商「${second_last.provider.business_name}」发货仓库「${second_last.warehouse.name}」不符`,
@@ -232,10 +247,10 @@ function DeliveryEdit(props) {
         })
         return false;
       }
-    }else if( goodsTableDataMap.size > 0 ){
+    } else if (goodsTableDataMap.size > 0) {
       const last = selectsMap.values().next().value;
       const tableItem = goodsTableDataMap.values().next().value;
-      if( tableItem.provider.id !== last.provider.id || tableItem.warehouse.id !== last.warehouse.id ){
+      if (tableItem.provider.id !== last.provider.id || tableItem.warehouse.id !== last.warehouse.id) {
         toastContext.toast({
           active: true,
           message: `选择的商品与已选择的供应商「${tableItem.provider.business_name}」发货仓库「${tableItem.warehouse.name}」不符`,
@@ -246,16 +261,16 @@ function DeliveryEdit(props) {
     }
     return true;
   }
-  ,[goodsTableDataMap])
+    , [goodsTableDataMap])
 
   const handleConfirmAddGoods = useCallback(
     () => {
       const arr = [];
-      selectGoodsMapTemp.forEach((valueItem)=>{
-        arr.push( [ Symbol(), valueItem] )
+      selectGoodsMapTemp.forEach((valueItem) => {
+        arr.push([Symbol(valueItem.sku), valueItem])
       })
       setGoodsTableDataMap(new Map([...goodsTableDataMap, ...arr]))
-      setSelectGoodsMapTemp( new Map() );
+      setSelectGoodsMapTemp(new Map());
       setActive(false);
     },
     [goodsTableDataMap, selectGoodsMapTemp],
@@ -292,7 +307,7 @@ function DeliveryEdit(props) {
           const { data } = res;
           for (let key in data) {
             const { provider, warehouse, item_list } = data[key];
-            item_list.map( item => {
+            item_list.map(item => {
               item["provider"] = provider;
               item["warehouse"] = warehouse;
             })
@@ -310,7 +325,7 @@ function DeliveryEdit(props) {
 
   useEffect(() => {
     if (!active) return;
-    if ( tree && !searchVal ) return;
+    if (tree && !searchVal) return;
     const timer = setTimeout(() => {
       setQuerying(true)
       queryModalList();
@@ -322,7 +337,7 @@ function DeliveryEdit(props) {
   }, [searchKey, searchVal]);
 
   useEffect(() => {
-    if (!active || (active && tree) ) return;
+    if (!active || (active && tree)) return;
     const timer = setTimeout(() => {
       setQuerying(true)
       queryModalList();
@@ -345,10 +360,12 @@ function DeliveryEdit(props) {
         sku,
         po_item_id,
         shipping_num,
+        shipping_currency: form_currency
       })
     })
     editShippingOrder({
       ...formObject,
+      shipping_currency: form_currency,
       shipping_date: moment(formObject.shipping_date).format("YYYY-MM-DD"),
       shipping_detail,
       provider_id: provider.id,
@@ -396,7 +413,7 @@ function DeliveryEdit(props) {
                 content: "确认",
                 destructive: true,
                 onAction: () => {
-                  modalContext.modal({active: false})
+                  modalContext.modal({ active: false })
                 },
               },
               secondaryActions: [
@@ -476,8 +493,8 @@ function DeliveryEdit(props) {
   return (
     <Page
       breadcrumbs={[{ content: '采购实施列表', url: '/delivery' }]}
-      title={ id ? id : "新建发货单" }
-      subtitle={ detail && detail.create_message || "" }
+      title={id ? id : "新建发货单"}
+      subtitle={detail && detail.create_message || ""}
     >
       <Layout>
         <Layout.Section>
@@ -560,11 +577,11 @@ function DeliveryEdit(props) {
                 <FormLayout.Group>
                   <Select
                     label="运费币制(运费选了必填)"
-                    value={formObject.shipping_currency}
+                    value={form_currency}
                     name="shipping_currency"
                     id="shipping_currency"
-                    onChange={handleFormObjectChange}
-                    options={ currenctyOpts }
+                    onChange={(val)=>{ setForm_currency(val) }}
+                    options={currenctyOpts}
                   />
                   <TextField
                     label="入仓号"
@@ -587,8 +604,8 @@ function DeliveryEdit(props) {
           <SourcingProviCard provInfo={provider} />
           <SourcingRepoCard wareInfo={warehouse} />
           <SourcingRemarkCard
-            remark={ formObject.remark }
-            onChange={ (val)=>{ handleFormObjectChange(val, "remark") } }
+            remark={formObject.remark}
+            onChange={(val) => { handleFormObjectChange(val, "remark") }}
           />
 
         </Layout.Section>
@@ -650,7 +667,7 @@ function DeliveryEdit(props) {
                 onTreeSelectChange={treeSelectChange}
                 childrenResolver={(item) => item.item_list}
                 identifier={item => item.id}
-                selectValidtor={ selectValidtor }
+                selectValidtor={selectValidtor}
               />
           }
 
