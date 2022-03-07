@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-03-07 15:16:22
+ * @LastEditTime: 2022-03-07 15:22:12
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -58,7 +58,7 @@ function DeliveryEdit(props) {
   const selectedGoods = useMemo(() => {
     const arr = [];
     for (const [key, goods] of goodsTableDataMap) {
-      arr.push(goods);
+      arr.push({...goods, count: (goods.purchase_num - goods.shipping_num).toString() });
     }
     return arr;
   }, [goodsTableDataMap]);
@@ -152,7 +152,7 @@ function DeliveryEdit(props) {
 
 
   const rowMarkup = useMemo(() =>
-    selectedGoods.map(({ id, sku, purchase_num, goods_name, headKey, count = "" }, index) => (
+    selectedGoods.map(({ id, sku, purchase_num, shipping_num, count = "", goods_name, headKey, }, index) => (
       <IndexTable.Row
         id={id}
         key={sku}
