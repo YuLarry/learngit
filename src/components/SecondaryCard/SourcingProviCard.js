@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-19 17:12:19
- * @LastEditTime: 2022-01-28 14:56:30
+ * @LastEditTime: 2022-03-07 11:37:25
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -19,6 +19,7 @@ function SourcingProviCard(props) {
     id = "",
     phone = "",
     account_id = "",
+    provider_account = null,
   } = provInfo
 
 
@@ -28,7 +29,7 @@ function SourcingProviCard(props) {
       <SourcingCardSection title="地址" text={ business_address } />
       <SourcingCardSection title="电话" text={ phone } />
       <SourcingCardSection title="联系人" text={ contacts } />
-      <SourcingCardSection title="收款账户" text={ account_id } />
+      <SourcingCardSection title="收款账户" text={ account_id || ( provider_account && provider_account.bank_card_number ) || "" } />
 
     </Card>
   );

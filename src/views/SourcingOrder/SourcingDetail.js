@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-20 16:16:03
- * @LastEditTime: 2022-03-01 14:06:48
+ * @LastEditTime: 2022-03-07 11:48:22
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -154,11 +154,8 @@ function SourcingDetail(props) {
                 {rowMarkup}
               </IndexTable>
             </div>
-
-
             <br />
           </Card>
-
           <Card
             title="操作记录"
           >
@@ -167,15 +164,13 @@ function SourcingDetail(props) {
                 dateKey="created_at"
                 timeline={order ? order.operation_record.reverse() : []}
               />
-
             </Card.Section>
-
           </Card>
 
         </Layout.Section>
         <Layout.Section secondary>
           <SourcingInfoCard poInfo={order || {}} />
-          <SourcingProviCard provInfo={order ? { ...order.provider,account_id: order.bank_card_number } : {}} />
+          <SourcingProviCard provInfo={order ? { ...order.provider, provider_account: order.provider_account } : {}} />
           <SourcingRepoCard wareInfo={order ? order.warehouse : {}} />
           <SourcingRemarkCard readOnly={true} remark={ order && order.remark }  />
         </Layout.Section>

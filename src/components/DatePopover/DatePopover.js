@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-19 19:21:22
- * @LastEditTime: 2022-02-08 16:33:34
+ * @LastEditTime: 2022-03-07 12:16:24
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -15,7 +15,11 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 function DatePopover(props) {
 
-  const { onChange = ()=>{}, value = new Date() } = props
+  const { 
+    onChange = ()=>{}, 
+    value = new Date(),
+    disableDatesAfter = null,
+  } = props
   
   const [popoverActive, setPopoverActive] = useState(false);
 
@@ -70,6 +74,7 @@ function DatePopover(props) {
         onChange={(v) => { setSelectedDate(v.start) }}
         onMonthChange={handleMonthChange}
         selected={selectedDate}
+        disableDatesAfter={ disableDatesAfter }
       />
 
     </Popover>

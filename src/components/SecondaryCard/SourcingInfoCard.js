@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-20 16:25:34
- * @LastEditTime: 2022-02-15 18:24:33
+ * @LastEditTime: 2022-03-07 11:35:47
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -14,7 +14,9 @@ function SourcingInfoCard(props) {
 
   const { poInfo = {}, hasMore=false } = props;
   const {
+    brand = null,
     brand_name = "",
+    subject = null,
     subject_title = "",
     provider_name = "",
     bank_card_number = "",
@@ -30,8 +32,8 @@ function SourcingInfoCard(props) {
 
   return (
     <Card title="采购信息">
-      <SourcingCardSection title="项目" text={ brand_name } />
-      <SourcingCardSection title="采购方" text={ subject_title } />
+      <SourcingCardSection title="项目" text={ brand_name || ( brand && brand.name ) || "" } />
+      <SourcingCardSection title="采购方" text={ subject_title || ( subject && subject.title ) || "" } />
       { hasMore && <SourcingCardSection title="供应商" text={ provider_name } /> }
       { hasMore && <SourcingCardSection title="收款账户" text={ bank_card_number } /> }
       { hasMore && <SourcingCardSection title="收货仓库" text={ warehouse_name } /> }

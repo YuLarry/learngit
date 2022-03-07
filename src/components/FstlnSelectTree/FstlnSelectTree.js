@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-19 14:30:33
- * @LastEditTime: 2022-02-14 11:24:58
+ * @LastEditTime: 2022-03-07 15:16:11
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -12,14 +12,32 @@ import "./FstlnSelectTree.scss";
 
 function FstlnSelectTree(props) {
 
-  const { identifier = item => item.sku, treeData, treeHeadRender, treeRowRender, onTreeSelectChange, childrenResolver = (item) => item } = props;
+  const { 
+    identifier = item => item.sku, 
+    treeData, 
+    treeHeadRender, 
+    treeRowRender, 
+    onTreeSelectChange, 
+    childrenResolver = (item) => item,
+    selectValidtor = ()=> true,
+  } = props;
 
   const [selectedItems, setSelectedItems] = useState(new Map());
 
+  const changeSelectedItems = useCallback(
+    (_tempSelected) => {
+      const rlt = selectValidtor( _tempSelected );
+      // console.log(rlt);
+      if( selectValidtor( _tempSelected ) ) {
+        setSelectedItems(_tempSelected);
+      }
+    },
+    [selectValidtor],
+  );
 
   const headChangeHandler = useCallback(
     (val, key) => {
-      console.log(key);
+      // console.log(key);
       const _tempSelected = new Map(selectedItems);
       const children = childrenResolver(treeData[key])
       children.map((item) => {
@@ -29,9 +47,9 @@ function FstlnSelectTree(props) {
           _tempSelected.delete(identifier(item));
         }
       })
-      setSelectedItems(_tempSelected);
+      changeSelectedItems( _tempSelected );
     },
-    [childrenResolver, selectedItems, treeData],
+    [changeSelectedItems, childrenResolver, identifier, selectedItems, treeData],
   );
   const rowChangeHandler = useCallback(
     (val, item) => {
@@ -41,9 +59,9 @@ function FstlnSelectTree(props) {
       } else if (_tempSelected.has(identifier(item))) {
         _tempSelected.delete(identifier(item));
       }
-      setSelectedItems(_tempSelected);
+      changeSelectedItems( _tempSelected );
     },
-    [selectedItems],
+    [changeSelectedItems, identifier, selectedItems],
   );
 
   const computeHeadsCheckedStatus = useMemo(() => {

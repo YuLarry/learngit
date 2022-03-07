@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-19 17:05:46
- * @LastEditTime: 2022-03-01 15:51:58
+ * @LastEditTime: 2022-03-07 12:17:20
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -10,7 +10,6 @@ import { Badge, Button, Card, DropZone, IndexTable, Layout, Modal, Page, Resourc
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { DatePopover } from "../../components/DatePopover/DatePopover";
 import { ProductInfoPopover } from "../../components/ProductInfoPopover/ProductInfoPopover";
-import { SourcingCardSection } from "../../components/SecondaryCard/SourcingCardSection";
 import { SourcingInfoCard } from "../../components/SecondaryCard/SourcingInfoCard";
 import {
   DeleteMinor
@@ -159,6 +158,7 @@ function PayRequest(props) {
                 <DatePopover
                   value={date}
                   onChange={(val) => { invoiceChangeHandler(index, 'date', val) }}
+                  disableDatesAfter={ new Date() }
                 />
               </div>
               <div className="invoice-col" style={{ display: (file ? "none" : "") }}>

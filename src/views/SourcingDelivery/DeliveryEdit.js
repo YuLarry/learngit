@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-03-04 17:08:22
+ * @LastEditTime: 2022-03-07 15:16:22
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -31,6 +31,7 @@ import moment from "moment";
 import { FstlnLoading } from "../../components/FstlnLoading";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { fstlnTool } from "../../utils/Tools";
+import { duration } from "moment";
 
 
 function DeliveryEdit(props) {
@@ -187,41 +188,71 @@ function DeliveryEdit(props) {
   )
 
   const treeHeadRender = (rowItem, itemDetail, children) => {
-    const { po_no, warehouse_name, brand_name, purchase_qty, provider: { business_name } } = itemDetail
+    const { po_no, warehouse_name, purchase_qty, provider: { business_name } } = itemDetail
     return (
       <div className="tree-row">
         <div>{po_no}</div>
         <div>{business_name}</div>
         <div>{warehouse_name}</div>
-        <div>{purchase_qty}</div>
+        <div></div>
       </div>
     )
   }
 
   const treeRowRender = (child) => {
-    const { sku, purchase_num, goods_name } = child
+    const { sku, purchase_num, goods_name, shipping_num } = child
     return (
       <div className="tree-row">
         {/* <div style={{width: "20%"}}></div> */}
         <div>{sku}</div>
         <div>{goods_name}</div>
-        <div>{purchase_num}</div>
+        <div>{purchase_num - shipping_num}</div>
       </div>
     )
   }
 
   const treeSelectChange = useCallback(
     (selectsMap) => {
+      // console.log(selectsMap);
       setSelectGoodsMapTemp(selectsMap);
     },
     [],
   );
 
-
+  const selectValidtor = useCallback(( selectsMap )=>{
+    if( selectsMap.size === 0 ){
+      return true;
+    }else if( selectsMap.size > 1 ){
+      const last = [...selectsMap.values()][selectsMap.size - 1];
+      const second_last = [...selectsMap.values()][selectsMap.size - 2];
+      if( second_last.provider.id !== last.provider.id || second_last.warehouse.id !== last.warehouse.id ){
+        toastContext.toast({
+          active: true,
+          message: `选择的商品与已选择的供应商「${second_last.provider.business_name}」发货仓库「${second_last.warehouse.name}」不符`,
+          duration: 1000,
+        })
+        return false;
+      }
+    }else if( goodsTableDataMap.size > 0 ){
+      const last = selectsMap.values().next().value;
+      const tableItem = goodsTableDataMap.values().next().value;
+      if( tableItem.provider.id !== last.provider.id || tableItem.warehouse.id !== last.warehouse.id ){
+        toastContext.toast({
+          active: true,
+          message: `选择的商品与已选择的供应商「${tableItem.provider.business_name}」发货仓库「${tableItem.warehouse.name}」不符`,
+          duration: 1000,
+        })
+        return false;
+      }
+    }
+    return true;
+  }
+  ,[goodsTableDataMap])
 
   const handleConfirmAddGoods = useCallback(
     () => {
       setGoodsTableDataMap(new Map([...goodsTableDataMap, ...selectGoodsMapTemp]))
+      setSelectGoodsMapTemp( new Map() );
       setActive(false);
     },
     [goodsTableDataMap, selectGoodsMapTemp],
@@ -258,6 +289,13 @@ function DeliveryEdit(props) {
         .then(res => {
           // console.log(res);
           const { data } = res;
+          for (let key in data) {
+            const { provider, warehouse, item_list } = data[key];
+            item_list.map( item => {
+              item["provider"] = provider;
+              item["warehouse"] = warehouse;
+            })
+          }
           setTree(data);
 
         })
@@ -524,7 +562,10 @@ function DeliveryEdit(props) {
 
           <SourcingProviCard provInfo={provider} />
           <SourcingRepoCard wareInfo={warehouse} />
-          <SourcingRemarkCard />
+          <SourcingRemarkCard
+            remark={ formObject.remark }
+            onChange={ (val)=>{ handleFormObjectChange(val, "remark") } }
+          />
 
         </Layout.Section>
       </Layout>
@@ -585,6 +626,7 @@ function DeliveryEdit(props) {
                 onTreeSelectChange={treeSelectChange}
                 childrenResolver={(item) => item.item_list}
                 identifier={item => item.id}
+                selectValidtor={ selectValidtor }
               />
           }
 
