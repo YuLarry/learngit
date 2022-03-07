@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-03-07 15:28:03
+ * @LastEditTime: 2022-03-07 17:20:25
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -50,7 +50,7 @@ function DeliveryEdit(props) {
   const handleChange = useCallback(() => setActive(!active), [active]);
   // = modal =
 
-  const [tree, setTree] = useState({});
+  const [tree, setTree] = useState(null);
   const [selectGoodsMapTemp, setSelectGoodsMapTemp] = useState(new Map());
 
   const [goodsTableDataMap, setGoodsTableDataMap] = useState(new Map());
@@ -275,10 +275,8 @@ function DeliveryEdit(props) {
   const [searchVal, setSearchVal] = useState("");
   const [querying, setQuerying] = useState(false);
 
-  useEffect(() => {
-    if (!active) return;
-    const timer = setTimeout(() => {
-      setQuerying(true)
+  const queryModalList = useCallback(
+    () => {
       getPoItemList({
         provider_name: "",
         warehouse_name: "",
@@ -301,12 +299,35 @@ function DeliveryEdit(props) {
         .finally(() => {
           setQuerying(false)
         })
+    },
+    [searchKey, searchVal],
+  );
+
+
+  useEffect(() => {
+    if (!active) return;
+    if ( tree && !searchVal ) return;
+    const timer = setTimeout(() => {
+      setQuerying(true)
+      queryModalList();
     }, 1000);
     return () => {
       clearTimeout(timer);
       setQuerying(false)
     }
-  }, [searchKey, searchVal, active]);
+  }, [searchKey, searchVal]);
+
+  useEffect(() => {
+    if (!active || (active && tree) ) return;
+    const timer = setTimeout(() => {
+      setQuerying(true)
+      queryModalList();
+    }, 1000);
+    return () => {
+      clearTimeout(timer);
+      setQuerying(false)
+    }
+  }, [active]);
 
 
 
@@ -619,7 +640,7 @@ function DeliveryEdit(props) {
               <FstlnLoading />
               :
               <FstlnSelectTree
-                treeData={tree}
+                treeData={tree || {}}
                 treeHeadRender={treeHeadRender}
                 treeRowRender={treeRowRender}
                 onTreeSelectChange={treeSelectChange}
