@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-21 15:28:14
- * @LastEditTime: 2022-03-07 15:42:21
+ * @LastEditTime: 2022-03-07 16:41:52
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -46,9 +46,9 @@ function DeliveryInbound(props) {
 
   const [clientSelected, setClientSelected] = useState("");
   const [warehouseSelected, setWarehouseSelected] = useState("");
-  useEffect(() => {
-    clientList.size > 0 && setClientSelected(clientList.keys().next().value)
-  }, [clientList])
+  // useEffect(() => {
+  //   clientList.size > 0 && setClientSelected(clientList.keys().next().value)
+  // }, [clientList])
 
   const clientsOptions = useMemo(() => {
     const arr = [];
@@ -67,9 +67,9 @@ function DeliveryInbound(props) {
     return arr;
   },
     [warehouseArea])
-  useEffect(() => {
-    warehouseArea.size > 0 && setWarehouseSelected(warehouseArea.keys().next().value)
-  }, [warehouseArea])
+  // useEffect(() => {
+  //   warehouseArea.size > 0 && setWarehouseSelected(warehouseArea.keys().next().value)
+  // }, [warehouseArea])
 
 
   const [boxCardCount, setBoxCardCount] = useState("1");
@@ -431,27 +431,6 @@ function DeliveryInbound(props) {
 
         })
         .finally(() => {
-          // const data = [
-          //   {
-          //     "sku": "6902176906473",
-          //     "warehouse_sku": "6902176906473",
-          //     "client_account_code": "WSRM",
-          //     "client_account_name": "WS Redmagic",
-          //     "service_provider_code": "wingsing",
-          //     "service_provider_name": "荣晟",
-          //     "goods": {
-          //       "sku": "6902176906473",
-          //       "cn_name": "魔盒散热背夹（黑色 带3A线）红魔",
-          //       "en_name": "Ice Dock",
-          //       "price": "14.90",
-          //       "image_url": ""
-          //     }
-          //   },
-          // ];
-
-
-
-
         })
     },
     [clientSelected, inputSku],
@@ -611,12 +590,14 @@ function DeliveryInbound(props) {
                 options={clientsOptions}
                 value={clientSelected}
                 onChange={(val) => { setClientSelected(val) }}
+                placeholder="请选择货主"
               />
               <Select
                 label="货区"
                 options={warehousesOptions}
                 value={warehouseSelected}
                 onChange={(val) => { setWarehouseSelected(val) }}
+                placeholder="请选择货区"
               />
 
             </FormLayout.Group>

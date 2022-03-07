@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-03-04 15:36:14
+ * @LastEditTime: 2022-03-07 16:27:46
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -104,11 +104,11 @@ function SourcingEdit(props) {
 
   const [provider_id, setProvider_id] = useState("");
 
-  useEffect(() => {
-    if( !id && !provider_id ){
-      provList.length > 0 && setProvider_id( provList[0].value )
-    }
-  }, [id, provList, provider_id]);
+  // useEffect(() => {
+  //   if( !id && !provider_id ){
+  //     provList.length > 0 && setProvider_id( provList[0].value )
+  //   }
+  // }, [id, provList, provider_id]);
 
   const accountBankNum = useMemo(() => {
     const detailItem = accountList.find(item => item.id.toString() === sourcingOrderForm.account_id && sourcingOrderForm.account_id.toString() || "")
@@ -182,7 +182,6 @@ function SourcingEdit(props) {
     [currency, selectedGoods, sourcingOrderForm],
   );
 
-
   useEffect(() => {
     loadingContext.loading(true)
     Promise.all([
@@ -199,10 +198,12 @@ function SourcingEdit(props) {
       .then(([resBrand, resProv, resSubj, resWare, resPlatform, resBusinessType, resDepartment]) => {
         const { data } = resBrand;
         const brandListArr = Object.keys(data).map((key) => ({ label: data[key], value: key }))
+        // brandListArr.unshift({label: "", value: "", })
         setBrandList(brandListArr);
 
         const { data: subjData } = resSubj;
         const subjListArr = Object.keys(subjData).map((key) => ({ label: subjData[key], value: key }))
+        // subjListArr.unshift({label: "", value: "", })
         setSubjList(subjListArr);
 
         const { data: provData } = resProv;
@@ -246,18 +247,28 @@ function SourcingEdit(props) {
         setDepartmentList( depaArr )
 
         // set initial form value
+        // setSourcingOrderForm({
+        //   ...sourcingOrderForm,
+        //   brand_code: brandListArr[0].value,
+        //   provider_id: provListArr[0].value,
+        //   warehouse_code: wareListArr[0].value,
+        //   subject_code: subjListArr[0].value,
+        //   division: depaArr[0].value,
+        //   business_type: busiArr[0].value,
+        //   platform: platArr[0].value,
+
+        // })
         setSourcingOrderForm({
           ...sourcingOrderForm,
-          brand_code: brandListArr[0].value,
-          // provider_id: provListArr[0].value,
-          warehouse_code: wareListArr[0].value,
-          subject_code: subjListArr[0].value,
-          division: depaArr[0].value,
-          business_type: busiArr[0].value,
-          platform: platArr[0].value,
+          brand_code: "",
+          provider_id: "",
+          warehouse_code: "",
+          subject_code: "",
+          division: "",
+          business_type: "",
+          platform: "",
 
         })
-        // setProvider_id(provListArr[0].value);
 
       })
       .finally(() => {
@@ -602,6 +613,7 @@ function SourcingEdit(props) {
                     id="brand_code"
                     onChange={formChangeHandler}
                     disabled={ order }
+                    placeholder="请选择项目"
                   />
                   <Select
                     label="采购方"
@@ -610,6 +622,7 @@ function SourcingEdit(props) {
                     id="subject_code"
                     onChange={formChangeHandler}
                     disabled={ order }
+                    placeholder="请选择采购方"
                   />
                 </FormLayout.Group>
                 <FormLayout.Group>
@@ -620,6 +633,7 @@ function SourcingEdit(props) {
                     id="provider_id"
                     onChange={(value) => { console.log(value);setProvider_id(value) }}
                     disabled={ order }
+                    placeholder="请选择供应商"
                   />
                   <Select
                     label="收款账户"
@@ -628,6 +642,7 @@ function SourcingEdit(props) {
                     id="account_id"
                     onChange={formChangeHandler}
                     disabled={ order }
+                    placeholder="请选择收款账户"
                   />
                 </FormLayout.Group>
                 <FormLayout.Group>
@@ -638,6 +653,7 @@ function SourcingEdit(props) {
                     id="warehouse_code"
                     onChange={formChangeHandler}
                     disabled={ order }
+                    placeholder="请选择收货仓库"
                   />
                   <Select
                     label="事业部"
@@ -646,6 +662,7 @@ function SourcingEdit(props) {
                     id="division"
                     onChange={formChangeHandler}
                     disabled={ order }
+                    placeholder="请选择事业部"
                   />
                 </FormLayout.Group>
                 <FormLayout.Group>
@@ -656,6 +673,7 @@ function SourcingEdit(props) {
                     id="business_type"
                     onChange={formChangeHandler}
                     disabled={ order }
+                    placeholder="请选择业务类型"
                   />
                   <Select
                     label="平台"
@@ -664,6 +682,7 @@ function SourcingEdit(props) {
                     id="platform"
                     onChange={formChangeHandler}
                     disabled={ order }
+                    // placeholder="请选择平台"
                   />
                 </FormLayout.Group>
 
