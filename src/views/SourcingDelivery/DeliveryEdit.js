@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-03-07 19:56:56
+ * @LastEditTime: 2022-03-08 11:11:02
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -99,12 +99,12 @@ function DeliveryEdit(props) {
     , [goodsTableDataMap, handleSelectionChange, selectedResources]);
 
   const goodsFormChangeHandler = useCallback(
-    (syml, val, key) => {
+    (symb, val, key) => {
       if (val && !fstlnTool.INT_MORE_THAN_ZERO_REG.test(val)) return;
-      const _tempGoodItem = goodsTableDataMap.get(syml);
+      const _tempGoodItem = goodsTableDataMap.get(symb);
       _tempGoodItem[key] = val
       const tempMap = new Map(goodsTableDataMap);
-      tempMap.set(syml, _tempGoodItem);
+      tempMap.set(symb, _tempGoodItem);
       setGoodsTableDataMap(tempMap);
 
     },

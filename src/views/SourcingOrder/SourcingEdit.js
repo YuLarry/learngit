@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-03-08 11:01:55
+ * @LastEditTime: 2022-03-08 11:11:17
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -137,7 +137,7 @@ function SourcingEdit(props) {
   const selectedGoods = useMemo(() => {
     const arr = [];
     for (const [key, goods] of goodsTableDataMap) {
-      arr.push(goods);
+      arr.push({...goods, symb: key});
     }
     return arr;
   }, [goodsTableDataMap]);
@@ -465,11 +465,11 @@ function SourcingEdit(props) {
   );
 
   const rowMarkup = useMemo(() =>
-    selectedGoods.map(({ id, cn_name, en_name, price, sku, purchase_num = 0,purchase_price }, index) => (
+    selectedGoods.map(({ id, cn_name, en_name, price, sku, purchase_num = 0,purchase_price, symb }, index) => (
       <IndexTable.Row
         id={id}
-        key={id}
-        selected={selectedResources.includes(id)}
+        key={index}
+        selected={selectedResources.includes(symb)}
         position={index}
       >
         <IndexTable.Cell>
@@ -479,7 +479,7 @@ function SourcingEdit(props) {
           <TextField
             type="number"
             value={purchase_num.toString()}
-            onChange={(v) => { goodsFormChangeHandler(id, v, "purchase_num") }}
+            onChange={(v) => { goodsFormChangeHandler(symb, v, "purchase_num") }}
           />
         </IndexTable.Cell>
         <IndexTable.Cell>
@@ -487,13 +487,13 @@ function SourcingEdit(props) {
             type="number"
             value={price || purchase_price}
             prefix="$"
-            onChange={(v) => { goodsFormChangeHandler(id, v, "price") }}
+            onChange={(v) => { goodsFormChangeHandler(symb, v, "price") }}
           />
         </IndexTable.Cell>
         <IndexTable.Cell>
           <Button
             icon={DeleteMinor}
-            onClick={() => { handleDeleteGoods(id) }}
+            onClick={() => { handleDeleteGoods(symb) }}
           ></Button>
         </IndexTable.Cell>
 
@@ -546,8 +546,12 @@ function SourcingEdit(props) {
 
   const handleConfirmAddGoods = useCallback(
     () => {
-      // console.log(selectGoodsMapTemp);
-      setGoodsTableDataMap(new Map([...goodsTableDataMap, ...selectGoodsMapTemp]))
+      const arr = [];
+      selectGoodsMapTemp.forEach((valueItem) => {
+        arr.push([Symbol(valueItem.sku), {...valueItem}])
+      })
+      setGoodsTableDataMap(new Map([...goodsTableDataMap, ...arr]))
+      setSelectGoodsMapTemp(new Map());
       setActive(false);
     },
     [goodsTableDataMap, selectGoodsMapTemp],
