@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-03-08 11:11:17
+ * @LastEditTime: 2022-03-08 19:01:11
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -751,6 +751,7 @@ function SourcingEdit(props) {
         primaryAction={{
           content: '添加',
           onAction: handleConfirmAddGoods,
+          disabled: selectGoodsMapTemp.size === 0
         }}
         secondaryActions={[
           {

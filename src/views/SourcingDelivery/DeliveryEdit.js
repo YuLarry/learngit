@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-03-08 11:11:02
+ * @LastEditTime: 2022-03-08 19:00:49
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -540,6 +540,7 @@ function DeliveryEdit(props) {
                     name="shipping_no"
                     id="shipping_no"
                     onChange={handleFormObjectChange}
+                    maxLength={ 50 }
                   />
                 </FormLayout.Group>
                 <FormLayout.Group>
@@ -620,6 +621,7 @@ function DeliveryEdit(props) {
         primaryAction={{
           content: '添加',
           onAction: handleConfirmAddGoods,
+          disabled: selectGoodsMapTemp.size === 0
         }}
         secondaryActions={[
           {
