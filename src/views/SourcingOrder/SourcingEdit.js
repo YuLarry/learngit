@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-03-07 16:27:46
+ * @LastEditTime: 2022-03-08 11:01:55
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -79,18 +79,19 @@ function SourcingEdit(props) {
 
   });
 
-  useEffect(()=>{
-    if( accountList.length !== 0 && order ){
-      const idx = accountList.findIndex( (item)=>(item.id.toString() === order.account_id) );
-      if( idx === -1 ){
-        setSourcingOrderForm({ ...sourcingOrderForm, account_id: accountList[0].id.toString() })
-      }
-    }else if( accountList.length !== 0 ){
-      setSourcingOrderForm({ ...sourcingOrderForm, account_id: accountList[0].id.toString() })
-    }
+  /* 删除自动设置account info */
+  // useEffect(()=>{
+  //   if( accountList.length !== 0 && order ){
+  //     const idx = accountList.findIndex( (item)=>(item.id.toString() === order.account_id) );
+  //     if( idx === -1 ){
+  //       setSourcingOrderForm({ ...sourcingOrderForm, account_id: accountList[0].id.toString() })
+  //     }
+  //   }else if( accountList.length !== 0 ){
+  //     setSourcingOrderForm({ ...sourcingOrderForm, account_id: accountList[0].id.toString() })
+  //   }
     
-  }
-  ,[accountList, order])
+  // }
+  // ,[accountList, order])
 
   useEffect(() => {
     setSourcingOrderForm({ ...sourcingOrderForm, warehouse_code: wareList.length > 0 && wareList[0].value })
@@ -140,6 +141,11 @@ function SourcingEdit(props) {
     }
     return arr;
   }, [goodsTableDataMap]);
+
+  useEffect(()=>{
+    setGoodsTableDataMap(new Map());
+  }
+  ,[provider_id])
 
   const saveOrder = useCallback(
     () => {
@@ -458,7 +464,6 @@ function SourcingEdit(props) {
     [goodsTableDataMap],
   );
 
-
   const rowMarkup = useMemo(() =>
     selectedGoods.map(({ id, cn_name, en_name, price, sku, purchase_num = 0,purchase_price }, index) => (
       <IndexTable.Row
@@ -572,7 +577,6 @@ function SourcingEdit(props) {
     [provider_id, treeQueryForm],
   );
 
-
   useEffect(() => {
     if (active === false) return;
     const timer = setTimeout(() => {
@@ -584,8 +588,6 @@ function SourcingEdit(props) {
   },
     [active, queryGoodsRequest]
   );
-
-
 
   return (
     <Page
@@ -712,7 +714,10 @@ function SourcingEdit(props) {
               {rowMarkup}
             </IndexTable>
             <div style={{ textAlign: "center" }}>
-              <Button onClick={() => { setActive(true) }}>添加商品</Button>
+              <Button 
+              onClick={() => { setActive(true) }}
+              disabled={ !provider_id }
+              >添加商品</Button>
             </div>
             <br />
           </Card>
