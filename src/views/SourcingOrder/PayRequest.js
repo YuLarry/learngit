@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-19 17:05:46
- * @LastEditTime: 2022-03-07 15:42:38
+ * @LastEditTime: 2022-03-08 17:20:07
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -105,8 +105,6 @@ function PayRequest(props) {
 
   },
     [order])
-
-
 
   const { selectedResources } = useIndexResourceState(items);
 
@@ -305,7 +303,7 @@ function PayRequest(props) {
       breadcrumbs={[{ content: '采购实施列表', url: '/sourcing' }]}
       title="申请付款"
       titleMetadata={<div><Badge status="attention">Verified</Badge> <Badge status="attention">Verified</Badge> <Badge status="attention">Verified</Badge></div>}
-      subtitle="2021-12-25 10:05:00 由xxxxxxxxx创建"
+      subtitle={ order && order.create_message || "" }
     >
       <Layout>
         <Layout.Section>
@@ -339,7 +337,14 @@ function PayRequest(props) {
         </Layout.Section>
         <Layout.Section secondary>
           <SourcingInfoCard
-            poInfo={order || {}}
+            poInfo={order ? 
+            { 
+              ...order, 
+              provider_name: order.provider.business_name,
+              bank_card_number: order.provider_account.bank_card_number,
+              warehouse_name: order.warehouse.name,
+            } 
+            : {}}
             hasMore={true}
           />
         </Layout.Section>

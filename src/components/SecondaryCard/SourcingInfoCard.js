@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-20 16:25:34
- * @LastEditTime: 2022-03-07 11:35:47
+ * @LastEditTime: 2022-03-08 17:31:39
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -23,7 +23,7 @@ function SourcingInfoCard(props) {
     warehouse_name = "",
     purchase_total = "",
     currency = "",
-    purchase_qty = "",
+    purchase_qty = 0,
     remark = "",
     division = "",
     business_type = "",
