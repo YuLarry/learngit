@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-03-07 15:43:43
+ * @LastEditTime: 2022-03-08 11:20:39
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -142,6 +142,8 @@ function SourcingList(props) {
     if (selectedResources.length !== 1) { return false };
     const enableArr = [AUDIT_UNAUDITED, AUDIT_FAILURE, AUDIT_REVOKED];
     const selectedKey = selectedResources[0];
+    if( sourcingListMap.get(selectedKey).po_status === PO_STATUS_CANCEL ) return false;
+    
     return enableArr.indexOf(sourcingListMap.get(selectedKey).audit_status) !== -1
   },
     [selectedResources])
@@ -149,8 +151,9 @@ function SourcingList(props) {
   // audit enable control
   const auditEnable = useMemo(() => {
     if (selectedResources.length !== 1) { return false };
-    const enableArr = [AUDIT_UNAUDITED, AUDIT_FAILURE, AUDIT_REVOKED];
     const selectedKey = selectedResources[0];
+    if( sourcingListMap.get(selectedKey).po_status === PO_STATUS_CANCEL ) return false;
+    const enableArr = [AUDIT_UNAUDITED, AUDIT_FAILURE, AUDIT_REVOKED];
     return enableArr.indexOf(sourcingListMap.get(selectedKey).audit_status) !== -1
 
   }, [selectedResources, sourcingListMap])
@@ -159,6 +162,7 @@ function SourcingList(props) {
   const applyPayEnable = useMemo(() => {
     if (selectedResources.length !== 1) { return false };
     const selectedKey = selectedResources[0];
+    if( sourcingListMap.get(selectedKey).po_status === PO_STATUS_CANCEL ) return false;
     const item = sourcingListMap.get(selectedKey);
     return item.audit_status === AUDIT_PASS || item.payment_status === PAYMENT_STATUS_FAILURE
   }, [selectedResources, sourcingListMap])
@@ -166,6 +170,9 @@ function SourcingList(props) {
   // cancel enable control
   const cancelEnable = useMemo(() => {
     if (selectedResources.length !== 1) { return false };
+    const selectedKey = selectedResources[0];
+    if( sourcingListMap.get(selectedKey).po_status === PO_STATUS_CANCEL ) return false;
+
     const enableArr = [AUDIT_UNAUDITED, AUDIT_FAILURE, AUDIT_REVOKED];
     const index = selectedResources.findIndex(
       (item) =>
@@ -178,6 +185,9 @@ function SourcingList(props) {
   // delete enable control
   const deleteEnable = useMemo(() => {
     if (selectedResources.length !== 1) { return false };
+    const selectedKey = selectedResources[0];
+    if( sourcingListMap.get(selectedKey).po_status === PO_STATUS_CANCEL ) return false;
+
     const enableArr = [AUDIT_UNAUDITED];
     const index = selectedResources.findIndex(
       (item) =>
@@ -190,6 +200,9 @@ function SourcingList(props) {
   // export enable control
   const exportEnable = useMemo(() => {
     if (selectedResources.length !== 1) { return false };
+    const selectedKey = selectedResources[0];
+    if( sourcingListMap.get(selectedKey).po_status === PO_STATUS_CANCEL ) return false;
+
     const enableArr = [AUDIT_AUDITING, AUDIT_PASS];
     const index = selectedResources.findIndex(
       (item) => (enableArr.indexOf(sourcingListMap.get(item).audit_status) === -1)
