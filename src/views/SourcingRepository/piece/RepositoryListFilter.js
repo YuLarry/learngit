@@ -1,16 +1,15 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 15:00:29
- * @LastEditTime: 2022-03-09 12:12:18
+ * @LastEditTime: 2022-03-09 18:04:54
  * @LastEditors: lijunwei
  * @Description: s
  */
 
-import { Checkbox, DatePicker, Filters, RadioButton, Stack } from "@shopify/polaris";
+import { DatePicker, Filters, RadioButton, Stack } from "@shopify/polaris";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { getClientAccount, getProviderList, getWarehouseArea, getWarehouseList } from "../../../api/requests";
 import { ToastContext } from "../../../context/ToastContext";
-import { REPO_STATUS } from "../../../utils/StaticData";
 import moment from "moment"
 
 
@@ -29,12 +28,11 @@ function RepositoryListFilter(props) {
       client_account_code: "",
       warehouse_area: "",
       dateOn: false,
-      // repo_status: new Set(),
     },
     onChange = () => { }
   } = props
 
-  const [common_search, setCommon_search] = useState("");
+  const [common_search, setCommon_search] = useState(filter.common_search || "");
   const [pointer, setPointer] = useState(0);
   useEffect(() => {
     // use pointer to remove init triger filter onchange
@@ -53,13 +51,6 @@ function RepositoryListFilter(props) {
   }, [common_search]);
 
   const [{ month, year }, setDate] = useState({ month: new Date().getMonth(), year: new Date().getFullYear() });
-
-  // const [selectedDates, setSelectedDates] = useState({
-  //   start: new Date(),
-  //   end: new Date(),
-  // });
-
-
 
   const [providerListMap, setProviderListMap] = useState(new Map());
   const [wareHouseListMap, setWareHouseListMap] = useState(new Map());
@@ -89,7 +80,7 @@ function RepositoryListFilter(props) {
 
   useEffect(() => {
     onChange(filterData)
-  }, [filterData, onChange]);
+  }, [filterData]);
 
   const filterChangeHandler = useCallback(
     (key, value, checked) => {
@@ -118,7 +109,7 @@ function RepositoryListFilter(props) {
         checked={filterData.provider_id === id}
         id={`provid-${id}`}
         name="provider"
-        onChange={(checked, id) => { filterChangeHandler("provider_id", id) }}
+        onChange={(checked) => { filterChangeHandler("provider_id", id) }}
       />)
     }
     ))
@@ -135,7 +126,7 @@ function RepositoryListFilter(props) {
         checked={filterData.warehouse_code === code}
         id={`ware-${code}`}
         name="warehouse"
-        onChange={(checked, id) => { filterChangeHandler("warehouse_code", code) }}
+        onChange={(checked) => { filterChangeHandler("warehouse_code", code) }}
       />)
     }
     ))
@@ -151,7 +142,7 @@ function RepositoryListFilter(props) {
         checked={filterData.client_account_code === code}
         id={`clien-${code}`}
         name="client_account_code"
-        onChange={(checked, id) => { filterChangeHandler("client_account_code", code) }}
+        onChange={(checked) => { filterChangeHandler("client_account_code", code) }}
       />)
     }
     return arr;
@@ -168,7 +159,7 @@ function RepositoryListFilter(props) {
         checked={filterData.warehouse_area === code}
         id={`area-${code}`}
         name="warehouse_area"
-        onChange={(checked, id) => { filterChangeHandler("warehouse_area", code) }}
+        onChange={(checked) => { filterChangeHandler("warehouse_area", code) }}
       />)
     }
     return arr;
@@ -218,6 +209,7 @@ function RepositoryListFilter(props) {
     const filters = [];
     for (const key of filterConfig.keys()) {
       const { type, label, dataPool } = filterConfig.get(key);
+      if( !dataPool || dataPool.size === 0 ) break;
       if (type === "date" && filterData.dateOn && filterData[key]) {
         // console.log(filterData[key])
         const data = filterData[key];

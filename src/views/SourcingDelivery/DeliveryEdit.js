@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-03-09 11:32:53
+ * @LastEditTime: 2022-03-09 17:20:03
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -156,12 +156,12 @@ function DeliveryEdit(props) {
   }
     , [formObject])
 
-  useEffect(()=>{
-    if( !form_currency ){
+  useEffect(() => {
+    if (!form_currency) {
       setForm_currency(currenctyOpts[0].value)
     }
   },
-  [currenctyOpts]);
+    [currenctyOpts]);
 
   const productInfo = (product) => {
     if (!product) return null;
@@ -184,7 +184,7 @@ function DeliveryEdit(props) {
   }
 
   const rowMarkup = useMemo(() =>
-    selectedGoods.map(({ id, sku, count = "", goods, goods_name, headKey, symb}, index) => {
+    selectedGoods.map(({ id, sku, count = "", goods, goods_name, headKey, symb }, index) => {
       return (
         <IndexTable.Row
           id={id}
@@ -196,7 +196,7 @@ function DeliveryEdit(props) {
           </IndexTable.Cell>
           <IndexTable.Cell>
             <ProductInfoPopover
-              popoverNode={productInfo( goods )}
+              popoverNode={productInfo(goods)}
             >{sku}</ProductInfoPopover>
           </IndexTable.Cell>
           <IndexTable.Cell>
@@ -289,7 +289,7 @@ function DeliveryEdit(props) {
     () => {
       const arr = [];
       selectGoodsMapTemp.forEach((valueItem) => {
-        arr.push([Symbol(valueItem.sku), {...valueItem}])
+        arr.push([Symbol(valueItem.sku), { ...valueItem }])
       })
       setGoodsTableDataMap(new Map([...goodsTableDataMap, ...arr]))
       setSelectGoodsMapTemp(new Map());
@@ -434,7 +434,7 @@ function DeliveryEdit(props) {
                 content: "确认",
                 destructive: true,
                 onAction: () => {
-                  navigate( -1 );
+                  navigate(-1);
                   modalContext.modal({ active: false });
                 },
               },
@@ -514,7 +514,12 @@ function DeliveryEdit(props) {
 
   return (
     <Page
-      breadcrumbs={[{ content: '采购实施列表', url: '/delivery' }]}
+      breadcrumbs={[{
+        content: '采购实施列表',
+        onAction: () => {
+          navigate( -1 );
+        }
+      }]}
       title={id ? id : "新建发货单"}
       subtitle={detail && detail.create_message || ""}
     >
@@ -562,7 +567,7 @@ function DeliveryEdit(props) {
                     name="shipping_no"
                     id="shipping_no"
                     onChange={handleFormObjectChange}
-                    maxLength={ 50 }
+                    maxLength={50}
                   />
                 </FormLayout.Group>
                 <FormLayout.Group>
@@ -603,7 +608,7 @@ function DeliveryEdit(props) {
                     value={form_currency}
                     name="shipping_currency"
                     id="shipping_currency"
-                    onChange={(val)=>{ setForm_currency(val) }}
+                    onChange={(val) => { setForm_currency(val) }}
                     options={currenctyOpts}
                   />
                   <TextField

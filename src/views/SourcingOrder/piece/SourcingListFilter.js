@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 15:00:29
- * @LastEditTime: 2022-03-04 15:39:27
+ * @LastEditTime: 2022-03-09 16:47:02
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -24,7 +24,7 @@ function SourcingListFilter(props) {
     payment_status: new Set(),
     delivery_status: new Set(),
   }, onChange = ()=>{} } = props
-  const [common_search, setCommon_search] = useState("");
+  const [common_search, setCommon_search] = useState(filter.common_search || "");
 
   const toastContext = useContext(ToastContext);
   const [providerList, setProviderList] = useState([]);
@@ -197,6 +197,7 @@ function SourcingListFilter(props) {
     const filters = [];
     for (const key of filterConfig.keys()) {
       const { type, label, dataPool } = filterConfig.get(key);
+      if( !dataPool || dataPool.size === 0 ) break;
       if (type === "radio" && filterData[key]) {
         const { textKey } = filterConfig.get(key);
 

@@ -1,14 +1,14 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-03-09 11:43:06
+ * @LastEditTime: 2022-03-09 17:20:15
  * @LastEditors: lijunwei
  * @Description: 
  */
 
 import { Button, Card, IndexTable, Page, Pagination, Tabs, TextStyle, Thumbnail, useIndexResourceState } from "@shopify/polaris";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { DeliveryListFilter } from "./piece/DeliveryListFilter";
 import { AUDIT_AUDITING, AUDIT_FAILURE, AUDIT_PASS, AUDIT_REVOKED, AUDIT_UNAUDITED, INBOUND_TYPE, PAYMENT_STATUS_FAILURE, REPO_STATUS_ALL, REPO_STATUS_PENDING, REPO_STATUS_PORTION, REPO_STATUS_SUCCESS } from "../../utils/StaticData";
 import { deleteShippingOrder, getShipingList } from "../../api/requests";
@@ -21,9 +21,30 @@ import moment from "moment";
 
 
 function DeliveryList(props) {
-
-
   const navigate = useNavigate();
+
+  const [searchParams, setSearchParams] = useSearchParams();
+  const queryParamObj = useMemo(() => {
+    return (
+      searchParams.get("querys") && JSON.parse(atob(searchParams.get("querys"))) || {}
+    )
+  }
+    , [searchParams])
+  let {
+    provider_id = "",
+    warehouse_code = "",
+    shipping_date = {
+      start: new Date(),
+      end: new Date(),
+    },
+    dateOn = false,
+    common_search = "",
+
+    per_page,
+    page = 1,
+    status = REPO_STATUS_ALL
+  } = queryParamObj || {};
+
 
   const loadingContext = useContext(LoadingContext);
   const toastContext = useContext(ToastContext);
@@ -31,22 +52,18 @@ function DeliveryList(props) {
 
   const [refresh, setRefresh] = useState(0);
 
-  const [pageIndex, setPageIndex] = useState(1);
+  const [pageIndex, setPageIndex] = useState(page || 1);
   const pageSize = 20;
   const [total, setTotal] = useState(0);
 
   const [listLoading, setListLoading] = useState(false);
 
   const [filter, setFilter] = useState({
-    provider_id: "",
-    warehouse_code: "",
-    shipping_date: {
-      start: new Date(),
-      end: new Date(),
-    },
-    dateOn: false,
-    common_search: "",
-    repo_status: new Set(),
+    provider_id,
+    warehouse_code,
+    shipping_date,
+    dateOn,
+    common_search,
   });
 
   const resourceName = {
@@ -80,7 +97,7 @@ function DeliveryList(props) {
     ]
   }, []);
 
-  const [queryListStatus, setQueryListStatus] = useState(REPO_STATUS_ALL);
+  const [queryListStatus, setQueryListStatus] = useState(status);
 
   const [selectedTab, setSelectedTab] = useState(0);
   const handleTabChange = useCallback(
@@ -89,11 +106,6 @@ function DeliveryList(props) {
       setQueryListStatus(tabs[selectedTabIndex].id)
     }, [tabs]
   );
-
-
-
-  // const [exporting, setExporting] = useState(false);
-
 
   const pageStatus = useMemo(() => {
     const status = {
@@ -124,9 +136,6 @@ function DeliveryList(props) {
     setDeliveryListMap(tempMap);
   }
     , [deliveryList])
-
-
-
 
   const { selectedResources, allResourcesSelected, handleSelectionChange } = useIndexResourceState(deliveryList);
 
@@ -163,7 +172,6 @@ function DeliveryList(props) {
 
   }, [selectedResources, deliveryListMap])
 
-
   const deleteOrder = useCallback((id) => {
     loadingContext.loading(true);
     deleteShippingOrder(id)
@@ -179,8 +187,6 @@ function DeliveryList(props) {
         loadingContext.loading(false);
       })
   }, [refreshTrigger])
-
-
 
 
   const promotedBulkActions = useMemo(() => {
@@ -251,7 +257,7 @@ function DeliveryList(props) {
             // removeUnderline
             url={`detail/${id}`}
           >
-          <TextStyle variation="strong">{shipping_no}</TextStyle>
+            <TextStyle variation="strong">{shipping_no}</TextStyle>
           </Button>
         </IndexTable.Cell>
         <IndexTable.Cell>{business_name}</IndexTable.Cell>
@@ -270,26 +276,27 @@ function DeliveryList(props) {
 
   useEffect(() => {
     setListLoading(true);
+    console.log("xxxx")
     clearSelectedResources();
     const { dateOn, shipping_date: { start, end } } = filter;
-    getShipingList(
-      {
-        ...filter,
-        shipping_date: (
-          dateOn
-            ?
-            [
-              moment(start).format("YYYY-MM-DD"),
-              moment(end).format("YYYY-MM-DD")
-            ]
-            :
-            []
-        ),
-        per_page: pageSize,
-        page: pageIndex,
-        status: queryListStatus,
-      }
-    )
+    const queryData = {
+      ...filter,
+      shipping_date: (
+        dateOn
+          ?
+          [
+            moment(start).format("YYYY-MM-DD"),
+            moment(end).format("YYYY-MM-DD")
+          ]
+          :
+          []
+      ),
+      per_page: pageSize,
+      page: pageIndex,
+      status: queryListStatus,
+    }
+    setSearchParams( {querys :btoa(JSON.stringify( queryData ))} );
+    getShipingList(queryData)
       .then(res => {
         const { data: { list, meta: { pagination: { total = 0 } } } } = res;
         setTotal(total)
@@ -309,7 +316,7 @@ function DeliveryList(props) {
     >
       <Card>
         <Tabs
-          tabs={ tabs} selected={ selectedTab } onSelect={handleTabChange}
+          tabs={tabs} selected={selectedTab} onSelect={handleTabChange}
         ></Tabs>
         <div style={{ padding: '16px', display: 'flex' }}>
           <div style={{ flex: 1 }}>
@@ -330,7 +337,7 @@ function DeliveryList(props) {
             allResourcesSelected ? 'All' : selectedResources.length
           }
           // onSelectionChange={handleSelectionChange}
-          onSelectionChange={(a,b,c)=>{ handleSelectionChange( a, b , c ) }}
+          onSelectionChange={(a, b, c) => { handleSelectionChange(a, b, c) }}
           promotedBulkActions={promotedBulkActions}
           headings={[
             { title: "发货单号" },

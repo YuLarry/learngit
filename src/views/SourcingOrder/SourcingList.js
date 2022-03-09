@@ -1,14 +1,14 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-03-09 11:18:59
+ * @LastEditTime: 2022-03-09 17:22:12
  * @LastEditors: lijunwei
  * @Description: 
  */
 
 import { Button, Card, DatePicker, IndexTable, Link, Modal, Page, Pagination, RadioButton, Select, Stack, Tabs, TextStyle, Thumbnail, useIndexResourceState } from "@shopify/polaris";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { cancelSourcingOrder, commitApproval, deleteSourcingOrder, exportOrderExcel, exportOrderPdf, getBrandList, querySourcingList } from "../../api/requests";
 import { ProductInfoPopover } from "../../components/ProductInfoPopover/ProductInfoPopover";
 import { BadgeAuditStatus } from "../../components/StatusBadges/BadgeAuditStatus";
@@ -25,28 +25,48 @@ import { BACKEND_GOODS_DETAIL } from "../../api/apiUrl";
 
 function SourcingList(props) {
 
-  // console.log( BACKEND_GOODS_DETAIL );
+  const [searchParams, setSearchParams] = useSearchParams();
+  const queryParamObj = useMemo(() => {
+    return (
+      searchParams.get("querys") && JSON.parse( atob(searchParams.get("querys") ) ) || {}
+      )
+  }
+    , [searchParams])
+  let {
+    provider_id,
+    subject_code,
+    warehouse_code,
+    po,
+    common_search,
+    audit_status = new Set(),
+    payment_status = new Set(),
+    delivery_status = new Set(),
+
+    po_status,
+    per_page,
+    page,
+  } = queryParamObj;
 
   const navigate = useNavigate();
   const loadingContext = useContext(LoadingContext);
   const toastContext = useContext(ToastContext);
 
-  const [pageIndex, setPageIndex] = useState(1);
+  const [pageIndex, setPageIndex] = useState(page || 1);
   const pageSize = 20;
   const [total, setTotal] = useState(0);
   const [refresh, setRefresh] = useState(0);
   const [listLoading, setListLoading] = useState(false);
-
+  
 
   const [filter, setFilter] = useState({
-    provider_id: "",
-    subject_code: "",
-    warehouse_code: "",
-    po: "",
-    common_search: "",
-    audit_status: new Set(),
-    payment_status: new Set(),
-    delivery_status: new Set(),
+    provider_id,
+    subject_code,
+    warehouse_code,
+    po,
+    common_search,
+    audit_status: new Set([...audit_status]),
+    payment_status: new Set([...payment_status]),
+    delivery_status: new Set([...delivery_status]),
   });
 
   const tabs = useMemo(() => {
@@ -75,7 +95,7 @@ function SourcingList(props) {
     ]
   }, []);
 
-  const [queryListStatus, setQueryListStatus] = useState(PO_STATUS_ALL);
+  const [queryListStatus, setQueryListStatus] = useState( po_status || PO_STATUS_ALL);
 
   const [selectedTab, setSelectedTab] = useState(0);
   const handleTabChange = useCallback(
@@ -142,8 +162,8 @@ function SourcingList(props) {
     if (selectedResources.length !== 1) { return false };
     const enableArr = [AUDIT_UNAUDITED, AUDIT_FAILURE, AUDIT_REVOKED];
     const selectedKey = selectedResources[0];
-    if( sourcingListMap.get(selectedKey).po_status === PO_STATUS_CANCEL ) return false;
-    
+    if (sourcingListMap.get(selectedKey).po_status === PO_STATUS_CANCEL) return false;
+
     return enableArr.indexOf(sourcingListMap.get(selectedKey).audit_status) !== -1
   },
     [selectedResources])
@@ -152,7 +172,7 @@ function SourcingList(props) {
   const auditEnable = useMemo(() => {
     if (selectedResources.length !== 1) { return false };
     const selectedKey = selectedResources[0];
-    if( sourcingListMap.get(selectedKey).po_status === PO_STATUS_CANCEL ) return false;
+    if (sourcingListMap.get(selectedKey).po_status === PO_STATUS_CANCEL) return false;
     const enableArr = [AUDIT_UNAUDITED, AUDIT_FAILURE, AUDIT_REVOKED];
     return enableArr.indexOf(sourcingListMap.get(selectedKey).audit_status) !== -1
 
@@ -162,8 +182,8 @@ function SourcingList(props) {
   const applyPayEnable = useMemo(() => {
     if (selectedResources.length !== 1) { return false };
     const selectedKey = selectedResources[0];
-    if( sourcingListMap.get(selectedKey).po_status === PO_STATUS_CANCEL ) return false;
-    if( sourcingListMap.get(selectedKey).audit_status === AUDIT_REVOKED ) return false;
+    if (sourcingListMap.get(selectedKey).po_status === PO_STATUS_CANCEL) return false;
+    if (sourcingListMap.get(selectedKey).audit_status === AUDIT_REVOKED) return false;
     const item = sourcingListMap.get(selectedKey);
     return item.audit_status === AUDIT_PASS || item.payment_status === PAYMENT_STATUS_FAILURE
   }, [selectedResources, sourcingListMap])
@@ -172,7 +192,7 @@ function SourcingList(props) {
   const cancelEnable = useMemo(() => {
     if (selectedResources.length !== 1) { return false };
     const selectedKey = selectedResources[0];
-    if( sourcingListMap.get(selectedKey).po_status === PO_STATUS_CANCEL ) return false;
+    if (sourcingListMap.get(selectedKey).po_status === PO_STATUS_CANCEL) return false;
 
     const enableArr = [AUDIT_UNAUDITED, AUDIT_FAILURE, AUDIT_REVOKED];
     const index = selectedResources.findIndex(
@@ -187,7 +207,7 @@ function SourcingList(props) {
   const deleteEnable = useMemo(() => {
     if (selectedResources.length !== 1) { return false };
     const selectedKey = selectedResources[0];
-    if( sourcingListMap.get(selectedKey).po_status === PO_STATUS_CANCEL ) return false;
+    if (sourcingListMap.get(selectedKey).po_status === PO_STATUS_CANCEL) return false;
 
     const enableArr = [AUDIT_UNAUDITED];
     const index = selectedResources.findIndex(
@@ -202,7 +222,7 @@ function SourcingList(props) {
   const exportEnable = useMemo(() => {
     if (selectedResources.length !== 1) { return false };
     const selectedKey = selectedResources[0];
-    if( sourcingListMap.get(selectedKey).po_status === PO_STATUS_CANCEL ) return false;
+    if (sourcingListMap.get(selectedKey).po_status === PO_STATUS_CANCEL) return false;
 
     const enableArr = [AUDIT_AUDITING, AUDIT_PASS];
     const index = selectedResources.findIndex(
@@ -363,7 +383,7 @@ function SourcingList(props) {
   }, [])
 
   const rowMarkup = useMemo(() => sourcingList.map(
-    ({ id, po_no, subject_title, provider_name, warehouse_name, audit_status, payment_status, delivery_status, item }, index) => {
+    ({ id, po_no, provider = {}, warehouse = {}, subject = {}, audit_status, payment_status, delivery_status, item }, index) => {
 
       const prodNod = item.map((goodsItem, idx) => (goodsItemNode(goodsItem, idx)))
       const poBase64 = window.btoa(encodeURIComponent(po_no));
@@ -383,9 +403,9 @@ function SourcingList(props) {
             <TextStyle variation="strong">{po_no}</TextStyle>
           </Button>
         </IndexTable.Cell>
-        <IndexTable.Cell>{subject_title}</IndexTable.Cell>
-        <IndexTable.Cell>{provider_name}</IndexTable.Cell>
-        <IndexTable.Cell>{warehouse_name}</IndexTable.Cell>
+        <IndexTable.Cell>{subject && subject.title || ""}</IndexTable.Cell>
+        <IndexTable.Cell>{provider && provider.business_name || ""}</IndexTable.Cell>
+        <IndexTable.Cell>{warehouse && warehouse.name || ""}</IndexTable.Cell>
         <IndexTable.Cell>
           {<BadgeAuditStatus status={audit_status} />}
         </IndexTable.Cell>
@@ -420,21 +440,23 @@ function SourcingList(props) {
       payment_status = new Set(),
       delivery_status = new Set(),
     } = filter;
-    querySourcingList(
-      {
-        provider_id,
-        subject_code,
-        warehouse_code,
-        po,
-        common_search,
-        audit_status: [...audit_status],
-        payment_status: [...payment_status],
-        delivery_status: [...delivery_status],
-        po_status: queryListStatus,
-        per_page: pageSize,
-        page: pageIndex
-      }
-    )
+
+    const queryData = {
+      provider_id,
+      subject_code,
+      warehouse_code,
+      po,
+      common_search,
+      audit_status: [...audit_status],
+      payment_status: [...payment_status],
+      delivery_status: [...delivery_status],
+      po_status: queryListStatus,
+      per_page: pageSize,
+      page: pageIndex
+    };
+    setSearchParams({ querys: btoa(JSON.stringify(queryData)) })
+    console.log(searchParams.get("querys"));
+    querySourcingList(queryData)
       .then(res => {
         const { data: { list, meta: { pagination: { total = 0 } } } } = res;
         setSourcingList(list);
@@ -443,7 +465,7 @@ function SourcingList(props) {
       .finally(() => {
         setListLoading(false)
       })
-  }, [filter, pageIndex, queryListStatus, refresh])
+  }, [filter, pageIndex, queryListStatus, refresh, searchParams, setSearchParams])
 
 
   // export modal

@@ -1,14 +1,14 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-03-09 12:04:20
+ * @LastEditTime: 2022-03-09 18:05:55
  * @LastEditors: lijunwei
  * @Description: 
  */
 
 import { Button, Card, IndexTable, Page, Pagination, Tabs, TextStyle, useIndexResourceState } from "@shopify/polaris";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { confirmInbound, getRepoTableList } from "../../api/requests";
 import { BadgeInboundStatus } from "../../components/StatusBadges/BadgeInboundStatus";
 import { LoadingContext } from "../../context/LoadingContext";
@@ -22,35 +22,46 @@ import moment from "moment"
 
 function RepositoryList(props) {
 
-  const navigation = useNavigate();
-
-  const loadingContext = useContext(LoadingContext);
-  const modalContext = useContext(ModalContext);
-  const toastContext = useContext(ToastContext);
-  const [listLoading, setListLoading] = useState(false);
-
-
-
-
-  const [filter, setFilter] = useState({
-    provider_id: "",
-    warehouse_code: "",
-    create_date: {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const queryParamObj = useMemo(() => {
+    return (
+      searchParams.get("querys") && JSON.parse(atob(searchParams.get("querys"))) || {}
+    )
+  }
+    , [searchParams])
+  let {
+    provider_id = "",
+    warehouse_code = "",
+    create_date = {
       start: new Date(),
       end: new Date(),
     },
-    common_search: "",
-    client_account_code: "",
-    warehouse_area: "",
-    dateOn: false,
+    common_search = "",
+    client_account_code = "",
+    warehouse_area = "",
+    dateOn = false,
+    status,
+    per_page,
+    page = 1,
+  } = queryParamObj || {};
+
+  const loadingContext = useContext(LoadingContext);
+  const toastContext = useContext(ToastContext);
+  const [listLoading, setListLoading] = useState(false);
+
+  const [filter, setFilter] = useState({
+    provider_id,
+    warehouse_code,
+    create_date,
+    common_search,
+    client_account_code,
+    warehouse_area,
+    dateOn,
   });
 
-  const [pageIndex, setPageIndex] = useState(1);
+  const [pageIndex, setPageIndex] = useState( page );
   const pageSize = 20;
   const [total, setTotal] = useState(0);
-
-  // const [exporting, setExporting] = useState(false);
-
 
   const pageStatus = useMemo(() => {
     const status = {
@@ -71,7 +82,7 @@ function RepositoryList(props) {
   const tableList = useMemo(() => {
     const arr = [];
     tableListMap.forEach((item, key) => {
-      arr.push( item );
+      arr.push(item);
     })
     return arr;
   }, [tableListMap]);
@@ -82,7 +93,12 @@ function RepositoryList(props) {
   };
 
   const { selectedResources, allResourcesSelected, handleSelectionChange } = useIndexResourceState(tableList);
-
+  const clearSelectedResources = useCallback(() => {
+    selectedResources.map((selectedItem) => {
+      handleSelectionChange("single", false, selectedItem)
+    })
+  },
+    [handleSelectionChange, selectedResources])
 
   const rowMarkup = tableList.map(
     ({ id, inbound_no, plan_total_qty, actual_total_qty, client_account_code, item, provider_name, warehouse_area, warehouse_name, status }, index) => (
@@ -115,7 +131,6 @@ function RepositoryList(props) {
     ),
   );
 
-
   const tabs = useMemo(() => ([
     {
       id: INBOUND_STATUS_ALL,
@@ -141,17 +156,19 @@ function RepositoryList(props) {
   ]),
     []);
 
+  const [queryListStatus, setQueryListStatus] = useState( status || INBOUND_STATUS_ALL );
   const [selectedTab, setSelectedTab] = useState(0);
-  const status = useMemo(() => (tabs[selectedTab].id), [selectedTab, tabs]);
   const handleTabChange = useCallback(
-    (selectedTabIndex) => setSelectedTab(selectedTabIndex),
-    [],
+    (selectedTabIndex) => {
+      setSelectedTab(selectedTabIndex);
+      setQueryListStatus(tabs[selectedTabIndex].id)
+    }
+    ,[tabs]
   );
 
   const [refresh, setRefresh] = useState(0);
 
   useEffect(() => {
-    // loadingContext.loading(true)
     setListLoading(true)
     const { dateOn, create_date: { start, end } } = filter;
     const data = {
@@ -160,27 +177,25 @@ function RepositoryList(props) {
         moment(start).format("YYYY-MM-DD"),
         moment(end).format("YYYY-MM-DD")
       ] : [],
-      status,
+      status: queryListStatus,
       per_page: pageSize,
       page: pageIndex,
     }
-    getRepoTableList(
-      data
-    )
+    setSearchParams( {querys: btoa(JSON.stringify(data))} );
+    clearSelectedResources();
+    getRepoTableList(data)
       .then(res => {
         const { data: { list } } = res;
         const _map = new Map();
         list.map((item) => {
-          _map.set( item.id, item );
+          _map.set(item.id, item);
         })
         setTableListMap(_map);
       })
       .finally(() => {
-        // loadingContext.loading(false)
         setListLoading(false)
-
       })
-  }, [filter, pageIndex, selectedTab, status, refresh]);
+  }, [filter, pageIndex, queryListStatus]);
 
   const [modalSkuList, setModalSkuList] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
@@ -231,7 +246,6 @@ function RepositoryList(props) {
             message: "手动入库成功",
             duration: 1000,
           })
-
           setRefresh(refresh + 1);
         })
         .finally(() => {

@@ -1,14 +1,14 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-24 15:50:14
- * @LastEditTime: 2022-03-07 15:44:08
+ * @LastEditTime: 2022-03-09 17:35:56
  * @LastEditors: lijunwei
  * @Description: 
  */
 
 import { Badge, Card, IndexTable, Layout, Page, Thumbnail } from "@shopify/polaris";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { confirmInbound, getInboundDetail } from "../../api/requests";
 import { FstlnTimeline } from "../../components/FstlnTimeline/FstlnTimeline";
 import { ProductInfoPopover } from "../../components/ProductInfoPopover/ProductInfoPopover";
@@ -20,7 +20,7 @@ import { ToastContext } from "../../context/ToastContext";
 import { InRepositoryManualModal } from "./piece/InRepositoryManualModal";
 
 function RepositoryDetail(props) {
-
+  const navigate = useNavigate();
   const loadingContext = useContext(LoadingContext);
   const modalContext = useContext(ModalContext);
   const toastContext = useContext(ToastContext);
@@ -136,7 +136,12 @@ function RepositoryDetail(props) {
 
   return (
     <Page
-      breadcrumbs={[{ content: '入库单列表', url: '/repository' }]}
+      breadcrumbs={[{ 
+        content: '入库单列表',
+        onAction: ()=>{
+          navigate( -1 )
+        }
+      }]}
       title={id}
       titleMetadata={<BadgeInboundStatus status={detail && detail.status} />}
       subtitle={detail && detail.create_message || ""}

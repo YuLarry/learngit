@@ -1,16 +1,15 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 15:00:29
- * @LastEditTime: 2022-03-04 15:40:35
+ * @LastEditTime: 2022-03-09 18:03:16
  * @LastEditors: lijunwei
- * @Description: s
+ * @Description: 
  */
 
-import { Checkbox, DatePicker, Filters, RadioButton, Stack } from "@shopify/polaris";
+import { DatePicker, Filters, RadioButton, Stack } from "@shopify/polaris";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { getProviderList, getWarehouseList } from "../../../api/requests";
 import { ToastContext } from "../../../context/ToastContext";
-import { REPO_STATUS } from "../../../utils/StaticData";
 import moment from "moment";
 
 function DeliveryListFilter(props) {
@@ -25,12 +24,27 @@ function DeliveryListFilter(props) {
       },
       dateOn: false,
       common_search: "",
-      repo_status: new Set(),
-
     },
     onChange = () => { }
   } = props
-
+  const [common_search, setCommon_search] = useState(filter.common_search || "");
+  const [pointer, setPointer] = useState(0);
+  useEffect(() => {
+    // use pointer to remove init triger filter onchange
+    setPointer(pointer + 1);
+    if (pointer > 0) {
+      const timer = setTimeout(() => {
+        onChange({
+          ...filter,
+          common_search
+        })
+      }, 1000);
+      return () => {
+        clearTimeout(timer)
+      }
+    }
+  }, [common_search]);
+  
   const toastContext = useContext(ToastContext);
   const [providerList, setProviderList] = useState([]);
   const [wareHouseList, setWareHouseList] = useState([]);
@@ -38,8 +52,6 @@ function DeliveryListFilter(props) {
   const [wareHouseListMap, setWareHouseListMap] = useState(new Map());
 
   const [filterData, setFilterData] = useState(filter);
-
-  const [common_search, setCommon_search] = useState("");
 
 
   useEffect(() => {
@@ -96,33 +108,11 @@ function DeliveryListFilter(props) {
     , [filterChangeHandler, filterData.warehouse_code, wareHouseList])
 
 
-  // repo status checkbox
-  const repoStatusCheckboxMarkup = useMemo(() => {
-    const checkBoxes = [];
-    REPO_STATUS.forEach((statusLabel, entry) => {
-      checkBoxes.push(
-        (<Checkbox
-          key={`stat-${entry}`}
-          label={statusLabel}
-          checked={filterData.repo_status.has(entry)}
-          id={`stat-${entry}`}
-          name="paymentStatus"
-          onChange={(checked) => { filterChangeHandler("repo_status", entry, checked) }}
-        />)
-      )
-    })
-    return checkBoxes
-  }, [filterChangeHandler, filterData.repo_status]);
-
-
-
-
   const filterConfig = useMemo(() => {
     const config = new Map();
     config.set("provider_id", { label: "供应商", type: "radio", dataPool: providerListMap, textKey: "business_name" });
     config.set("warehouse_code", { label: "收货仓库", type: "radio", dataPool: wareHouseListMap, textKey: "name" });
     config.set("shipping_date", { label: "发货日期", type: "date" });
-    config.set("repo_status", { label: "预报状态", type: "checkbox", dataPool: REPO_STATUS });
     return config;
   }, [providerListMap, wareHouseListMap]);
 
@@ -157,6 +147,7 @@ function DeliveryListFilter(props) {
     const filters = [];
     for (const key of filterConfig.keys()) {
       const { type, label, dataPool } = filterConfig.get(key);
+      if( !dataPool || dataPool.size === 0 ) break;
       if (type === "date" && filterData.dateOn && filterData[key]) {
         const data = filterData[key];
         if (data.start && data.end) {
@@ -320,22 +311,7 @@ function DeliveryListFilter(props) {
   },
     [])
 
-  const [pointer, setPointer] = useState(0);
-  useEffect(() => {
-    // use pointer to remove init triger filter onchange
-    setPointer(pointer + 1);
-    if (pointer > 0) {
-      const timer = setTimeout(() => {
-        onChange({
-          ...filter,
-          common_search
-        })
-      }, 1000);
-      return () => {
-        clearTimeout(timer)
-      }
-    }
-  }, [common_search]);
+  
 
   return (
     <Filters
