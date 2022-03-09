@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-03-07 15:28:41
+ * @LastEditTime: 2022-03-09 12:04:20
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -66,8 +66,16 @@ function RepositoryList(props) {
     return status
   }, [pageIndex, total]);
 
+  const [tableListMap, setTableListMap] = useState(new Map());
 
-  const [tableList, setTableList] = useState([]);
+  const tableList = useMemo(() => {
+    const arr = [];
+    tableListMap.forEach((item, key) => {
+      arr.push( item );
+    })
+    return arr;
+  }, [tableListMap]);
+
   const resourceName = {
     singular: '入库单',
     plural: '入库单',
@@ -100,7 +108,7 @@ function RepositoryList(props) {
         <IndexTable.Cell>
           <BadgeInboundStatus status={status} />
         </IndexTable.Cell>
-        <IndexTable.Cell>商品</IndexTable.Cell>
+        <IndexTable.Cell>{`${item.length} 商品`}</IndexTable.Cell>
         <IndexTable.Cell>{plan_total_qty}</IndexTable.Cell>
         <IndexTable.Cell>{actual_total_qty}</IndexTable.Cell>
       </IndexTable.Row>
@@ -161,7 +169,11 @@ function RepositoryList(props) {
     )
       .then(res => {
         const { data: { list } } = res;
-        setTableList(list);
+        const _map = new Map();
+        list.map((item) => {
+          _map.set( item.id, item );
+        })
+        setTableListMap(_map);
       })
       .finally(() => {
         // loadingContext.loading(false)
@@ -172,20 +184,30 @@ function RepositoryList(props) {
 
   const [modalSkuList, setModalSkuList] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
+
+  // repo action enable control
+  const repoEnabled = useMemo(() => {
+    if (selectedResources.length !== 1) { return false };
+    const enableArr = [INBOUND_STATUS_PENDING, INBOUND_STATUS_PORTION];
+    const index = selectedResources.findIndex((item) => (enableArr.indexOf(tableListMap.get(item).status) === -1))
+    return index === -1
+
+  }, [selectedResources, tableListMap])
+
+
   const promotedBulkActions = useMemo(() => {
     return (
       [
         {
           content: '手动确定入库',
           onAction: () => {
-            // setModalSkuList()
-            const inboundItem = tableList.find( item => item.id === selectedResources[0])
-            // console.log(inboundItem);
-            if( inboundItem ){
+            const inboundItem = tableList.find(item => item.id === selectedResources[0])
+            if (inboundItem) {
               setModalSkuList(inboundItem.item);
             }
             setModalOpen(true);
           },
+          disabled: !repoEnabled,
         },
 
       ]
@@ -194,28 +216,28 @@ function RepositoryList(props) {
 
   const commitModal = useCallback(
     () => {
-      const { inbound_no } = tableList.find( item => item.id === selectedResources[0])
-      const inbound_item = modalSkuList.map(({po_item_id, inbound_qty})=>({po_item_id, inbound_qty: parseInt(inbound_qty)}))
+      const { inbound_no } = tableList.find(item => item.id === selectedResources[0])
+      const inbound_item = modalSkuList.map(({ po_item_id, inbound_qty }) => ({ po_item_id, inbound_qty: parseInt(inbound_qty) }))
       const data = {
         inbound_no,
         inbound_item,
       }
       loadingContext.loading(true);
-      confirmInbound( data )
-      .then(res=>{
-        setModalOpen(false);
-        toastContext.toast({
-          active: true,
-          message: "手动入库成功",
-          duration: 1000,
-        })
+      confirmInbound(data)
+        .then(res => {
+          setModalOpen(false);
+          toastContext.toast({
+            active: true,
+            message: "手动入库成功",
+            duration: 1000,
+          })
 
-        setRefresh(refresh + 1);
-      })
-      .finally(()=>{
-      loadingContext.loading(false);
-        
-      })
+          setRefresh(refresh + 1);
+        })
+        .finally(() => {
+          loadingContext.loading(false);
+
+        })
     },
     [tableList, modalSkuList, selectedResources],
   );
@@ -284,7 +306,7 @@ function RepositoryList(props) {
         modalOpenChange={(openStatus) => { setModalOpen(openStatus) }}
         tableList={modalSkuList}
         tableListChange={(list) => { setModalSkuList(list) }}
-        onCommit={ ( list )=>{ console.log(list);commitModal() } }
+        onCommit={(list) => { console.log(list); commitModal() }}
       />
 
     </Page>

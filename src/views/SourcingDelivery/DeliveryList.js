@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-03-04 16:05:56
+ * @LastEditTime: 2022-03-09 11:43:06
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -248,6 +248,7 @@ function DeliveryList(props) {
           <Button
             plain
             monochrome
+            // removeUnderline
             url={`detail/${id}`}
           >
           <TextStyle variation="strong">{shipping_no}</TextStyle>

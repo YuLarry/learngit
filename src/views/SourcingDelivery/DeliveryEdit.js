@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-03-08 19:00:49
+ * @LastEditTime: 2022-03-09 11:32:53
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -161,11 +161,30 @@ function DeliveryEdit(props) {
       setForm_currency(currenctyOpts[0].value)
     }
   },
-  [currenctyOpts])  
+  [currenctyOpts]);
 
+  const productInfo = (product) => {
+    if (!product) return null;
+    const { cn_name, en_name, image_url, id, price, sku } = product;
+    return (
+      <div className="product-container" style={{ maxWidth: "400px", display: "flex", alignItems: "flex-start" }}>
+
+        <Thumbnail
+          source={image_url || ""}
+          alt={en_name}
+          size="small"
+        />
+        <div style={{ flex: 1, marginLeft: "1em" }}>
+          <h4>{en_name}</h4>
+          <h4>{cn_name}</h4>
+          <span>{price}</span>
+        </div>
+      </div>
+    )
+  }
 
   const rowMarkup = useMemo(() =>
-    selectedGoods.map(({ id, sku, count = "", goods_name, headKey, symb}, index) => {
+    selectedGoods.map(({ id, sku, count = "", goods, goods_name, headKey, symb}, index) => {
       return (
         <IndexTable.Row
           id={id}
@@ -176,7 +195,9 @@ function DeliveryEdit(props) {
             {headKey}
           </IndexTable.Cell>
           <IndexTable.Cell>
-            <ProductInfoPopover>{sku}</ProductInfoPopover>
+            <ProductInfoPopover
+              popoverNode={productInfo( goods )}
+            >{sku}</ProductInfoPopover>
           </IndexTable.Cell>
           <IndexTable.Cell>
             <div style={{ width: "8em" }}>
@@ -242,7 +263,8 @@ function DeliveryEdit(props) {
       if (second_last.provider.id !== last.provider.id || second_last.warehouse.id !== last.warehouse.id) {
         toastContext.toast({
           active: true,
-          message: `选择的商品与已选择的供应商「${second_last.provider.business_name}」发货仓库「${second_last.warehouse.name}」不符`,
+          // message: `选择的商品与已选择的供应商「${second_last.provider.business_name}」发货仓库「${second_last.warehouse.name}」不符`,
+          message: `该操作与发货单已选供应商/收货仓库冲突，请重新选择已有供应商/收货仓库对应的SKU！`,
           duration: 1000,
         })
         return false;
@@ -390,7 +412,6 @@ function DeliveryEdit(props) {
     [formObject, goodsTableDataMap, active])
 
 
-
   useEffect(() => {
     unsavedChangeContext.remind({
       active: true,
@@ -413,7 +434,8 @@ function DeliveryEdit(props) {
                 content: "确认",
                 destructive: true,
                 onAction: () => {
-                  modalContext.modal({ active: false })
+                  navigate( -1 );
+                  modalContext.modal({ active: false });
                 },
               },
               secondaryActions: [
@@ -527,7 +549,7 @@ function DeliveryEdit(props) {
           </Card>
 
 
-          <Card title="采购单信息" sectioned>
+          <Card title="物流信息" sectioned>
             <Form
               onSubmit={() => { }}
             >

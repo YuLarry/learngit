@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 15:00:29
- * @LastEditTime: 2022-02-18 11:39:56
+ * @LastEditTime: 2022-03-09 12:12:18
  * @LastEditors: lijunwei
  * @Description: s
  */
@@ -113,10 +113,10 @@ function RepositoryListFilter(props) {
     providerList.map((provider => {
       const { id, business_name } = provider
       return (<RadioButton
-        key={id}
+        key={`provid-${id}`}
         label={business_name}
         checked={filterData.provider_id === id}
-        id={id}
+        id={`provid-${id}`}
         name="provider"
         onChange={(checked, id) => { filterChangeHandler("provider_id", id) }}
       />)
@@ -130,10 +130,10 @@ function RepositoryListFilter(props) {
     wareHouseList.map((warehouse => {
       const { code, name } = warehouse
       return (<RadioButton
-        key={code}
+        key={`ware-${code}`}
         label={name}
         checked={filterData.warehouse_code === code}
-        id={code}
+        id={`ware-${code}`}
         name="warehouse"
         onChange={(checked, id) => { filterChangeHandler("warehouse_code", code) }}
       />)
@@ -146,10 +146,10 @@ function RepositoryListFilter(props) {
     const arr = [];
     for (const [code, name] of clientListMap) {
       arr.push(<RadioButton
-        key={code}
+        key={`clien-${code}`}
         label={name}
         checked={filterData.client_account_code === code}
-        id={code}
+        id={`clien-${code}`}
         name="client_account_code"
         onChange={(checked, id) => { filterChangeHandler("client_account_code", code) }}
       />)
@@ -163,10 +163,10 @@ function RepositoryListFilter(props) {
     const arr = [];
     for (const [code, name] of warehouseAreaMap) {
       arr.push(<RadioButton
-        key={code}
+        key={`area-${code}`}
         label={name}
         checked={filterData.warehouse_area === code}
-        id={code}
+        id={`area-${code}`}
         name="warehouse_area"
         onChange={(checked, id) => { filterChangeHandler("warehouse_area", code) }}
       />)

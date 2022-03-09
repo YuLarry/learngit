@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-03-08 11:20:39
+ * @LastEditTime: 2022-03-09 11:18:59
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -163,6 +163,7 @@ function SourcingList(props) {
     if (selectedResources.length !== 1) { return false };
     const selectedKey = selectedResources[0];
     if( sourcingListMap.get(selectedKey).po_status === PO_STATUS_CANCEL ) return false;
+    if( sourcingListMap.get(selectedKey).audit_status === AUDIT_REVOKED ) return false;
     const item = sourcingListMap.get(selectedKey);
     return item.audit_status === AUDIT_PASS || item.payment_status === PAYMENT_STATUS_FAILURE
   }, [selectedResources, sourcingListMap])

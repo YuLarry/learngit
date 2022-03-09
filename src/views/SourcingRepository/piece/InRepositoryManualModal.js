@@ -1,13 +1,14 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-24 16:02:59
- * @LastEditTime: 2022-02-18 16:54:59
+ * @LastEditTime: 2022-03-09 11:49:36
  * @LastEditors: lijunwei
  * @Description: 
  */
 
 import { IndexTable, Modal, TextField, TextStyle, useIndexResourceState } from "@shopify/polaris";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { fstlnTool } from "../../../utils/Tools";
 
 function InRepositoryManualModal(props) {
 
@@ -35,7 +36,7 @@ function InRepositoryManualModal(props) {
 
   const goodsFormChangeHandler = useCallback(
     (idx, val, key) => {
-
+      if( val && key === "inbound_qty" && !fstlnTool.INT_MORE_THAN_ZERO_REG.test(val) ) return;
       const a = [...tableList];
 
       a[idx][key] = val
