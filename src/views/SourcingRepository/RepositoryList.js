@@ -1,12 +1,12 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-03-09 18:05:55
+ * @LastEditTime: 2022-03-10 16:38:39
  * @LastEditors: lijunwei
  * @Description: 
  */
 
-import { Button, Card, IndexTable, Page, Pagination, Tabs, TextStyle, useIndexResourceState } from "@shopify/polaris";
+import { Button, Card, IndexTable, Link, Page, Pagination, Tabs, TextStyle, Thumbnail, useIndexResourceState } from "@shopify/polaris";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { confirmInbound, getRepoTableList } from "../../api/requests";
@@ -18,6 +18,8 @@ import { INBOUND_STATUS_ALL, INBOUND_STATUS_FINISH, INBOUND_STATUS_PENDING, INBO
 import { InRepositoryManualModal } from "./piece/InRepositoryManualModal";
 import { RepositoryListFilter } from "./piece/RepositoryListFilter";
 import moment from "moment"
+import { ProductInfoPopover } from "../../components/ProductInfoPopover/ProductInfoPopover";
+import { BACKEND_GOODS_DETAIL } from "../../api/apiUrl";
 
 
 function RepositoryList(props) {
@@ -59,7 +61,7 @@ function RepositoryList(props) {
     dateOn,
   });
 
-  const [pageIndex, setPageIndex] = useState( page );
+  const [pageIndex, setPageIndex] = useState(page);
   const pageSize = 20;
   const [total, setTotal] = useState(0);
 
@@ -99,37 +101,74 @@ function RepositoryList(props) {
     })
   },
     [handleSelectionChange, selectedResources])
+  const goodsItemNode = useCallback((item, idx) => {
+    if (!item) return null;
+    const { sku, plan_qty, goods } = item;
+    const { image_url = "", en_name = "", id } = goods || {}
+    return (
+      <div className="product-container" key={idx} style={{ maxWidth: "400px", display: "flex", alignItems: "flex-start" }}>
+
+        <Thumbnail
+          source={image_url || ""}
+          alt={en_name}
+          size="small"
+        />
+        <div style={{ flex: 1, marginLeft: "1em" }}>
+          <Link
+            onClick={
+              (e) => {
+                e.stopPropagation();
+                window.open(`${BACKEND_GOODS_DETAIL}/${id}`);
+              }
+            }
+
+          >{sku}</Link>
+          <p>{plan_qty}</p>
+        </div>
+      </div>
+    )
+  }, [])
 
   const rowMarkup = tableList.map(
-    ({ id, inbound_no, plan_total_qty, actual_total_qty, client_account_code, item, provider_name, warehouse_area, warehouse_name, status }, index) => (
-      <IndexTable.Row
-        id={id}
-        key={inbound_no}
-        selected={selectedResources.includes(id)}
-        position={index}
-      >
-        <IndexTable.Cell>
-          <Button
-            plain
-            monochrome
-            url={`detail/${inbound_no}`}
-          >
-            <TextStyle variation="strong">{inbound_no}</TextStyle>
-          </Button>
-        </IndexTable.Cell>
-        <IndexTable.Cell>{client_account_code}</IndexTable.Cell>
-        <IndexTable.Cell>{provider_name}</IndexTable.Cell>
-        <IndexTable.Cell>{warehouse_name}</IndexTable.Cell>
-        <IndexTable.Cell>{warehouse_area}</IndexTable.Cell>
-        <IndexTable.Cell>
-          <BadgeInboundStatus status={status} />
-        </IndexTable.Cell>
-        <IndexTable.Cell>{`${item.length} 商品`}</IndexTable.Cell>
-        <IndexTable.Cell>{plan_total_qty}</IndexTable.Cell>
-        <IndexTable.Cell>{actual_total_qty}</IndexTable.Cell>
-      </IndexTable.Row>
-    ),
-  );
+    ({ id, inbound_no, plan_total_qty, actual_total_qty, client_account_code, item, provider_name, warehouse_area, warehouse_name, status }, index) => {
+
+      const prodNod = item.map((goodsItem, idx) => (goodsItemNode(goodsItem, idx)))
+      return (
+        <IndexTable.Row
+          id={id}
+          key={inbound_no}
+          selected={selectedResources.includes(id)}
+          position={index}
+        >
+          <IndexTable.Cell>
+            <Button
+              plain
+              monochrome
+              url={`detail/${inbound_no}`}
+            >
+              <TextStyle variation="strong">{inbound_no}</TextStyle>
+            </Button>
+          </IndexTable.Cell>
+          <IndexTable.Cell>{client_account_code}</IndexTable.Cell>
+          <IndexTable.Cell>{provider_name}</IndexTable.Cell>
+          <IndexTable.Cell>{warehouse_name}</IndexTable.Cell>
+          <IndexTable.Cell>{warehouse_area}</IndexTable.Cell>
+          <IndexTable.Cell>
+            <BadgeInboundStatus status={status} />
+          </IndexTable.Cell>
+          <IndexTable.Cell>
+            <ProductInfoPopover
+              popoverNode={item.length > 0 ? prodNod : null}
+            >
+              {`${item.length} 商品`}
+            </ProductInfoPopover>
+          </IndexTable.Cell>
+          <IndexTable.Cell>{plan_total_qty}</IndexTable.Cell>
+          <IndexTable.Cell>{actual_total_qty}</IndexTable.Cell>
+        </IndexTable.Row>
+      )
+    }
+    , []);
 
   const tabs = useMemo(() => ([
     {
@@ -156,14 +195,14 @@ function RepositoryList(props) {
   ]),
     []);
 
-  const [queryListStatus, setQueryListStatus] = useState( status || INBOUND_STATUS_ALL );
+  const [queryListStatus, setQueryListStatus] = useState(status || INBOUND_STATUS_ALL);
   const [selectedTab, setSelectedTab] = useState(0);
   const handleTabChange = useCallback(
     (selectedTabIndex) => {
       setSelectedTab(selectedTabIndex);
       setQueryListStatus(tabs[selectedTabIndex].id)
     }
-    ,[tabs]
+    , [tabs]
   );
 
   const [refresh, setRefresh] = useState(0);
@@ -181,7 +220,7 @@ function RepositoryList(props) {
       per_page: pageSize,
       page: pageIndex,
     }
-    setSearchParams( {querys: btoa(JSON.stringify(data))} );
+    setSearchParams({ querys: btoa(JSON.stringify(data)) });
     clearSelectedResources();
     getRepoTableList(data)
       .then(res => {
