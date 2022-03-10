@@ -1,13 +1,14 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-24 16:02:59
- * @LastEditTime: 2022-03-09 11:49:36
+ * @LastEditTime: 2022-03-10 16:25:40
  * @LastEditors: lijunwei
  * @Description: 
  */
 
-import { IndexTable, Modal, TextField, TextStyle, useIndexResourceState } from "@shopify/polaris";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { IndexTable, Modal, TextField, TextStyle, Thumbnail } from "@shopify/polaris";
+import { useCallback, useMemo } from "react";
+import { ProductInfoPopover } from "../../../components/ProductInfoPopover/ProductInfoPopover";
 import { fstlnTool } from "../../../utils/Tools";
 
 function InRepositoryManualModal(props) {
@@ -25,14 +26,6 @@ function InRepositoryManualModal(props) {
     plural: '商品',
   };
 
-  const { selectedResources, allResourcesSelected, handleSelectionChange } = useIndexResourceState(tableList);
-
-  const promotedBulkActions = [
-    {
-      content: '移除',
-      onAction: () => console.log('Todo: implement bulk edit'),
-    },
-  ];
 
   const goodsFormChangeHandler = useCallback(
     (idx, val, key) => {
@@ -45,6 +38,26 @@ function InRepositoryManualModal(props) {
     [tableList, tableListChange],
   );
 
+  const productInfo = (product) => {
+    if (!product) return null;
+    const { cn_name, en_name, image_url, id, price, sku } = product;
+    return (
+      <div className="product-container" style={{ maxWidth: "400px", display: "flex", alignItems: "flex-start" }}>
+
+        <Thumbnail
+          source={image_url || ""}
+          alt={en_name}
+          size="small"
+        />
+        <div style={{ flex: 1, marginLeft: "1em" }}>
+          <h4>{en_name}</h4>
+          <h4>{cn_name}</h4>
+          <span>{price}</span>
+        </div>
+      </div>
+    )
+  }
+
 
   const rowMarkup = useMemo(() => {
     return tableList.map(
@@ -53,10 +66,8 @@ function InRepositoryManualModal(props) {
         po_item_id,
         po_no,
         shipping_no,
-        goods: {
-          cn_name
-        },
-        inbound_qty = "0",
+        goods,
+        inbound_qty = "1",
         sku }, index) => (
         <IndexTable.Row
           id={id}
@@ -67,7 +78,14 @@ function InRepositoryManualModal(props) {
           <IndexTable.Cell>
             <TextStyle variation="strong">{sku}</TextStyle>
           </IndexTable.Cell>
-          <IndexTable.Cell>{cn_name}</IndexTable.Cell>
+          <IndexTable.Cell>
+            <ProductInfoPopover 
+              popoverNode={ productInfo(goods)  }
+            >
+              <div>{ goods.cn_name }</div>
+              <div>{ goods.en_name }</div>
+            </ProductInfoPopover>
+          </IndexTable.Cell>
           <IndexTable.Cell>
             {plan_qty}
           </IndexTable.Cell>
