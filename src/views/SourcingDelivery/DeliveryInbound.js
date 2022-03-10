@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-21 15:28:14
- * @LastEditTime: 2022-03-07 17:06:36
+ * @LastEditTime: 2022-03-10 14:43:29
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -454,9 +454,33 @@ function DeliveryInbound(props) {
   const moveToInboundTable = useCallback(
     () => {
       if (selectedResources.length < 1) return;
+      if( !boxCardCount ){
+        toastContext.toast({
+          active: true,
+          message: "请输入所选商品可整除的数量！"
+        })
+        return;
+      }
+      console.log(selectedSku);
+      if( selectedSku.length === 0 ){
+        toastContext.toast({
+          active: true,
+          message: "请输入选择正确的sku"
+        })
+        return;
+      }
       const _tempMap = new Map(inboundGoodsMap);
+
+      const numArr = [];
+      let modValid = true;
       selectedResources.map((id) => {
         const item = goodsMap.get(id);
+        const { shipping_num } = item;
+        console.log(Number(shipping_num) % Number( boxCardCount ));
+        if( modValid && Number(shipping_num) % Number( boxCardCount ) !== 0 ){
+          modValid = false;
+        }
+        numArr.push( shipping_num );
         let boxCardInfo = {};
         switch (type) {
           case INBOUND_TYPE.BOX:
@@ -477,10 +501,15 @@ function DeliveryInbound(props) {
           default:
             break;
         }
-
-
         _tempMap.set(id, { ...item, ...boxCardInfo });
       })
+      if( !modValid ){
+        toastContext.toast({
+          active: true,
+          message: `请输入可以被 ${numArr.join(',')} 整除的数量！`
+        })
+        return;
+      }
       setInboundGoodsMap(_tempMap)
       clearSelectedResources();
       setInboundModalOpen(false);
@@ -560,12 +589,20 @@ function DeliveryInbound(props) {
         content: '预报仓库',
         // onAction: () => setInboundModalOpen(true),
         onAction: () => {
+          if( !clientSelected || !warehouseSelected ){
+            toastContext.toast({
+              active: true,
+              message: "请先选择货主 货区，再进行预报",
+              duration:"1000"
+            })
+            return;
+          }
           tableInboundActionHandler()
         },
       },
     ]
   ),
-    [tableInboundActionHandler]);
+    [clientSelected, tableInboundActionHandler, warehouseSelected]);
   const typeText = useMemo(() => {
     const obj = {
       [INBOUND_TYPE.PCS]: "pcs",
@@ -585,8 +622,10 @@ function DeliveryInbound(props) {
 
   return (
     <Page
-      breadcrumbs={[{ content: '采购实施列表', url: '/delivery' }]}
-      title={ `${atob(shipping_code)}[按${typeText}预报仓库]` }
+      breadcrumbs={[{ content: '采购实施列表', onAction: ()=>{
+        navigate( -1 )
+      } }]}
+      title={ `${atob(shipping_code)} - 按${typeText}预报仓库` }
       narrowWidth
     >
       <Card title="仓库信息" sectioned>
@@ -632,7 +671,7 @@ function DeliveryInbound(props) {
             { title: '商品信息' },
             { title: '本次发货数量' },
           ]}
-          emptyState={<div>没有商品</div>}
+          emptyState={<TextStyle variation="subdued">没有商品</TextStyle>}
         >
           {rowMarkup}
         </IndexTable>
@@ -657,7 +696,7 @@ function DeliveryInbound(props) {
             { title: '商品信息' },
             { title: '预报数量' },
           ]}
-          emptyState={<div>没有商品</div>}
+          emptyState={<TextStyle variation="subdued">没有商品</TextStyle>}
 
         >
           {inboundListMarkup}
