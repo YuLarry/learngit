@@ -1,24 +1,24 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-24 16:02:59
- * @LastEditTime: 2022-03-10 16:25:40
+ * @LastEditTime: 2022-03-10 16:51:58
  * @LastEditors: lijunwei
  * @Description: 
  */
 
-import { IndexTable, Modal, TextField, TextStyle, Thumbnail } from "@shopify/polaris";
+import { Button, IndexTable, Modal, TextField, TextStyle, Thumbnail } from "@shopify/polaris";
 import { useCallback, useMemo } from "react";
 import { ProductInfoPopover } from "../../../components/ProductInfoPopover/ProductInfoPopover";
 import { fstlnTool } from "../../../utils/Tools";
 
 function InRepositoryManualModal(props) {
 
-  const { 
-    modalOpen = false, 
-    modalOpenChange = () => { }, 
-    tableList = [], 
-    tableListChange = () => { } ,
-    onCommit = ()=>{}
+  const {
+    modalOpen = false,
+    modalOpenChange = () => { },
+    tableList = [],
+    tableListChange = () => { },
+    onCommit = () => { }
   } = props;
 
   const resourceName = {
@@ -29,7 +29,7 @@ function InRepositoryManualModal(props) {
 
   const goodsFormChangeHandler = useCallback(
     (idx, val, key) => {
-      if( val && key === "inbound_qty" && !fstlnTool.INT_MORE_THAN_ZERO_REG.test(val) ) return;
+      if (val && key === "inbound_qty" && !fstlnTool.INT_MORE_THAN_ZERO_REG.test(val)) return;
       const a = [...tableList];
 
       a[idx][key] = val
@@ -59,6 +59,7 @@ function InRepositoryManualModal(props) {
   }
 
 
+
   const rowMarkup = useMemo(() => {
     return tableList.map(
       ({ id,
@@ -79,11 +80,11 @@ function InRepositoryManualModal(props) {
             <TextStyle variation="strong">{sku}</TextStyle>
           </IndexTable.Cell>
           <IndexTable.Cell>
-            <ProductInfoPopover 
-              popoverNode={ productInfo(goods)  }
+            <ProductInfoPopover
+              popoverNode={productInfo(goods)}
             >
-              <div>{ goods.cn_name }</div>
-              <div>{ goods.en_name }</div>
+              <div>{goods.cn_name}</div>
+              <div>{goods.en_name}</div>
             </ProductInfoPopover>
           </IndexTable.Cell>
           <IndexTable.Cell>
@@ -97,8 +98,23 @@ function InRepositoryManualModal(props) {
               onChange={(v) => { goodsFormChangeHandler(index, v, "inbound_qty") }}
             />
           </IndexTable.Cell>
-          <IndexTable.Cell>{po_no}</IndexTable.Cell>
-          <IndexTable.Cell>{shipping_no}</IndexTable.Cell>
+          <IndexTable.Cell>
+            <Button
+              plain
+              url={`/sourcing/detail/${btoa(encodeURIComponent(po_no))}`}
+            >
+              {po_no}
+            </Button>
+          </IndexTable.Cell>
+          <IndexTable.Cell>
+            <Button
+              plain
+              url={`/delivery/detail/${btoa(encodeURIComponent(shipping_no))}`}
+            >
+              {shipping_no}
+            </Button>
+
+          </IndexTable.Cell>
 
         </IndexTable.Row>
       ),
@@ -119,7 +135,7 @@ function InRepositoryManualModal(props) {
       primaryAction={{
         content: '确认',
         onAction: () => {
-          onCommit( tableList )
+          onCommit(tableList)
         },
       }}
       secondaryActions={[

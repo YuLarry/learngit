@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-20 14:31:27
- * @LastEditTime: 2022-03-07 15:36:08
+ * @LastEditTime: 2022-03-10 16:42:40
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -15,7 +15,7 @@ import {
 
 function ProductInfoPopover(props) {
 
-  const { popoverNode, tableCellText, children } = props
+  const { popoverNode, children } = props
 
   const [popoverActive, setPopoverActive] = useState(false);
   const togglePopoverActive = useCallback(
