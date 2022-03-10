@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-21 15:28:14
- * @LastEditTime: 2022-03-10 14:43:29
+ * @LastEditTime: 2022-03-10 15:51:06
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -80,7 +80,7 @@ function DeliveryInbound(props) {
   const goodsList = useMemo(() => {
     const arr = [];
     for (const [key, item] of goodsMap) {
-      arr.push(item);
+      arr.push({ ...item });
     }
     return arr;
   },
@@ -104,7 +104,6 @@ function DeliveryInbound(props) {
   );
 
 
-
   const productInfo = (product) => {
     if (!product) return null;
     const { cn_name, en_name, image_url, id, price, sku } = product;
@@ -125,6 +124,8 @@ function DeliveryInbound(props) {
     )
   }
 
+  const [detailModalTableList, setDetailModalTableList] = useState([]);
+
   const rowMarkup = useMemo(() => {
     return goodsList.map(
       ({ id, sku, po_no, shipping_num, goods }, index) => (
@@ -139,7 +140,8 @@ function DeliveryInbound(props) {
           </IndexTable.Cell>
           <IndexTable.Cell>
             <ProductInfoPopover popoverNode={productInfo(goods)}>
-              {goods.cn_name}
+              <div>{goods.cn_name}</div>
+              <div>{goods.en_name}</div>
             </ProductInfoPopover>
           </IndexTable.Cell>
           <IndexTable.Cell>
@@ -165,6 +167,15 @@ function DeliveryInbound(props) {
   },
     [inboundGoodsMap]);
 
+
+  const modalSkuInfo = useCallback(
+    (info) => {
+      setDetailModalTableList(info);
+      setSkuDetailModalOpen(true);
+    },
+    [],
+  );
+
   const inboundListMarkup = useMemo(() => {
     return inboundGoodsList.map(
       ({ id, sku, po_no, shipping_num, box_qty, goods }, index) => (
@@ -175,17 +186,26 @@ function DeliveryInbound(props) {
           position={index}
         >
           <IndexTable.Cell>
-            <Button
-              plain
-              monochrome
-              onClick={() => { }}
-            >
-              <TextStyle variation="strong">{sku}</TextStyle>
-            </Button>
+            {
+              type === INBOUND_TYPE.PCS
+                ?
+                <TextStyle variation="strong">{sku}</TextStyle>
+                :
+                <Button
+                  plain
+                  monochrome
+                  onClick={() => {
+                    modalSkuInfo([{ id, sku, goods, box_qty, shipping_num }]);
+                  }}
+                >
+                  <TextStyle variation="strong">{sku}</TextStyle>
+                </Button>
+            }
+
           </IndexTable.Cell>
           <IndexTable.Cell>
             <ProductInfoPopover popoverNode={productInfo(goods)}>
-            {goods.cn_name}
+              {goods.cn_name}
             </ProductInfoPopover>
           </IndexTable.Cell>
           <IndexTable.Cell>
@@ -198,7 +218,7 @@ function DeliveryInbound(props) {
       ),
     )
   },
-    [inboundGoodsList, selectedResources]
+    [inboundGoodsList, modalSkuInfo, selectedResources, type]
   );
 
   useEffect(() => {
@@ -212,49 +232,38 @@ function DeliveryInbound(props) {
     })
   }, [goodsMap, inboundGoodsMap])
 
-
   const skuList = useMemo(() => {
-    return goodsList.map(
-      ({ id, name, location, orders, amountSpent }, index) => (
+    console.log(1111);
+    return detailModalTableList.map(
+      ({ id, sku, goods, box_qty, shipping_num }, index) => (
         <IndexTable.Row
           id={id}
           key={id}
-          selected={selectedResources.includes(id)}
           position={index}
+          selectable={false}
         >
           <IndexTable.Cell>
-            <TextStyle variation="strong">{name}</TextStyle>
+            <TextStyle variation="strong">{sku}</TextStyle>
           </IndexTable.Cell>
           <IndexTable.Cell>
-            <ProductInfoPopover popoverNode={productInfo()}>
-              {"商品信息"}
+            <ProductInfoPopover popoverNode={productInfo(goods)}>
+              <div>{goods.cn_name}</div>
+              <div>{goods.en_name}</div>
             </ProductInfoPopover>
-            {/* ZTE Watch Live Black<br />
-            ZTE 手表 黑 */}
           </IndexTable.Cell>
           <IndexTable.Cell>
-            {orders}
+            {shipping_num}
           </IndexTable.Cell>
           <IndexTable.Cell>
-            {orders}
+            {Number(shipping_num) / Number(box_qty)}
           </IndexTable.Cell>
 
         </IndexTable.Row>
       ),
     )
   },
-    [goodsList, selectedResources]
+    [detailModalTableList]
   );
-
-  // =====
-
-  // modal ===
-
-  const [active, setActive] = useState(true);
-
-  const handleChange = useCallback(() => setActive(!active), [active]);
-
-  // modal ===
 
   // autocomplete ===
   const [selectedSku, setSelectedSku] = useState([]);
@@ -305,8 +314,6 @@ function DeliveryInbound(props) {
   );
   // autocomplete ===
 
-
-
   const saveInbound = useCallback(() => {
     loadingContext.loading(true);
     let totalCount = 0;
@@ -346,7 +353,7 @@ function DeliveryInbound(props) {
         shipping_no: atob(shipping_code),
         sku,
         plan_qty,
-        ... cardBoxInfo
+        ...cardBoxInfo
       }
     })
     const data = {
@@ -386,7 +393,7 @@ function DeliveryInbound(props) {
       getClientAccount(),
       getWarehouseArea(),
       getShippingDetail(atob(shipping_code)),
-      getWaitShippingList( atob(shipping_code) ),
+      getWaitShippingList(atob(shipping_code)),
     ])
 
       .then(([clientRes, warehouseRes, detailRes, waitRes]) => {
@@ -454,15 +461,15 @@ function DeliveryInbound(props) {
   const moveToInboundTable = useCallback(
     () => {
       if (selectedResources.length < 1) return;
-      if( !boxCardCount ){
+      if (type !== INBOUND_TYPE.PCS && !boxCardCount) {
         toastContext.toast({
           active: true,
           message: "请输入所选商品可整除的数量！"
         })
         return;
       }
-      console.log(selectedSku);
-      if( selectedSku.length === 0 ){
+      // console.log(selectedSku);
+      if (type !== INBOUND_TYPE.PCS && selectedSku.length === 0) {
         toastContext.toast({
           active: true,
           message: "请输入选择正确的sku"
@@ -476,11 +483,11 @@ function DeliveryInbound(props) {
       selectedResources.map((id) => {
         const item = goodsMap.get(id);
         const { shipping_num } = item;
-        console.log(Number(shipping_num) % Number( boxCardCount ));
-        if( modValid && Number(shipping_num) % Number( boxCardCount ) !== 0 ){
+        // console.log(Number(shipping_num) % Number( boxCardCount ));
+        if (type !== INBOUND_TYPE.PCS && modValid && Number(shipping_num) % Number(boxCardCount) !== 0) {
           modValid = false;
         }
-        numArr.push( shipping_num );
+        numArr.push(shipping_num);
         let boxCardInfo = {};
         switch (type) {
           case INBOUND_TYPE.BOX:
@@ -503,7 +510,7 @@ function DeliveryInbound(props) {
         }
         _tempMap.set(id, { ...item, ...boxCardInfo });
       })
-      if( !modValid ){
+      if (type !== INBOUND_TYPE.PCS && !modValid) {
         toastContext.toast({
           active: true,
           message: `请输入可以被 ${numArr.join(',')} 整除的数量！`
@@ -516,7 +523,6 @@ function DeliveryInbound(props) {
     },
     [boxCardCount, clearSelectedResources, goodsMap, inboundGoodsMap, selectedResources, selectedSku, type]
   );
-
 
   useEffect(() => {
     unsavedChangeContext.remind({
@@ -566,8 +572,6 @@ function DeliveryInbound(props) {
   },
     [saveInbound])
 
-
-
   const tableInboundActionHandler = useCallback(
     () => {
       if (type === INBOUND_TYPE.PCS) {
@@ -575,13 +579,12 @@ function DeliveryInbound(props) {
       } else {
         const { shipping_num } = goodsMap.get(selectedResources[0]);
         // console.log( item );
-        setBoxCardCount( shipping_num.toString() );
+        setBoxCardCount(shipping_num.toString());
         setInboundModalOpen(true);
       }
     },
     [goodsMap, moveToInboundTable, selectedResources, type],
   );
-
 
   const promotedBulkActions = useMemo(() => (
     [
@@ -589,11 +592,11 @@ function DeliveryInbound(props) {
         content: '预报仓库',
         // onAction: () => setInboundModalOpen(true),
         onAction: () => {
-          if( !clientSelected || !warehouseSelected ){
+          if (!clientSelected || !warehouseSelected) {
             toastContext.toast({
               active: true,
               message: "请先选择货主 货区，再进行预报",
-              duration:"1000"
+              duration: "1000"
             })
             return;
           }
@@ -614,7 +617,7 @@ function DeliveryInbound(props) {
 
   const boxCountHandler = useCallback(
     (val) => {
-      if( val === "" || fstlnTool.INT_MORE_THAN_ZERO_REG.test( val ) ){
+      if (val === "" || fstlnTool.INT_MORE_THAN_ZERO_REG.test(val)) {
         setBoxCardCount(val)
       }
     },
@@ -622,10 +625,12 @@ function DeliveryInbound(props) {
 
   return (
     <Page
-      breadcrumbs={[{ content: '采购实施列表', onAction: ()=>{
-        navigate( -1 )
-      } }]}
-      title={ `${atob(shipping_code)} - 按${typeText}预报仓库` }
+      breadcrumbs={[{
+        content: '采购实施列表', onAction: () => {
+          navigate(-1)
+        }
+      }]}
+      title={`${atob(shipping_code)} - 按${typeText}预报仓库`}
       narrowWidth
     >
       <Card title="仓库信息" sectioned>
@@ -651,13 +656,9 @@ function DeliveryInbound(props) {
 
           </FormLayout>
         </Form>
-
-
       </Card>
 
-      <Card title="发货明细"
-
-      >
+      <Card title="发货明细">
         <IndexTable
           resourceName={resourceName}
           itemCount={goodsList.length}
@@ -679,20 +680,13 @@ function DeliveryInbound(props) {
         <br />
       </Card>
 
-      <Card title="入库信息"
-
-      >
+      <Card title="入库信息">
         <IndexTable
           resourceName={resourceName}
           itemCount={inboundGoodsList.length}
-          // selectedItemsCount={
-          //   allResourcesSelected ? 'All' : selectedResources.length
-          // }
-          // onSelectionChange={handleSelectionChange}
-          // promotedBulkActions={promotedBulkActions}
           selectable={false}
           headings={[
-            { title: '系统SKU' },
+            { title: '货品SKU' },
             { title: '商品信息' },
             { title: '预报数量' },
           ]}
@@ -703,7 +697,6 @@ function DeliveryInbound(props) {
         </IndexTable>
         <br />
       </Card>
-
 
       <Modal
         // small
@@ -735,15 +728,12 @@ function DeliveryInbound(props) {
                 type="number"
                 label="预报数量"
                 value={boxCardCount}
-                onChange={ boxCountHandler }
+                onChange={boxCountHandler}
               />
             </FormLayout>
 
           </Form>
-
         </Modal.Section>
-
-
       </Modal>
 
 
@@ -751,27 +741,12 @@ function DeliveryInbound(props) {
         open={skuDetailModalOpen}
         onClose={handleSkuDetailModalOpenChange}
         title="查看货品SKU"
-      // primaryAction={{
-      //   content: '确认',
-      //   onAction: handleSkuDetailModalOpenChange,
-      // }}
-      // secondaryActions={[
-      //   {
-      //     content: '取消',
-      //     onAction: handleSkuDetailModalOpenChange,
-      //   },
-      // ]}
+        large={true}
       >
         <div>
-
           <IndexTable
             resourceName={resourceName}
-            itemCount={goodsList.length}
-            selectedItemsCount={
-              allResourcesSelected ? 'All' : selectedResources.length
-            }
-            onSelectionChange={handleSelectionChange}
-            promotedBulkActions={promotedBulkActions}
+            itemCount={detailModalTableList.length}
             selectable={false}
             headings={[
               { title: '系统SKU' },
@@ -783,9 +758,6 @@ function DeliveryInbound(props) {
             {skuList}
           </IndexTable>
         </div>
-
-
-
       </Modal>
     </Page>
   );
