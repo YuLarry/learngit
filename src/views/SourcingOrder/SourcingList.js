@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-03-09 17:22:12
+ * @LastEditTime: 2022-03-10 19:02:17
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -16,7 +16,7 @@ import { BadgeDeliveryStatus } from "../../components/StatusBadges/BadgeDelivery
 import { BadgePaymentStatus } from "../../components/StatusBadges/BadgePaymentStatus";
 import { LoadingContext } from "../../context/LoadingContext";
 import { ToastContext } from "../../context/ToastContext";
-import { AUDIT_AUDITING, AUDIT_FAILURE, AUDIT_PASS, AUDIT_REVOKED, AUDIT_UNAUDITED, PAYMENT_STATUS_FAILURE, PO_STATUS_ALL, PO_STATUS_CANCEL, PO_STATUS_FINISH, PO_STATUS_PENDING } from "../../utils/StaticData";
+import { AUDIT_AUDITING, AUDIT_FAILURE, AUDIT_PASS, AUDIT_REVOKED, AUDIT_UNAUDITED, PAYMENT_STATUS_FAILURE, PAYMENT_STATUS_PENDING, PO_STATUS_ALL, PO_STATUS_CANCEL, PO_STATUS_FINISH, PO_STATUS_PENDING } from "../../utils/StaticData";
 import { SourcingListFilter } from "./piece/SourcingListFilter";
 import moment from "moment";
 import { fstlnTool } from "../../utils/Tools";
@@ -28,8 +28,8 @@ function SourcingList(props) {
   const [searchParams, setSearchParams] = useSearchParams();
   const queryParamObj = useMemo(() => {
     return (
-      searchParams.get("querys") && JSON.parse( atob(searchParams.get("querys") ) ) || {}
-      )
+      searchParams.get("querys") && JSON.parse(atob(searchParams.get("querys"))) || {}
+    )
   }
     , [searchParams])
   let {
@@ -56,7 +56,7 @@ function SourcingList(props) {
   const [total, setTotal] = useState(0);
   const [refresh, setRefresh] = useState(0);
   const [listLoading, setListLoading] = useState(false);
-  
+
 
   const [filter, setFilter] = useState({
     provider_id,
@@ -95,7 +95,7 @@ function SourcingList(props) {
     ]
   }, []);
 
-  const [queryListStatus, setQueryListStatus] = useState( po_status || PO_STATUS_ALL);
+  const [queryListStatus, setQueryListStatus] = useState(po_status || PO_STATUS_ALL);
 
   const [selectedTab, setSelectedTab] = useState(0);
   const handleTabChange = useCallback(
@@ -185,7 +185,7 @@ function SourcingList(props) {
     if (sourcingListMap.get(selectedKey).po_status === PO_STATUS_CANCEL) return false;
     if (sourcingListMap.get(selectedKey).audit_status === AUDIT_REVOKED) return false;
     const item = sourcingListMap.get(selectedKey);
-    return item.audit_status === AUDIT_PASS || item.payment_status === PAYMENT_STATUS_FAILURE
+    return ( item.audit_status === AUDIT_PASS && (item.payment_status === PAYMENT_STATUS_PENDING || item.payment_status === PAYMENT_STATUS_FAILURE ) )
   }, [selectedResources, sourcingListMap])
 
   // cancel enable control
@@ -323,6 +323,12 @@ function SourcingList(props) {
         onAction: actionCommitAudit,
         disabled: !auditEnable,
       },
+
+    ];
+  }, [actionCommitAudit, actionEditAudit, auditEnable, editEdable])
+
+  const bulkActions = useMemo(() => {
+    return [
       {
         content: '申请付款',
         onAction: () => {
@@ -352,7 +358,9 @@ function SourcingList(props) {
 
       },
     ];
-  }, [applyPayEnable, auditEnable, cancelEnable, deleteEnable, exportEnable])
+  }, [actionCommitCancelOrder, actionDeleteOrder, applyPayEnable, cancelEnable, deleteEnable, exportEnable, exportPdf, navigate, selectedResources, sourcingListMap])
+
+
 
   const goodsItemNode = useCallback((item, idx) => {
     if (!item) return null;
@@ -455,7 +463,7 @@ function SourcingList(props) {
       page: pageIndex
     };
     setSearchParams({ querys: btoa(JSON.stringify(queryData)) })
-    console.log(searchParams.get("querys"));
+    // console.log(searchParams.get("querys"));
     querySourcingList(queryData)
       .then(res => {
         const { data: { list, meta: { pagination: { total = 0 } } } } = res;
@@ -593,6 +601,7 @@ function SourcingList(props) {
           }
           onSelectionChange={(a, b, c) => { handleSelectionChange(a, b, c) }}
           promotedBulkActions={promotedBulkActions}
+          bulkActions={bulkActions}
           headings={[
             { title: "采购单号" },
             { title: "采购方" },

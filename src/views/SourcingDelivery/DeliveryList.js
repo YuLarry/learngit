@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-03-10 10:59:57
+ * @LastEditTime: 2022-03-10 17:56:56
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -195,6 +195,22 @@ function DeliveryList(props) {
 
     return [
       {
+        content: "删除发货单",
+        onAction: () => {
+          deleteOrder(selectedResources[0])
+        },
+        disabled: !deleteEnable,
+      },
+    ];
+  }, [deleteEnable, deleteOrder, deliveryListMap, selectedResources])
+
+
+  const bulkActions = useMemo(() => {
+    const code = (deliveryListMap && selectedResources.length > 0) ? deliveryListMap.get(selectedResources[0]).shipping_no : "";
+    const codeBase64 = btoa(code);
+
+    return [
+      {
         content: '按pcs入库',
         onAction: () => { navigate(`inbound?shipping_code=${codeBase64}&type=${INBOUND_TYPE.PCS}`) },
         disabled: !inboundEnable,
@@ -209,15 +225,9 @@ function DeliveryList(props) {
         onAction: () => { navigate(`inbound?shipping_code=${codeBase64}&type=${INBOUND_TYPE.PALLET}`) },
         disabled: !inboundEnable,
       },
-      {
-        content: "删除发货单",
-        onAction: () => {
-          deleteOrder(selectedResources[0])
-        },
-        disabled: !deleteEnable,
-      },
+      
     ];
-  }, [deleteEnable, deleteOrder, deliveryListMap, inboundEnable, navigate, selectedResources])
+  }, [deliveryListMap, inboundEnable, navigate, selectedResources])
 
   const goodsItemNode = useCallback((item, idx) => {
     if (!item) return null;
@@ -338,6 +348,7 @@ function DeliveryList(props) {
           // onSelectionChange={handleSelectionChange}
           onSelectionChange={(a, b, c) => { handleSelectionChange(a, b, c) }}
           promotedBulkActions={promotedBulkActions}
+          bulkActions={ bulkActions }
           headings={[
             { title: "发货单号" },
             { title: "供应商" },

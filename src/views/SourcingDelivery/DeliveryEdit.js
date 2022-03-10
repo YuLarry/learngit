@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-03-10 16:16:27
+ * @LastEditTime: 2022-03-10 16:57:30
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -31,7 +31,6 @@ import moment from "moment";
 import { FstlnLoading } from "../../components/FstlnLoading";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { fstlnTool } from "../../utils/Tools";
-import { duration } from "moment";
 
 
 function DeliveryEdit(props) {
