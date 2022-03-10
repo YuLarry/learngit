@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-03-10 11:09:50
+ * @LastEditTime: 2022-03-10 16:16:27
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -289,7 +289,7 @@ function DeliveryEdit(props) {
     () => {
       const arr = [];
       selectGoodsMapTemp.forEach((valueItem) => {
-        arr.push([Symbol(valueItem.sku), { ...valueItem }])
+        arr.push([Symbol(valueItem.sku), { ...valueItem, count: (valueItem.purchase_num - valueItem.shipping_num).toString() }])
       })
       setGoodsTableDataMap(new Map([...goodsTableDataMap, ...arr]))
       setSelectGoodsMapTemp(new Map());

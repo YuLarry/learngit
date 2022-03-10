@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-21 15:28:14
- * @LastEditTime: 2022-03-10 15:51:06
+ * @LastEditTime: 2022-03-10 15:54:57
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -735,7 +735,6 @@ function DeliveryInbound(props) {
           </Form>
         </Modal.Section>
       </Modal>
-
 
       <Modal
         open={skuDetailModalOpen}
