@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-03-09 17:20:15
+ * @LastEditTime: 2022-03-10 10:59:57
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -276,7 +276,6 @@ function DeliveryList(props) {
 
   useEffect(() => {
     setListLoading(true);
-    console.log("xxxx")
     clearSelectedResources();
     const { dateOn, shipping_date: { start, end } } = filter;
     const queryData = {

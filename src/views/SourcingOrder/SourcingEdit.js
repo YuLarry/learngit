@@ -1,12 +1,12 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-03-08 19:01:11
+ * @LastEditTime: 2022-03-10 11:04:56
  * @LastEditors: lijunwei
  * @Description: 
  */
 
-import { Button, Card, Form, FormLayout, Icon, IndexTable, Layout, Modal, Page, Select, TextField, useIndexResourceState } from "@shopify/polaris";
+import { Button, Card, Form, FormLayout, Icon, IndexTable, Layout, Modal, Page, Select, TextField, TextStyle, useIndexResourceState } from "@shopify/polaris";
 import {
   SearchMinor,
   DeleteMinor
@@ -712,7 +712,7 @@ function SourcingEdit(props) {
                 { title: '采购价格' },
                 { title: '' },
               ]}
-              emptyState={`商品为空`}
+              emptyState={<TextStyle variation="subdued">{`请选择采购单信息！`}</TextStyle>}
               selectable={false}
             >
               {rowMarkup}

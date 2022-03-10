@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-03-09 17:20:03
+ * @LastEditTime: 2022-03-10 11:09:50
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -148,7 +148,7 @@ function DeliveryEdit(props) {
     ];
     if (!formObject.shipping_price) {
       arr = [
-        { label: "", value: "" },
+        { label: "请选择运费币制", value: "" },
         ...arr
       ]
     }
@@ -536,7 +536,7 @@ function DeliveryEdit(props) {
               }
               onSelectionChange={handleSelectionChange}
               promotedBulkActions={promotedBulkActions}
-              emptyState={`商品为空`}
+              emptyState={<TextStyle variation="subdued">{`请选择发货单信息！`}</TextStyle>}
               headings={[
                 { title: '采购单号' },
                 { title: '系统SKU' },
@@ -568,6 +568,7 @@ function DeliveryEdit(props) {
                     id="shipping_no"
                     onChange={handleFormObjectChange}
                     maxLength={50}
+                    placeholder="请输入发货单单号"
                   />
                 </FormLayout.Group>
                 <FormLayout.Group>
@@ -577,6 +578,8 @@ function DeliveryEdit(props) {
                     name="expected_days"
                     id="expected_days"
                     onChange={handleFormObjectChange}
+                    placeholder="0"
+                  
                   />
                   <TextField
                     label="物流单号(选填)"
@@ -584,6 +587,7 @@ function DeliveryEdit(props) {
                     name="tracking_no"
                     id="tracking_no"
                     onChange={handleFormObjectChange}
+                    placeholder="请输入物流单号"
                   />
                 </FormLayout.Group>
                 <FormLayout.Group>
@@ -593,6 +597,8 @@ function DeliveryEdit(props) {
                     name="tracking_service"
                     id="tracking_service"
                     onChange={handleFormObjectChange}
+                    placeholder="请输入物流服务商"
+
                   />
                   <TextField
                     label="运费(选填)"
@@ -600,6 +606,7 @@ function DeliveryEdit(props) {
                     name="shipping_price"
                     id="shipping_price"
                     onChange={handleFormObjectChange}
+                    placeholder="0"
                   />
                 </FormLayout.Group>
                 <FormLayout.Group>
@@ -610,6 +617,7 @@ function DeliveryEdit(props) {
                     id="shipping_currency"
                     onChange={(val) => { setForm_currency(val) }}
                     options={currenctyOpts}
+                    // placeholder="请选择运费币制"
                   />
                   <TextField
                     label="入仓号"
@@ -617,6 +625,7 @@ function DeliveryEdit(props) {
                     name="binning_no"
                     id="binning_no"
                     onChange={handleFormObjectChange}
+                    placeholder="请输入入仓号"
                   />
                 </FormLayout.Group>
 
