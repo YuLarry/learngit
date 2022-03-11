@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-03-11 14:25:24
+ * @LastEditTime: 2022-03-11 19:32:41
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -12,7 +12,7 @@ import {
   DeleteMinor,
 } from '@shopify/polaris-icons';
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { editShippingOrder, getPoItemList } from "../../api/requests";
+import { editShippingOrder, getPoItemList, getShippingDetail } from "../../api/requests";
 import { FstlnSelectTree } from "../../components/FstlnSelectTree/FstlnSelectTree";
 import { ProductInfoPopover } from "../../components/ProductInfoPopover/ProductInfoPopover";
 import { SourcingRemarkCard } from "../../components/SecondaryCard/SourcingNoteCard";
@@ -35,6 +35,9 @@ import { fstlnTool } from "../../utils/Tools";
 
 function DeliveryEdit(props) {
   const { id } = useParams();
+  const idDecode = id && atob(id);
+  const idURIDecode = idDecode && decodeURIComponent(idDecode);
+
   const location = useLocation();
 
 
@@ -43,6 +46,8 @@ function DeliveryEdit(props) {
   const unsavedChangeContext = useContext(UnsavedChangeContext);
   const modalContext = useContext(ModalContext);
   const toastContext = useContext(ToastContext);
+
+  const [detail, setDetail] = useState(null);
 
   // = modal =
   const [active, setActive] = useState(false);
@@ -109,9 +114,6 @@ function DeliveryEdit(props) {
     },
     [goodsTableDataMap],
   );
-
-
-  const [detail, setDetail] = useState(null);
 
   const [formObject, setFormObject] = useState({
     shipping_date: new Date(),
@@ -183,7 +185,7 @@ function DeliveryEdit(props) {
   }
 
   const rowMarkup = useMemo(() =>
-    selectedGoods.map(({ id, sku, count = "", goods, goods_name, headKey, symb }, index) => {
+    selectedGoods.map(({ id, sku, count = "", shipping_num, goods, headKey, symb, po_no }, index) => {
       return (
         <IndexTable.Row
           id={id}
@@ -191,7 +193,7 @@ function DeliveryEdit(props) {
           position={index}
         >
           <IndexTable.Cell>
-            {headKey}
+            {headKey || po_no}
           </IndexTable.Cell>
           <IndexTable.Cell>
             <ProductInfoPopover
@@ -200,19 +202,28 @@ function DeliveryEdit(props) {
           </IndexTable.Cell>
           <IndexTable.Cell>
             <div style={{ width: "8em" }}>
-              <TextField
-                type="number"
-                value={count}
-                prefix=""
-                onChange={(v) => { goodsFormChangeHandler(symb, v, "count") }}
-              />
+              {
+                id
+                  ?
+                  <div>{count || shipping_num.toString()}</div>
+                  :
+                  <TextField
+                    type="number"
+                    value={count || shipping_num.toString()}
+                    prefix=""
+                    onChange={(v) => { goodsFormChangeHandler(symb, v, "count") }}
+                  />
+              }
+
             </div>
           </IndexTable.Cell>
           <IndexTable.Cell>
-            <Button
-              icon={DeleteMinor}
-              onClick={() => { handleDeleteGoods(symb) }}
-            ></Button>
+            {!id &&
+              <Button
+                icon={DeleteMinor}
+                onClick={() => { handleDeleteGoods(symb) }}
+              ></Button>
+            }
           </IndexTable.Cell>
         </IndexTable.Row>
       )
@@ -228,7 +239,7 @@ function DeliveryEdit(props) {
         <div>{po_no}</div>
         <div>{business_name}</div>
         <div>{warehouse_name}</div>
-        <div>{ purchase_qty }</div>
+        <div>{purchase_qty}</div>
       </div>
     )
   }
@@ -300,6 +311,7 @@ function DeliveryEdit(props) {
   );
 
   const selectedPoItemInfo = useMemo(() => {
+    if (id) return null;
     if (goodsTableDataMap && goodsTableDataMap.size > 0) {
       const { headKey } = goodsTableDataMap.values().next().value;
       // console.log(tree[headKey])
@@ -370,8 +382,6 @@ function DeliveryEdit(props) {
       setQuerying(false)
     }
   }, [active]);
-
-
 
   const saveDeliveryOrder = useCallback(() => {
     loadingContext.loading(true);
@@ -461,9 +471,6 @@ function DeliveryEdit(props) {
   },
     [saveDeliveryOrder])
 
-
-
-
   const activator = useMemo(() => {
     const { shipping_date } = formObject;
     const str = `${shipping_date.getFullYear()}-${shipping_date.getMonth() + 1}-${shipping_date.getDate()}`
@@ -477,6 +484,7 @@ function DeliveryEdit(props) {
         }
         value={str}
         onFocus={() => { setDatePopoverActive(true) }}
+        disabled={id}
       />)
   },
     [formObject])
@@ -510,7 +518,32 @@ function DeliveryEdit(props) {
   },
     [activator, datePopoverActive, formObject.shipping_date, handleFormObjectChange, handleMonthChange, month, year])
 
+  useEffect(() => {
+    if (!id) return;
+    loadingContext.loading(true);
+    getShippingDetail(idURIDecode)
+      .then(res => {
+        const { data } = res;
+        // return;
+        setFormObject({
+          ...data,
+          shipping_date: moment(data.shipping_date)._d,
+        })
 
+        const { item } = data;
+
+        const arr = [];
+        item.forEach((valueItem) => {
+          arr.push([Symbol(valueItem.sku), { ...valueItem, count: valueItem.shipping_num.toString() }])
+        })
+
+        setGoodsTableDataMap(new Map(arr))
+
+      })
+      .finally(() => {
+        loadingContext.loading(false);
+      })
+  }, []);
 
 
   return (
@@ -518,10 +551,10 @@ function DeliveryEdit(props) {
       breadcrumbs={[{
         content: '采购实施列表',
         onAction: () => {
-          navigate( -1 );
+          navigate(-1);
         }
       }]}
-      title={id ? id : "新建发货单"}
+      title={idURIDecode ? idURIDecode : "新建发货单"}
       subtitle={detail && detail.create_message || ""}
     >
       <Layout>
@@ -548,9 +581,11 @@ function DeliveryEdit(props) {
             >
               {rowMarkup}
             </IndexTable>
-            <div style={{ textAlign: "center" }}>
-              <Button onClick={() => { setActive(true) }}>添加商品</Button>
-            </div>
+            {!id &&
+              <div style={{ textAlign: "center" }}>
+                <Button onClick={() => { setActive(true) }}>添加商品</Button>
+              </div>
+            }
             <br />
           </Card>
 
@@ -570,17 +605,18 @@ function DeliveryEdit(props) {
                     onChange={handleFormObjectChange}
                     maxLength={50}
                     placeholder="请输入发货单单号"
+                    disabled={id}
                   />
                 </FormLayout.Group>
                 <FormLayout.Group>
                   <TextField
                     label="预计到货天数"
-                    value={formObject.expected_days}
+                    value={formObject.expected_days.toString()}
                     name="expected_days"
                     id="expected_days"
                     onChange={handleFormObjectChange}
                     placeholder="0"
-                  
+                    disabled={id}
                   />
                   <TextField
                     label="物流单号(选填)"
@@ -589,6 +625,7 @@ function DeliveryEdit(props) {
                     id="tracking_no"
                     onChange={handleFormObjectChange}
                     placeholder="请输入物流单号"
+                    disabled={id}
                   />
                 </FormLayout.Group>
                 <FormLayout.Group>
@@ -599,7 +636,7 @@ function DeliveryEdit(props) {
                     id="tracking_service"
                     onChange={handleFormObjectChange}
                     placeholder="请输入物流服务商"
-
+                    disabled={id}
                   />
                   <TextField
                     label="运费(选填)"
@@ -608,6 +645,8 @@ function DeliveryEdit(props) {
                     id="shipping_price"
                     onChange={handleFormObjectChange}
                     placeholder="0"
+                    disabled={id}
+
                   />
                 </FormLayout.Group>
                 <FormLayout.Group>
@@ -619,6 +658,8 @@ function DeliveryEdit(props) {
                     onChange={(val) => { setForm_currency(val) }}
                     options={currenctyOpts}
                     // placeholder="请选择运费币制"
+                    disabled={id}
+
                   />
                   <TextField
                     label="入仓号"
@@ -627,6 +668,8 @@ function DeliveryEdit(props) {
                     id="binning_no"
                     onChange={handleFormObjectChange}
                     placeholder="请输入入仓号"
+                    disabled={ id }
+
                   />
                 </FormLayout.Group>
 
@@ -639,9 +682,10 @@ function DeliveryEdit(props) {
         </Layout.Section>
         <Layout.Section secondary>
 
-          <SourcingProviCard provInfo={provider} />
-          <SourcingRepoCard wareInfo={warehouse} />
+          <SourcingProviCard provInfo={id ? formObject.provider : provider} noCardNum={ true } />
+          <SourcingRepoCard wareInfo={id ? formObject.warehouse : warehouse} />
           <SourcingRemarkCard
+            readOnly={id}
             remark={formObject.remark}
             onChange={(val) => { handleFormObjectChange(val, "remark") }}
           />
@@ -709,7 +753,6 @@ function DeliveryEdit(props) {
                 selectValidtor={selectValidtor}
               />
           }
-
         </div>
       </Modal>
 

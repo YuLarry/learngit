@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-19 17:12:19
- * @LastEditTime: 2022-03-07 11:37:25
+ * @LastEditTime: 2022-03-11 19:32:16
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -11,7 +11,7 @@ import { SourcingCardSection } from "./SourcingCardSection";
 
 function SourcingProviCard(props) {
 
-  const { provInfo = {} } = props;
+  const { provInfo = {}, noCardNum = false } = props;
   const {
     business_address = "",
     business_name = "",
@@ -29,7 +29,7 @@ function SourcingProviCard(props) {
       <SourcingCardSection title="地址" text={ business_address } />
       <SourcingCardSection title="电话" text={ phone } />
       <SourcingCardSection title="联系人" text={ contacts } />
-      <SourcingCardSection title="收款账户" text={ account_id || ( provider_account && provider_account.bank_card_number ) || "" } />
+      { !noCardNum && <SourcingCardSection title="收款账户" text={ account_id || ( provider_account && provider_account.bank_card_number ) || "" } /> }
 
     </Card>
   );

@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-03-11 17:14:58
+ * @LastEditTime: 2022-03-11 17:48:16
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -689,7 +689,7 @@ function SourcingEdit(props) {
               headings={[
                 { title: '系统SKU' },
                 { title: '采购数量' },
-                { title: '采购价格' },
+                { title: '采购单价' },
                 { title: '' },
               ]}
               emptyState={<TextStyle variation="subdued">{`请选择采购单信息！`}</TextStyle>}

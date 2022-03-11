@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-03-10 17:56:56
+ * @LastEditTime: 2022-03-11 17:46:48
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -253,7 +253,7 @@ function DeliveryList(props) {
     ({ id, shipping_no, provider: { business_name }, warehouse: { name }, status, item, shipping_date, expected_date }, index) => {
 
       const prodNod = item.map((goodsItem, idx) => (goodsItemNode(goodsItem, idx)))
-
+      const soBase64 = window.btoa(encodeURIComponent(shipping_no));
       return (<IndexTable.Row
         id={id}
         key={index}
@@ -265,7 +265,7 @@ function DeliveryList(props) {
             plain
             monochrome
             // removeUnderline
-            url={`detail/${id}`}
+            url={`detail/${soBase64}`}
           >
             <TextStyle variation="strong">{shipping_no}</TextStyle>
           </Button>
