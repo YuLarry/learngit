@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-21 15:28:14
- * @LastEditTime: 2022-03-10 15:54:57
+ * @LastEditTime: 2022-03-11 11:06:42
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -233,7 +233,6 @@ function DeliveryInbound(props) {
   }, [goodsMap, inboundGoodsMap])
 
   const skuList = useMemo(() => {
-    console.log(1111);
     return detailModalTableList.map(
       ({ id, sku, goods, box_qty, shipping_num }, index) => (
         <IndexTable.Row

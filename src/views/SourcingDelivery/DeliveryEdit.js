@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-03-10 16:57:30
+ * @LastEditTime: 2022-03-11 11:13:41
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -234,12 +234,14 @@ function DeliveryEdit(props) {
   }
 
   const treeRowRender = (child) => {
-    const { sku, purchase_num, goods_name, shipping_num } = child
+    const { sku, purchase_num, shipping_num, goods = {} } = child
+    const { cn_name = "", en_name = "" } = goods;
     return (
       <div className="tree-row">
         {/* <div style={{width: "20%"}}></div> */}
         <div>{sku}</div>
-        <div>{goods_name}</div>
+        <div>{cn_name}</div>
+        <div>{en_name}</div>
         <div>{purchase_num - shipping_num}</div>
       </div>
     )
