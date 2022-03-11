@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-03-10 19:02:17
+ * @LastEditTime: 2022-03-11 12:02:13
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -157,12 +157,12 @@ function SourcingList(props) {
   },
     [clearSelectedResources, refresh])
 
-
+  // 编辑采购单
   const editEdable = useMemo(() => {
     if (selectedResources.length !== 1) { return false };
     const enableArr = [AUDIT_UNAUDITED, AUDIT_FAILURE, AUDIT_REVOKED];
     const selectedKey = selectedResources[0];
-    if (sourcingListMap.get(selectedKey).po_status === PO_STATUS_CANCEL) return false;
+    // if (sourcingListMap.get(selectedKey).po_status === PO_STATUS_CANCEL) return false;
 
     return enableArr.indexOf(sourcingListMap.get(selectedKey).audit_status) !== -1
   },

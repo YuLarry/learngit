@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-03-11 11:13:41
+ * @LastEditTime: 2022-03-11 14:25:24
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -228,7 +228,7 @@ function DeliveryEdit(props) {
         <div>{po_no}</div>
         <div>{business_name}</div>
         <div>{warehouse_name}</div>
-        <div></div>
+        <div>{ purchase_qty }</div>
       </div>
     )
   }

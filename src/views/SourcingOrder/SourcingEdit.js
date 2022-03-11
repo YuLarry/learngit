@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-03-10 11:04:56
+ * @LastEditTime: 2022-03-11 17:14:58
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -34,23 +34,16 @@ function SourcingEdit(props) {
   const idDecode = id && atob(id);
   const idURIDecode = idDecode && decodeURIComponent(idDecode);
   const navigate = useNavigate();
-  
 
   const [brandList, setBrandList] = useState([]);
   const [provList, setProvList] = useState([]);
   const [subjList, setSubjList] = useState([]);
   const [wareList, setWareList] = useState([]);
-
   const [provMap, setProvMap] = useState(new Map());
   const [wareMap, setWareMap] = useState(new Map());
-
   const [accountList, setAccountList] = useState([]);
-
-
-
   const [tree, setTree] = useState({});
   const [selectGoodsMapTemp, setSelectGoodsMapTemp] = useState(new Map());
-
 
   const loadingContext = useContext(LoadingContext);
   const unsavedChangeContext = useContext(UnsavedChangeContext);
@@ -61,14 +54,11 @@ function SourcingEdit(props) {
   const [businessTypeList, setBusinessTypeList] = useState([]);
   const [platformList, setPlatformList] = useState([]);
 
-
   const [order, setOrder] = useState(null);
 
   const [sourcingOrderForm, setSourcingOrderForm] = useState({
     remark: "",
-    // provider_id: "",
     warehouse_code: "",
-    account_id: "",
     brand_code: "",
     subject_code: "",
     division: "",
@@ -79,19 +69,16 @@ function SourcingEdit(props) {
 
   });
 
-  /* 删除自动设置account info */
-  // useEffect(()=>{
-  //   if( accountList.length !== 0 && order ){
-  //     const idx = accountList.findIndex( (item)=>(item.id.toString() === order.account_id) );
-  //     if( idx === -1 ){
-  //       setSourcingOrderForm({ ...sourcingOrderForm, account_id: accountList[0].id.toString() })
-  //     }
-  //   }else if( accountList.length !== 0 ){
-  //     setSourcingOrderForm({ ...sourcingOrderForm, account_id: accountList[0].id.toString() })
-  //   }
-    
-  // }
-  // ,[accountList, order])
+  const [accountInfo, setAccountInfo] = useState(null);
+  const accountHandler = useCallback(
+    (id) => {
+      if (accountList.length === 0) return;
+      const accountInfo = accountList.find(item => item.id.toString() === id);
+      console.log(accountInfo);
+      setAccountInfo(accountInfo)
+    }
+    , [accountList]
+  );
 
   useEffect(() => {
     setSourcingOrderForm({ ...sourcingOrderForm, warehouse_code: wareList.length > 0 && wareList[0].value })
@@ -101,29 +88,12 @@ function SourcingEdit(props) {
     setSourcingOrderForm({ ...sourcingOrderForm, business_type: businessTypeList.length > 0 && businessTypeList[0].value })
   }, [businessTypeList]);
 
-  const [currency, setCurrency] = useState("");
 
   const [provider_id, setProvider_id] = useState("");
 
-  // useEffect(() => {
-  //   if( !id && !provider_id ){
-  //     provList.length > 0 && setProvider_id( provList[0].value )
-  //   }
-  // }, [id, provList, provider_id]);
-
-  const accountBankNum = useMemo(() => {
-    const detailItem = accountList.find(item => item.id.toString() === sourcingOrderForm.account_id && sourcingOrderForm.account_id.toString() || "")
-    let numText = "";
-    if (detailItem) {
-      numText = detailItem.label
-    }
-    return numText;
-  }
-    , [accountList, sourcingOrderForm])
 
   const formChangeHandler = useCallback(
     (value, id) => {
-      console.log(id, value);
       const newForm = { ...sourcingOrderForm, [id]: value };
       setSourcingOrderForm(newForm);
     },
@@ -137,28 +107,45 @@ function SourcingEdit(props) {
   const selectedGoods = useMemo(() => {
     const arr = [];
     for (const [key, goods] of goodsTableDataMap) {
-      arr.push({...goods, symb: key});
+      arr.push({ ...goods, symb: key });
     }
     return arr;
   }, [goodsTableDataMap]);
 
-  useEffect(()=>{
-    setGoodsTableDataMap(new Map());
+  const total_purchase_money = useMemo(() => {
+    let money = 0;
+    console.log("mo");
+    selectedGoods.map((item)=>{
+      const price = item.price ? Number( item.price ) : Number( item.purchase_price );
+      const count = Number( item.purchase_num ) || 0;
+      money += ( count * price )
+    })
+    return money.toFixed(2);
   }
-  ,[provider_id])
+  ,[selectedGoods])  
+  const total_purchase_num = useMemo(() => {
+    let num = 0;
+    selectedGoods.map((item)=>{
+      num += Number(item.purchase_num)
+    })
+    return num;
+  }
+  ,[selectedGoods])  
 
   const saveOrder = useCallback(
     () => {
       const selectedGoodsFormat = selectedGoods.map(goods => ({
         ...goods,
-        purchase_currency: currency,
-        purchase_price: goods.price,
+        purchase_currency: accountInfo.currency,
+        purchase_price: goods.purchase_price || goods.price,
       }))
       const data = {
         ...sourcingOrderForm,
         provider_id,
+        account_id: accountInfo.id,
         po_item: selectedGoodsFormat
       }
+      console.log(data);
       loadingContext.loading(true);
       editSourcingOrder(data)
         .then(res => {
@@ -167,6 +154,7 @@ function SourcingEdit(props) {
             toastContext.toast({
               active: true,
               message: "保存采购单成功！",
+              duration: 2000,
               onDismiss: () => {
                 toastContext.toast({ active: false });
                 navigate(-1)
@@ -185,9 +173,10 @@ function SourcingEdit(props) {
           loadingContext.loading(false);
         })
     },
-    [currency, selectedGoods, sourcingOrderForm],
+    [accountInfo, navigate, provider_id, selectedGoods, sourcingOrderForm],
   );
 
+  const [optsLoaded, setOptsLoaded] = useState(false);
   useEffect(() => {
     loadingContext.loading(true)
     Promise.all([
@@ -232,25 +221,25 @@ function SourcingEdit(props) {
         setWareMap(wareDataMap);
 
         const { data: resPlat } = resPlatform;
-        const platArr = [{label: "", value: ""}];
+        const platArr = [{ label: "", value: "" }];
         for (const k in resPlat) {
           platArr.push({ label: resPlat[k], value: k })
         }
-        setPlatformList( platArr )
+        setPlatformList(platArr)
 
         const { data: resBusin } = resBusinessType;
         const busiArr = [];
         for (const ke in resBusin) {
           busiArr.push({ label: resBusin[ke], value: ke })
         }
-        setBusinessTypeList( busiArr )
+        setBusinessTypeList(busiArr)
 
         const { data: resDepa } = resDepartment;
         const depaArr = [];
         for (const key in resDepa) {
           depaArr.push({ label: resDepa[key], value: key })
         }
-        setDepartmentList( depaArr )
+        setDepartmentList(depaArr)
 
         // set initial form value
         // setSourcingOrderForm({
@@ -276,6 +265,7 @@ function SourcingEdit(props) {
 
         })
 
+        setOptsLoaded(true);
       })
       .finally(() => {
         loadingContext.loading(false);
@@ -337,7 +327,7 @@ function SourcingEdit(props) {
     if (!provider_id) return;
     const opt = providerDetailMap.get(provider_id);
     if (opt) {
-      setAccountList(opt)     
+      setAccountList(opt)
     } else {
       getProviderDetail(provider_id)
         .then(res => {
@@ -348,69 +338,52 @@ function SourcingEdit(props) {
 
           setproviderDetailMap(newMap);
           setAccountList(options);
-          
         })
     }
 
   }, [providerDetailMap, provider_id])
 
-  // set provMap account card info
-  useEffect(() => {
-    const provInfo = provMap.get(provider_id);
-    const _map = new Map(provMap);
-    _map.set(provider_id, { ...provInfo, account_id: sourcingOrderForm.account_id })
-    setProvMap(_map)
-  },
-    [sourcingOrderForm])
 
-  // update currencty
-  useEffect(() => {
-    const accountInfo = accountList.find((account) => account.value === sourcingOrderForm.account_id)
-    accountInfo && setCurrency(accountInfo.currency);
-  }, [sourcingOrderForm]);
-
+  // get order detail
   useEffect(() => {
     if (!id) return;
+    if (!optsLoaded) return
     loadingContext.loading(true);
     getSourcingOrderDetail(idDecode)
       .then(res => {
-        // console.log(res);
         const { data } = res;
-        const provider_account = data && data.provider_account;
-        const { 
+        const {
+          brand,
           warehouse,
-
-
+          subject,
+          provider,
+          provider_account,
+          item,
         } = data || {};
-        setOrder( {
-          ...data, 
-          account_id: provider_account.id.toString(),
+        setOrder({
+          ...data,
+        });
+        setSourcingOrderForm({
+          ...data,
+          brand_code: brand.code,
+          subject_code: subject.subject_code,
+          warehouse_code: warehouse.code,
+        });
 
-        } );
-        setSourcingOrderForm( {
-          ...data, 
-          account_id: provider_account.id.toString(),
-          brand_code: "",
-          business_type: "",
-          division: "",
-          subject_code: "",
-          warehouse_code: warehouse.id.toString(),
-        } );
-        setProvider_id( res.data && res.data.provider && res.data.provider.id.toString() )
+        setAccountInfo({ ...provider_account });
 
-        const _goodsMap = new Map();
-        data.item.map((it)=>{
+        setProvider_id(provider && provider.id.toString())
+
+        const arr = item.map((it) => {
           const { goods } = it;
-          _goodsMap.set( goods.id, {...it, id: goods.id} );
+          return [Symbol(goods.sku), it]
         })
-        setGoodsTableDataMap( _goodsMap );
-
+        setGoodsTableDataMap(new Map(arr));
       })
       .finally(() => {
         loadingContext.loading(false);
       })
-
-  }, []);
+  }, [optsLoaded]);
 
   const [active, setActive] = useState(false);
   const handleChange = useCallback(() => setActive(!active), [active]);
@@ -423,13 +396,6 @@ function SourcingEdit(props) {
 
   const { selectedResources, allResourcesSelected, handleSelectionChange } = useIndexResourceState(selectedGoods, { resourceIDResolver: (goods) => goods.sku });
 
-
-  const handleDeleteGoods = useCallback((id) => {
-    const tempMap = new Map(goodsTableDataMap);
-    tempMap.delete(id);
-    setGoodsTableDataMap(tempMap);
-  }
-    , [goodsTableDataMap])
 
   const promotedBulkActions = useMemo(() => (
     [
@@ -452,8 +418,8 @@ function SourcingEdit(props) {
 
   const goodsFormChangeHandler = useCallback(
     (sku, val, key) => {
-      if( val && key === "purchase_num" && !fstlnTool.INT_MORE_THAN_ZERO_REG.test(val) ) return;
-      if( val && key === "price" && !fstlnTool.FLOAT_MORE_THAN_ZERO_REG.test(val) ) return;
+      if (val && key === "purchase_num" && !fstlnTool.INT_MORE_THAN_ZERO_REG.test(val)) return;
+      if (val && key === "price" && !fstlnTool.FLOAT_MORE_THAN_ZERO_REG.test(val)) return;
       const _tempGoodItem = goodsTableDataMap.get(sku);
       _tempGoodItem[key] = val
       const tempMap = new Map(goodsTableDataMap);
@@ -464,43 +430,62 @@ function SourcingEdit(props) {
     [goodsTableDataMap],
   );
 
-  const rowMarkup = useMemo(() =>
-    selectedGoods.map(({ id, cn_name, en_name, price, sku, purchase_num = 0,purchase_price, symb }, index) => (
-      <IndexTable.Row
-        id={id}
-        key={index}
-        selected={selectedResources.includes(symb)}
-        position={index}
-      >
-        <IndexTable.Cell>
-          {sku}
-        </IndexTable.Cell>
-        <IndexTable.Cell>
-          <TextField
-            type="number"
-            value={purchase_num.toString()}
-            onChange={(v) => { goodsFormChangeHandler(symb, v, "purchase_num") }}
-          />
-        </IndexTable.Cell>
-        <IndexTable.Cell>
-          <TextField
-            type="number"
-            value={price || purchase_price}
-            prefix="$"
-            onChange={(v) => { goodsFormChangeHandler(symb, v, "price") }}
-          />
-        </IndexTable.Cell>
-        <IndexTable.Cell>
-          <Button
-            icon={DeleteMinor}
-            onClick={() => { handleDeleteGoods(symb) }}
-          ></Button>
-        </IndexTable.Cell>
+  const handleDeleteGoods = useCallback((syblKey) => {
+    if (id) {
+      goodsFormChangeHandler(syblKey, "0", "purchase_num");
+    } else {
+      const tempMap = new Map(goodsTableDataMap);
+      tempMap.delete(syblKey);
+      setGoodsTableDataMap(tempMap);
+    }
+  }
+    , [goodsFormChangeHandler, goodsTableDataMap, id])
 
-      </IndexTable.Row>
-    ))
-    ,
-    [goodsFormChangeHandler, handleDeleteGoods, selectedGoods, selectedResources]
+  const rowMarkup = useMemo(() => {
+    // console.log(selectedGoods);
+    return selectedGoods.map(({ item_id, id, cn_name, en_name, price, sku, purchase_num = "0", purchase_price, symb }, index) => {
+      // console.log( purchase_num );
+      return (
+        (item_id && purchase_num === "0")
+        ?
+        null
+        :
+        <IndexTable.Row
+          id={item_id || id}
+          key={index}
+          selected={selectedResources.includes(symb)}
+          position={index}
+        >
+          <IndexTable.Cell>
+            {sku}
+          </IndexTable.Cell>
+          <IndexTable.Cell>
+            <TextField
+              type="number"
+              value={purchase_num.toString()}
+              onChange={(v) => { goodsFormChangeHandler(symb, v, "purchase_num") }}
+            />
+          </IndexTable.Cell>
+          <IndexTable.Cell>
+            <TextField
+              type="number"
+              value={price || purchase_price}
+              prefix="$"
+              onChange={(v) => { goodsFormChangeHandler(symb, v, "price") }}
+            />
+          </IndexTable.Cell>
+          <IndexTable.Cell>
+            <Button
+              icon={DeleteMinor}
+              onClick={() => { handleDeleteGoods(symb) }}
+            ></Button>
+          </IndexTable.Cell>
+
+        </IndexTable.Row>)
+    })
+
+  }
+    , [goodsFormChangeHandler, handleDeleteGoods, selectedGoods, selectedResources]
   )
 
 
@@ -537,7 +522,7 @@ function SourcingEdit(props) {
 
   const treeSelectChange = useCallback(
     (selectsMap) => {
-      console.log(selectsMap);
+      // console.log(selectsMap);
       setSelectGoodsMapTemp(selectsMap);
     },
     [],
@@ -548,7 +533,7 @@ function SourcingEdit(props) {
     () => {
       const arr = [];
       selectGoodsMapTemp.forEach((valueItem) => {
-        arr.push([Symbol(valueItem.sku), {...valueItem}])
+        arr.push([Symbol(valueItem.sku), { ...valueItem }])
       })
       setGoodsTableDataMap(new Map([...goodsTableDataMap, ...arr]))
       setSelectGoodsMapTemp(new Map());
@@ -597,13 +582,13 @@ function SourcingEdit(props) {
     <Page
       breadcrumbs={[
         {
-          onAction: ()=>{
+          onAction: () => {
             navigate(-1);
           }
         }
       ]}
       title={id ? idURIDecode : "创建采购单"}
-      subtitle={ order && order.create_message || "" }
+      subtitle={order && order.create_message || ""}
 
     >
       <Layout>
@@ -618,7 +603,6 @@ function SourcingEdit(props) {
                     value={sourcingOrderForm.brand_code}
                     id="brand_code"
                     onChange={formChangeHandler}
-                    disabled={ order }
                     placeholder="请选择项目"
                   />
                   <Select
@@ -627,7 +611,6 @@ function SourcingEdit(props) {
                     value={sourcingOrderForm.subject_code}
                     id="subject_code"
                     onChange={formChangeHandler}
-                    disabled={ order }
                     placeholder="请选择采购方"
                   />
                 </FormLayout.Group>
@@ -637,17 +620,18 @@ function SourcingEdit(props) {
                     options={provList}
                     value={provider_id.toString()}
                     id="provider_id"
-                    onChange={(value) => { console.log(value);setProvider_id(value) }}
-                    disabled={ order }
+                    onChange={(value) => {
+                      setProvider_id(value);
+                      setGoodsTableDataMap(new Map())
+                    }}
                     placeholder="请选择供应商"
                   />
                   <Select
                     label="收款账户"
                     options={accountList}
-                    value={sourcingOrderForm.account_id}
+                    value={accountInfo && accountInfo.id.toString() || ""}
                     id="account_id"
-                    onChange={formChangeHandler}
-                    disabled={ order }
+                    onChange={accountHandler}
                     placeholder="请选择收款账户"
                   />
                 </FormLayout.Group>
@@ -658,7 +642,6 @@ function SourcingEdit(props) {
                     value={sourcingOrderForm.warehouse_code}
                     id="warehouse_code"
                     onChange={formChangeHandler}
-                    disabled={ order }
                     placeholder="请选择收货仓库"
                   />
                   <Select
@@ -667,7 +650,6 @@ function SourcingEdit(props) {
                     value={sourcingOrderForm.division}
                     id="division"
                     onChange={formChangeHandler}
-                    disabled={ order }
                     placeholder="请选择事业部"
                   />
                 </FormLayout.Group>
@@ -678,7 +660,6 @@ function SourcingEdit(props) {
                     value={sourcingOrderForm.business_type}
                     id="business_type"
                     onChange={formChangeHandler}
-                    disabled={ order }
                     placeholder="请选择业务类型"
                   />
                   <Select
@@ -687,8 +668,7 @@ function SourcingEdit(props) {
                     value={sourcingOrderForm.platform}
                     id="platform"
                     onChange={formChangeHandler}
-                    disabled={ order }
-                    // placeholder="请选择平台"
+                  // placeholder="请选择平台"
                   />
                 </FormLayout.Group>
 
@@ -718,9 +698,9 @@ function SourcingEdit(props) {
               {rowMarkup}
             </IndexTable>
             <div style={{ textAlign: "center" }}>
-              <Button 
-              onClick={() => { setActive(true) }}
-              disabled={ !provider_id }
+              <Button
+                onClick={() => { setActive(true) }}
+                disabled={!provider_id}
               >添加商品</Button>
             </div>
             <br />
@@ -729,13 +709,13 @@ function SourcingEdit(props) {
         <Layout.Section secondary>
           <Card title="采购信息">
 
-            <SourcingCardSection title="金额" text="text 文字" />
-            <SourcingCardSection title="币制" text="text 文字" />
-            <SourcingCardSection title="采购数量" text="text 文字" />
+            <SourcingCardSection title="金额" text={ total_purchase_money } />
+            <SourcingCardSection title="币制" text={accountInfo && accountInfo.currency} />
+            <SourcingCardSection title="采购数量" text={ total_purchase_num } />
 
           </Card>
-          <SourcingProviCard provInfo={{ ...provMap.get(provider_id), account_id: accountBankNum }} />
-          <SourcingRepoCard wareInfo={ wareMap.get(sourcingOrderForm.warehouse_code) } />
+          <SourcingProviCard provInfo={{ ...provMap.get(provider_id), account_id: accountInfo ? (accountInfo.label || accountInfo.bank_card_number) : "" }} />
+          <SourcingRepoCard wareInfo={wareMap.get(sourcingOrderForm.warehouse_code)} />
           <SourcingRemarkCard remark={sourcingOrderForm.remark || ""} onChange={(val) => { formChangeHandler(val, "remark") }} />
 
 
