@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-21 15:28:14
- * @LastEditTime: 2022-03-11 11:06:42
+ * @LastEditTime: 2022-03-11 11:44:09
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -140,8 +140,8 @@ function DeliveryInbound(props) {
           </IndexTable.Cell>
           <IndexTable.Cell>
             <ProductInfoPopover popoverNode={productInfo(goods)}>
-              <div>{goods.cn_name}</div>
-              <div>{goods.en_name}</div>
+              <div>{goods && goods.cn_name}</div>
+              <div>{goods && goods.en_name}</div>
             </ProductInfoPopover>
           </IndexTable.Cell>
           <IndexTable.Cell>
@@ -205,7 +205,7 @@ function DeliveryInbound(props) {
           </IndexTable.Cell>
           <IndexTable.Cell>
             <ProductInfoPopover popoverNode={productInfo(goods)}>
-              {goods.cn_name}
+              {goods && goods.cn_name}
             </ProductInfoPopover>
           </IndexTable.Cell>
           <IndexTable.Cell>
@@ -246,8 +246,8 @@ function DeliveryInbound(props) {
           </IndexTable.Cell>
           <IndexTable.Cell>
             <ProductInfoPopover popoverNode={productInfo(goods)}>
-              <div>{goods.cn_name}</div>
-              <div>{goods.en_name}</div>
+              <div>{goods && goods.cn_name}</div>
+              <div>{goods && goods.en_name}</div>
             </ProductInfoPopover>
           </IndexTable.Cell>
           <IndexTable.Cell>

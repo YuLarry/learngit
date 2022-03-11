@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-24 16:02:59
- * @LastEditTime: 2022-03-10 16:51:58
+ * @LastEditTime: 2022-03-11 11:44:47
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -83,8 +83,8 @@ function InRepositoryManualModal(props) {
             <ProductInfoPopover
               popoverNode={productInfo(goods)}
             >
-              <div>{goods.cn_name}</div>
-              <div>{goods.en_name}</div>
+              <div>{goods && goods.cn_name}</div>
+              <div>{goods && goods.en_name}</div>
             </ProductInfoPopover>
           </IndexTable.Cell>
           <IndexTable.Cell>
