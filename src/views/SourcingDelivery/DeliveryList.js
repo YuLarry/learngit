@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-03-14 15:43:13
+ * @LastEditTime: 2022-03-14 18:37:46
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -106,6 +106,14 @@ function DeliveryList(props) {
       setQueryListStatus(tabs[selectedTabIndex].id)
     }, [tabs]
   );
+
+  useEffect(()=>{
+    if( status ){
+      const index = tabs.findIndex(item=>(item.id === status))
+      handleTabChange(index);
+    }
+  }
+  ,[])
 
   const pageStatus = useMemo(() => {
     const status = {

@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-03-14 15:42:06
+ * @LastEditTime: 2022-03-14 18:41:04
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -204,6 +204,14 @@ function RepositoryList(props) {
     }
     , [tabs]
   );
+
+  useEffect(()=>{
+    if( status ){
+      const index = tabs.findIndex(item=>(item.id === status))
+      handleTabChange(index);
+    }
+  }
+  ,[])
 
   const [refresh, setRefresh] = useState(0);
 

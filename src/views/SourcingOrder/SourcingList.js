@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-03-14 15:42:20
+ * @LastEditTime: 2022-03-14 18:35:22
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -105,6 +105,14 @@ function SourcingList(props) {
     },
     [tabs]
   );
+  
+  useEffect(()=>{
+    if( po_status ){
+      const index = tabs.findIndex(item=>(item.id === po_status))
+      handleTabChange(index);
+    }
+  }
+  ,[])
 
   // const [exporting, setExporting] = useState(false);
 
