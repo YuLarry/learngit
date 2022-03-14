@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-03-10 16:38:39
+ * @LastEditTime: 2022-03-14 15:42:06
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -27,7 +27,7 @@ function RepositoryList(props) {
   const [searchParams, setSearchParams] = useSearchParams();
   const queryParamObj = useMemo(() => {
     return (
-      searchParams.get("querys") && JSON.parse(atob(searchParams.get("querys"))) || {}
+      searchParams.get("querys") && JSON.parse( decodeURIComponent( atob( searchParams.get("querys") ) )) || {}
     )
   }
     , [searchParams])
@@ -220,7 +220,7 @@ function RepositoryList(props) {
       per_page: pageSize,
       page: pageIndex,
     }
-    setSearchParams({ querys: btoa(JSON.stringify(data)) });
+    setSearchParams({ querys: btoa( encodeURIComponent( JSON.stringify(data) ) ) });
     clearSelectedResources();
     getRepoTableList(data)
       .then(res => {

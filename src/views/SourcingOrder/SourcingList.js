@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-03-11 12:02:13
+ * @LastEditTime: 2022-03-14 15:42:20
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -28,7 +28,7 @@ function SourcingList(props) {
   const [searchParams, setSearchParams] = useSearchParams();
   const queryParamObj = useMemo(() => {
     return (
-      searchParams.get("querys") && JSON.parse(atob(searchParams.get("querys"))) || {}
+      searchParams.get("querys") && JSON.parse(decodeURIComponent( atob(  searchParams.get("querys") ))) || {}
     )
   }
     , [searchParams])
@@ -462,7 +462,7 @@ function SourcingList(props) {
       per_page: pageSize,
       page: pageIndex
     };
-    setSearchParams({ querys: btoa(JSON.stringify(queryData)) })
+    setSearchParams({ querys: btoa( encodeURIComponent( JSON.stringify(queryData) ) ) })
     // console.log(searchParams.get("querys"));
     querySourcingList(queryData)
       .then(res => {

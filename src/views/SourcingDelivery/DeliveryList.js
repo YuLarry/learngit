@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-03-11 17:46:48
+ * @LastEditTime: 2022-03-14 15:43:13
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -26,7 +26,7 @@ function DeliveryList(props) {
   const [searchParams, setSearchParams] = useSearchParams();
   const queryParamObj = useMemo(() => {
     return (
-      searchParams.get("querys") && JSON.parse(atob(searchParams.get("querys"))) || {}
+      searchParams.get("querys") && JSON.parse( decodeURIComponent( atob(searchParams.get("querys")))) || {}
     )
   }
     , [searchParams])
@@ -304,7 +304,7 @@ function DeliveryList(props) {
       page: pageIndex,
       status: queryListStatus,
     }
-    setSearchParams( {querys :btoa(JSON.stringify( queryData ))} );
+    setSearchParams( {querys :btoa( encodeURIComponent( JSON.stringify( queryData )))} );
     getShipingList(queryData)
       .then(res => {
         const { data: { list, meta: { pagination: { total = 0 } } } } = res;
