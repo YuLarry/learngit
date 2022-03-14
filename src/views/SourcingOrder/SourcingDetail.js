@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-20 16:16:03
- * @LastEditTime: 2022-03-14 15:59:37
+ * @LastEditTime: 2022-03-14 16:57:59
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -21,6 +21,7 @@ import { BadgeAuditStatus } from "../../components/StatusBadges/BadgeAuditStatus
 import { BadgeDeliveryStatus } from "../../components/StatusBadges/BadgeDeliveryStatus";
 import { BadgePaymentStatus } from "../../components/StatusBadges/BadgePaymentStatus";
 import { LoadingContext } from "../../context/LoadingContext";
+import { AUDIT_FAILURE, AUDIT_REVOKED, AUDIT_UNAUDITED } from "../../utils/StaticData";
 
 function SourcingDetail(props) {
   const navigate = useNavigate();
@@ -126,7 +127,13 @@ function SourcingDetail(props) {
 
   }, []);
 
-
+  const enableEdit = useMemo(() => {
+    const enableArr = [AUDIT_UNAUDITED, AUDIT_FAILURE, AUDIT_REVOKED];
+    if (order && enableArr.indexOf(order.audit_status) > -1) {
+      return true;
+    }
+  }
+    , [order]);
 
   return (
     <Page
@@ -137,14 +144,18 @@ function SourcingDetail(props) {
           }
         }
       ]}
-      secondaryActions={[
-        {
-          content: "编辑采购单",
-          onAction: () => {
-            navigate(`/sourcing/edit/${id}`)
-          }
-        }
-      ]}
+      secondaryActions={
+        enableEdit
+          ?
+          [{
+            content: "编辑采购单",
+            onAction: () => {
+              navigate(`/sourcing/edit/${id}`)
+            }
+          }]
+          :
+          []
+      }
       title={idURIDecode}
       titleMetadata={badgesMarkup}
       subtitle={order && order.create_message || ""}
@@ -184,7 +195,7 @@ function SourcingDetail(props) {
         </Layout.Section>
         <Layout.Section secondary>
           <SourcingInfoCard poInfo={order ? {
-            ...order, 
+            ...order,
             division: departmentList[order.division],
             business_type: businessTypeList[order.business_type],
             platform: platformList[order.platform],

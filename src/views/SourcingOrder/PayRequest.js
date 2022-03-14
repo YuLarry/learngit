@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-19 17:05:46
- * @LastEditTime: 2022-03-14 14:59:12
+ * @LastEditTime: 2022-03-14 16:40:19
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -24,6 +24,9 @@ import { ModalContext } from "../../context/ModalContext";
 import moment from "moment"
 import { ToastContext } from "../../context/ToastContext";
 import { fstlnTool } from "../../utils/Tools";
+import { BadgeAuditStatus } from "../../components/StatusBadges/BadgeAuditStatus";
+import { BadgePaymentStatus } from "../../components/StatusBadges/BadgePaymentStatus";
+import { BadgeDeliveryStatus } from "../../components/StatusBadges/BadgeDeliveryStatus";
 
 
 function PayRequest(props) {
@@ -183,7 +186,7 @@ function PayRequest(props) {
               </div>
               <div className="invoice-col" style={{ display: (file ? "" : "none") }}>
                 <p>发票文件</p>
-                <div style={{ minHeight: "2em" }} >{file && file.name}</div>
+                <div style={{ minHeight: "2em", overflow:"hidden", whiteSpace: "nowrap", textOverflow: "ellipsis"}} >{file && file.name}</div>
               </div>
             </div>
             <div className="invoice-del">
@@ -312,11 +315,24 @@ function PayRequest(props) {
   },
     [savePay])
 
+
+    const badgesMarkup = useMemo(() => {
+      if (!order) return null;
+      const { audit_status, payment_status, delivery_status } = order;
+      return (
+        <div>
+          <BadgeAuditStatus status={audit_status} />
+          <BadgePaymentStatus status={payment_status} />
+          <BadgeDeliveryStatus status={delivery_status} />
+        </div>
+      )
+    }, [order])
+
   return (
     <Page
       breadcrumbs={[{ content: '采购实施列表', url: '/sourcing' }]}
       title="申请付款"
-      titleMetadata={<div><Badge status="attention">Verified</Badge> <Badge status="attention">Verified</Badge> <Badge status="attention">Verified</Badge></div>}
+      titleMetadata={ badgesMarkup }
       subtitle={order && order.create_message || ""}
     >
       <Layout>

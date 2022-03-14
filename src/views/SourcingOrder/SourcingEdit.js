@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-03-14 15:55:57
+ * @LastEditTime: 2022-03-14 16:14:13
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -684,7 +684,7 @@ function SourcingEdit(props) {
                     placeholder="请选择业务类型"
                   />
                   <Select
-                    label="平台"
+                    label="平台（选填）"
                     options={platformList}
                     value={sourcingOrderForm.platform}
                     id="platform"
@@ -730,9 +730,9 @@ function SourcingEdit(props) {
         <Layout.Section secondary>
           <Card title="采购信息">
 
-            <SourcingCardSection title="金额" text={total_purchase_money} />
+            <SourcingCardSection title="金额" text={total_purchase_money || 0} />
             <SourcingCardSection title="币制" text={accountInfo && accountInfo.currency} />
-            <SourcingCardSection title="采购数量" text={total_purchase_num} />
+            <SourcingCardSection title="采购数量" text={total_purchase_num || 0} />
 
           </Card>
           <SourcingProviCard provInfo={{ ...provMap.get(provider_id), account_id: accountInfo ? (accountInfo.label || accountInfo.bank_card_number) : "" }} />

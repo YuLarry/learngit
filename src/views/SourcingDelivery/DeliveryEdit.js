@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-03-11 19:32:41
+ * @LastEditTime: 2022-03-14 16:41:37
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -31,6 +31,9 @@ import moment from "moment";
 import { FstlnLoading } from "../../components/FstlnLoading";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { fstlnTool } from "../../utils/Tools";
+import { BadgeAuditStatus } from "../../components/StatusBadges/BadgeAuditStatus";
+import { BadgePaymentStatus } from "../../components/StatusBadges/BadgePaymentStatus";
+import { BadgeDeliveryStatus } from "../../components/StatusBadges/BadgeDeliveryStatus";
 
 
 function DeliveryEdit(props) {
@@ -546,6 +549,19 @@ function DeliveryEdit(props) {
   }, []);
 
 
+  const badgesMarkup = useMemo(() => {
+    if (!detail) return null;
+    const { audit_status, payment_status, delivery_status } = detail;
+    return (
+      <div>
+        <BadgeAuditStatus status={audit_status} />
+        <BadgePaymentStatus status={payment_status} />
+        <BadgeDeliveryStatus status={delivery_status} />
+      </div>
+    )
+  }, [detail])
+
+
   return (
     <Page
       breadcrumbs={[{
@@ -555,6 +571,7 @@ function DeliveryEdit(props) {
         }
       }]}
       title={idURIDecode ? idURIDecode : "新建发货单"}
+      titleMetadata={ badgesMarkup }
       subtitle={detail && detail.create_message || ""}
     >
       <Layout>
