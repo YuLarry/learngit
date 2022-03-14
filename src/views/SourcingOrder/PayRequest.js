@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-19 17:05:46
- * @LastEditTime: 2022-03-11 19:44:49
+ * @LastEditTime: 2022-03-14 14:59:12
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -15,7 +15,7 @@ import {
   DeleteMinor
 } from '@shopify/polaris-icons';
 import "./style/payRequest.scss";
-import { commitPaymentRequest, getSourcingOrderDetail } from "../../api/requests";
+import { commitPaymentRequest, getBusinessTypeList, getDepartmentList, getPlatformList, getSourcingOrderDetail } from "../../api/requests";
 import { useContext } from "react";
 import { LoadingContext } from "../../context/LoadingContext";
 import { useNavigate, useParams } from "react-router-dom";
@@ -37,6 +37,10 @@ function PayRequest(props) {
   const unsavedChangeContext = useContext(UnsavedChangeContext)
   const toastContext = useContext(ToastContext)
   const modalContext = useContext(ModalContext);
+
+  const [platformList, setPlatformList] = useState({});
+  const [departmentList, setDepartmentList] = useState({});
+  const [businessTypeList, setBusinessTypeList] = useState({});
 
   const [order, setOrder] = useState(null);
 
@@ -70,7 +74,7 @@ function PayRequest(props) {
 
   const invoiceChangeHandler = useCallback(
     (idx, name, val) => {
-      if( val && name === "price" && !fstlnTool.FLOAT_MORE_THAN_ZERO_REG.test(val) ) return;
+      if (val && name === "price" && !fstlnTool.FLOAT_MORE_THAN_ZERO_REG.test(val)) return;
       setInvoice([
         ...invoice.slice(0, idx),
         { ...invoice[idx], [name]: val },
@@ -119,7 +123,7 @@ function PayRequest(props) {
           >
             <IndexTable.Cell>
               <ProductInfoPopover popoverNode={productInfo}>
-              {sku}
+                {sku}
               </ProductInfoPopover>
             </IndexTable.Cell>
             {/* <IndexTable.Cell>{location}</IndexTable.Cell> */}
@@ -158,7 +162,7 @@ function PayRequest(props) {
                 <DatePopover
                   value={date}
                   onChange={(val) => { invoiceChangeHandler(index, 'date', val) }}
-                  disableDatesAfter={ new Date() }
+                  disableDatesAfter={new Date()}
                 />
               </div>
               <div className="invoice-col" style={{ display: (file ? "none" : "") }}>
@@ -208,6 +212,16 @@ function PayRequest(props) {
   useEffect(() => {
     if (!id) return;
     loadingContext.loading(true);
+    Promise.all([
+      getPlatformList(),
+      getBusinessTypeList(),
+      getDepartmentList(),
+    ])
+      .then(([resPlatform, resBusinessType, resDepartment]) => {
+        setPlatformList(resPlatform.data);
+        setBusinessTypeList(resBusinessType.data);
+        setDepartmentList(resDepartment.data);
+      })
     getSourcingOrderDetail(idURIEncode)
       .then(res => {
         // console.log(res);
@@ -225,11 +239,11 @@ function PayRequest(props) {
       loadingContext.loading(true)
       const invoiceFormdata = new FormData();
       invoiceFormdata.append("po_id", order.id)
-      invoice.map((invoiceItem, idx)=>{
-      const { date, file, price } = invoiceItem;
-        invoiceFormdata.append( `invoice_info[${idx}][date]`,  moment(date).format("YYYY-MM-DD"))
-        invoiceFormdata.append( `invoice_info[${idx}][price]`, price )
-        invoiceFormdata.append( `invoice_info[${idx}][image]`, file )
+      invoice.map((invoiceItem, idx) => {
+        const { date, file, price } = invoiceItem;
+        invoiceFormdata.append(`invoice_info[${idx}][date]`, moment(date).format("YYYY-MM-DD"))
+        invoiceFormdata.append(`invoice_info[${idx}][price]`, price)
+        invoiceFormdata.append(`invoice_info[${idx}][image]`, file)
       })
 
       console.log(invoiceFormdata)
@@ -239,7 +253,7 @@ function PayRequest(props) {
             active: true,
             message: "提交成功",
             duration: 1000,
-            onDismiss: ()=>{
+            onDismiss: () => {
               navigate(-1)
             }
           })
@@ -290,7 +304,7 @@ function PayRequest(props) {
         }
       },
     })
-    return ()=>{
+    return () => {
       unsavedChangeContext.remind({
         active: false,
       })
@@ -303,7 +317,7 @@ function PayRequest(props) {
       breadcrumbs={[{ content: '采购实施列表', url: '/sourcing' }]}
       title="申请付款"
       titleMetadata={<div><Badge status="attention">Verified</Badge> <Badge status="attention">Verified</Badge> <Badge status="attention">Verified</Badge></div>}
-      subtitle={ order && order.create_message || "" }
+      subtitle={order && order.create_message || ""}
     >
       <Layout>
         <Layout.Section>
@@ -337,14 +351,20 @@ function PayRequest(props) {
         </Layout.Section>
         <Layout.Section secondary>
           <SourcingInfoCard
-            poInfo={order ? 
-            { 
-              ...order, 
-              provider_name: order.provider.business_name,
-              bank_card_number: order.provider_account.bank_card_number,
-              warehouse_name: order.warehouse.name,
-            } 
-            : {}}
+            poInfo={order ?
+              {
+                ...order,
+                provider_name: order.provider.business_name,
+                bank_card_number: order.provider_account.bank_card_number,
+                warehouse_name: order.warehouse.name,
+                purchase_qty: order.purchase_qty,
+                purchase_total: order.purchase_total || undefined,
+
+                division: departmentList && departmentList[order.division],
+                business_type: businessTypeList && businessTypeList[order.business_type],
+                platform: platformList && platformList[order.platform],
+              }
+              : {}}
             hasMore={true}
           />
         </Layout.Section>
