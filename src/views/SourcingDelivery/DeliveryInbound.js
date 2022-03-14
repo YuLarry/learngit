@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-21 15:28:14
- * @LastEditTime: 2022-03-11 11:44:09
+ * @LastEditTime: 2022-03-14 15:14:11
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -423,7 +423,7 @@ function DeliveryInbound(props) {
   const querySku = useCallback(
     () => {
       getSkuOptionsList({
-        warehouse_sku: inputSku,
+        // warehouse_sku: inputSku,
         client_account_code: clientSelected,
       })
         .then((res) => {

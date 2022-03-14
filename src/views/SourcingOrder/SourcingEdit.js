@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-03-14 12:23:50
+ * @LastEditTime: 2022-03-14 15:12:39
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -121,22 +121,22 @@ function SourcingEdit(props) {
   const total_purchase_money = useMemo(() => {
     let money = 0;
     console.log("mo");
-    selectedGoods.map((item)=>{
-      const price = item.price ? Number( item.price ) : Number( item.purchase_price );
-      const count = Number( item.purchase_num ) || 0;
-      money += ( count * price )
+    selectedGoods.map((item) => {
+      const price = item.price ? Number(item.price) : Number(item.purchase_price);
+      const count = Number(item.purchase_num) || 0;
+      money += (count * price)
     })
     return money.toFixed(2);
   }
-  ,[selectedGoods])  
+    , [selectedGoods])
   const total_purchase_num = useMemo(() => {
     let num = 0;
-    selectedGoods.map((item)=>{
+    selectedGoods.map((item) => {
       num += Number(item.purchase_num)
     })
     return num;
   }
-  ,[selectedGoods])  
+    , [selectedGoods])
 
   const saveOrder = useCallback(
     () => {
@@ -329,16 +329,16 @@ function SourcingEdit(props) {
   },
     [saveOrder])
 
-    const searchAndChangeAccount = useCallback(( accList ) => {
-      if( accountInfo ){
-        const idx = accList.findIndex((item=> item.id.toString() === accountInfo.id.toString()))
-        if( idx === -1 ){
-          setAccountInfo( accList[0] );
-        }
-      }else{
-        setAccountInfo( accList[0] );
+  const searchAndChangeAccount = useCallback((accList) => {
+    if (accountInfo) {
+      const idx = accList.findIndex((item => item.id.toString() === accountInfo.id.toString()))
+      if (idx === -1) {
+        setAccountInfo("");
       }
-    }, [accountInfo]);
+    } else {
+      setAccountInfo("");
+    }
+  }, [accountInfo]);
 
   useEffect(() => {
     if (!provider_id) return;
@@ -467,41 +467,41 @@ function SourcingEdit(props) {
       // console.log( purchase_num );
       return (
         (item_id && purchase_num === "0")
-        ?
-        null
-        :
-        <IndexTable.Row
-          id={item_id || id}
-          key={index}
-          selected={selectedResources.includes(symb)}
-          position={index}
-        >
-          <IndexTable.Cell>
-            {sku}
-          </IndexTable.Cell>
-          <IndexTable.Cell>
-            <TextField
-              type="number"
-              value={purchase_num.toString()}
-              onChange={(v) => { goodsFormChangeHandler(symb, v, "purchase_num") }}
-            />
-          </IndexTable.Cell>
-          <IndexTable.Cell>
-            <TextField
-              type="number"
-              value={price || purchase_price}
-              prefix="$"
-              onChange={(v) => { goodsFormChangeHandler(symb, v, "price") }}
-            />
-          </IndexTable.Cell>
-          <IndexTable.Cell>
-            <Button
-              icon={DeleteMinor}
-              onClick={() => { handleDeleteGoods(symb) }}
-            ></Button>
-          </IndexTable.Cell>
+          ?
+          null
+          :
+          <IndexTable.Row
+            id={item_id || id}
+            key={index}
+            selected={selectedResources.includes(symb)}
+            position={index}
+          >
+            <IndexTable.Cell>
+              {sku}
+            </IndexTable.Cell>
+            <IndexTable.Cell>
+              <TextField
+                type="number"
+                value={purchase_num.toString()}
+                onChange={(v) => { goodsFormChangeHandler(symb, v, "purchase_num") }}
+              />
+            </IndexTable.Cell>
+            <IndexTable.Cell>
+              <TextField
+                type="number"
+                value={price || purchase_price}
+                prefix="$"
+                onChange={(v) => { goodsFormChangeHandler(symb, v, "price") }}
+              />
+            </IndexTable.Cell>
+            <IndexTable.Cell>
+              <Button
+                icon={DeleteMinor}
+                onClick={() => { handleDeleteGoods(symb) }}
+              ></Button>
+            </IndexTable.Cell>
 
-        </IndexTable.Row>)
+          </IndexTable.Row>)
     })
 
   }
@@ -729,9 +729,9 @@ function SourcingEdit(props) {
         <Layout.Section secondary>
           <Card title="采购信息">
 
-            <SourcingCardSection title="金额" text={ total_purchase_money } />
+            <SourcingCardSection title="金额" text={total_purchase_money} />
             <SourcingCardSection title="币制" text={accountInfo && accountInfo.currency} />
-            <SourcingCardSection title="采购数量" text={ total_purchase_num } />
+            <SourcingCardSection title="采购数量" text={total_purchase_num} />
 
           </Card>
           <SourcingProviCard provInfo={{ ...provMap.get(provider_id), account_id: accountInfo ? (accountInfo.label || accountInfo.bank_card_number) : "" }} />
