@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-03-11 17:48:16
+ * @LastEditTime: 2022-03-14 12:23:50
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -70,6 +70,10 @@ function SourcingEdit(props) {
   });
 
   const [accountInfo, setAccountInfo] = useState(null);
+
+
+
+  // console.log(accountInfo)
   const accountHandler = useCallback(
     (id) => {
       if (accountList.length === 0) return;
@@ -99,6 +103,8 @@ function SourcingEdit(props) {
     },
     [sourcingOrderForm],
   );
+
+
 
   const [providerDetailMap, setproviderDetailMap] = useState(new Map());
 
@@ -323,11 +329,23 @@ function SourcingEdit(props) {
   },
     [saveOrder])
 
+    const searchAndChangeAccount = useCallback(( accList ) => {
+      if( accountInfo ){
+        const idx = accList.findIndex((item=> item.id.toString() === accountInfo.id.toString()))
+        if( idx === -1 ){
+          setAccountInfo( accList[0] );
+        }
+      }else{
+        setAccountInfo( accList[0] );
+      }
+    }, [accountInfo]);
+
   useEffect(() => {
     if (!provider_id) return;
     const opt = providerDetailMap.get(provider_id);
     if (opt) {
       setAccountList(opt)
+      searchAndChangeAccount(opt);
     } else {
       getProviderDetail(provider_id)
         .then(res => {
@@ -338,6 +356,8 @@ function SourcingEdit(props) {
 
           setproviderDetailMap(newMap);
           setAccountList(options);
+          searchAndChangeAccount(options);
+
         })
     }
 
@@ -700,7 +720,7 @@ function SourcingEdit(props) {
             <div style={{ textAlign: "center" }}>
               <Button
                 onClick={() => { setActive(true) }}
-                disabled={!provider_id}
+                disabled={!(provider_id && accountInfo)}
               >添加商品</Button>
             </div>
             <br />

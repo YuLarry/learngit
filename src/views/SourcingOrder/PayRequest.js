@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-19 17:05:46
- * @LastEditTime: 2022-03-08 17:20:07
+ * @LastEditTime: 2022-03-11 19:44:49
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -325,7 +325,7 @@ function PayRequest(props) {
                 headings={[
                   { title: '系统SKU' },
                   { title: '采购数量' },
-                  { title: '金额' },
+                  { title: '采购价格' },
                 ]}
               >
                 {rowMarkup}
