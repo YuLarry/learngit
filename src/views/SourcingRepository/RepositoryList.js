@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-03-14 18:41:04
+ * @LastEditTime: 2022-03-14 18:48:33
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -242,7 +242,7 @@ function RepositoryList(props) {
       .finally(() => {
         setListLoading(false)
       })
-  }, [filter, pageIndex, queryListStatus]);
+  }, [filter, pageIndex, queryListStatus, refresh]);
 
   const [modalSkuList, setModalSkuList] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);

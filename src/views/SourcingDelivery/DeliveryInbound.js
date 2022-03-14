@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-21 15:28:14
- * @LastEditTime: 2022-03-14 17:55:07
+ * @LastEditTime: 2022-03-14 19:00:38
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -493,13 +493,6 @@ function DeliveryInbound(props) {
         })
         return;
       }
-      if (type !== INBOUND_TYPE.PCS && !modValid) {
-        toastContext.toast({
-          active: true,
-          message: `请输入可以被 ${numArr.join(',')} 整除的数量！`
-        })
-        return;
-      }
       const _tempMap = new Map(inboundGoodsMap);
 
       const numArr = [];
@@ -543,6 +536,13 @@ function DeliveryInbound(props) {
         }
         _tempMap.set(id, { ...item, ...boxCardInfo });
       })
+      if (type !== INBOUND_TYPE.PCS && !modValid) {
+        toastContext.toast({
+          active: true,
+          message: `请输入可以被 ${numArr.join(',')} 整除的数量！`
+        })
+        return;
+      }
       
       setInboundGoodsMap(_tempMap)
       clearSelectedResources();
