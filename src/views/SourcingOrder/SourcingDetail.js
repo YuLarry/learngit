@@ -1,16 +1,16 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-20 16:16:03
- * @LastEditTime: 2022-03-07 15:42:54
+ * @LastEditTime: 2022-03-14 15:59:37
  * @LastEditors: lijunwei
  * @Description: 
  */
 
-import { Badge, Card, IndexTable, Layout, Page, Thumbnail } from "@shopify/polaris";
+import { Card, IndexTable, Layout, Page, Thumbnail } from "@shopify/polaris";
 import { useContext } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { getSourcingOrderDetail } from "../../api/requests";
+import { getBusinessTypeList, getDepartmentList, getPlatformList, getSourcingOrderDetail } from "../../api/requests";
 import { FstlnTimeline } from "../../components/FstlnTimeline/FstlnTimeline";
 import { ProductInfoPopover } from "../../components/ProductInfoPopover/ProductInfoPopover";
 import { SourcingInfoCard } from "../../components/SecondaryCard/SourcingInfoCard";
@@ -34,23 +34,23 @@ function SourcingDetail(props) {
   const [order, setOrder] = useState(null);
 
 
-  const productInfo = ( goodsItem ) => {
-      const { cn_name, en_name, id, image_url, price, sku } = goodsItem;
-      return (
-        <div className="product-container" style={{ maxWidth: "400px", display: "flex", alignItems: "flex-start" }}>
+  const productInfo = (goodsItem) => {
+    const { cn_name, en_name, id, image_url, price, sku } = goodsItem;
+    return (
+      <div className="product-container" style={{ maxWidth: "400px", display: "flex", alignItems: "flex-start" }}>
 
-          <Thumbnail
-            source={image_url || ""}
-            alt={en_name}
-            size="small"
-          />
-          <div style={{ flex: 1, marginLeft: "1em" }}>
-            <h4>{en_name}</h4>
-            <h4>{cn_name}</h4>
-            <span>{price}</span>
-          </div>
+        <Thumbnail
+          source={image_url || ""}
+          alt={en_name}
+          size="small"
+        />
+        <div style={{ flex: 1, marginLeft: "1em" }}>
+          <h4>{en_name}</h4>
+          <h4>{cn_name}</h4>
+          <span>{price}</span>
         </div>
-      )
+      </div>
+    )
   }
 
   const rowMarkup = useMemo(() => {
@@ -66,7 +66,7 @@ function SourcingDetail(props) {
             <ProductInfoPopover
               popoverNode={productInfo(goods)}
             >
-            { sku }
+              {sku}
             </ProductInfoPopover>
 
           </IndexTable.Cell>
@@ -98,9 +98,23 @@ function SourcingDetail(props) {
     )
   }, [order])
 
+  const [platformList, setPlatformList] = useState({});
+  const [departmentList, setDepartmentList] = useState({});
+  const [businessTypeList, setBusinessTypeList] = useState({});
+
   useEffect(() => {
     if (!id) return;
     loadingContext.loading(true);
+    Promise.all([
+      getPlatformList(),
+      getBusinessTypeList(),
+      getDepartmentList(),
+    ])
+      .then(([resPlatform, resBusinessType, resDepartment]) => {
+        setPlatformList(resPlatform.data);
+        setBusinessTypeList(resBusinessType.data);
+        setDepartmentList(resDepartment.data);
+      })
     getSourcingOrderDetail(idDecode)
       .then(res => {
         // console.log(res);
@@ -118,7 +132,7 @@ function SourcingDetail(props) {
     <Page
       breadcrumbs={[
         {
-          onAction: ()=>{
+          onAction: () => {
             navigate(-1);
           }
         }
@@ -126,14 +140,14 @@ function SourcingDetail(props) {
       secondaryActions={[
         {
           content: "编辑采购单",
-          onAction: ()=>{
-            navigate( `/sourcing/edit/${id}` )
-          } 
+          onAction: () => {
+            navigate(`/sourcing/edit/${id}`)
+          }
         }
       ]}
       title={idURIDecode}
       titleMetadata={badgesMarkup}
-      subtitle={ order && order.create_message || "" }
+      subtitle={order && order.create_message || ""}
     >
       <Layout>
         <Layout.Section>
@@ -142,7 +156,7 @@ function SourcingDetail(props) {
           >
             <div>
               <IndexTable
-                itemCount={ order && order.item.length || 0}
+                itemCount={order && order.item.length || 0}
                 headings={[
                   { title: '系统SKU' },
                   { title: '采购数量' },
@@ -169,15 +183,17 @@ function SourcingDetail(props) {
 
         </Layout.Section>
         <Layout.Section secondary>
-          <SourcingInfoCard poInfo={order || {}} />
+          <SourcingInfoCard poInfo={order ? {
+            ...order, 
+            division: departmentList[order.division],
+            business_type: businessTypeList[order.business_type],
+            platform: platformList[order.platform],
+          } : {}} />
           <SourcingProviCard provInfo={order ? { ...order.provider, provider_account: order.provider_account } : {}} />
           <SourcingRepoCard wareInfo={order ? order.warehouse : {}} />
-          <SourcingRemarkCard readOnly={true} remark={ order && order.remark }  />
+          <SourcingRemarkCard readOnly={true} remark={order && order.remark} />
         </Layout.Section>
       </Layout>
-
-
-
     </Page>
   );
 }

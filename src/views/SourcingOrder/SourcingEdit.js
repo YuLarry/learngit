@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-03-14 15:12:39
+ * @LastEditTime: 2022-03-14 15:55:57
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -385,6 +385,7 @@ function SourcingEdit(props) {
         });
         setSourcingOrderForm({
           ...data,
+          platform: data.platform || "",
           brand_code: brand.code,
           subject_code: subject.subject_code,
           warehouse_code: warehouse.code,
