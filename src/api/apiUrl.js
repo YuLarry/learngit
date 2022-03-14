@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2021-11-23 19:45:00
- * @LastEditTime: 2022-03-14 17:05:12
+ * @LastEditTime: 2022-03-14 17:13:09
  * @LastEditors: lijunwei
  * @Description: request urls config
  */
@@ -44,8 +44,8 @@ export const SAVE_SHIPPING_ORDER       = "/shipping/store"                 // �
 export const DELETE_SHIPPING_ORDER     = "/shipping/delete"                // 删除发货单
 export const INBOUND_COMMIT            = "/inbound/prediction-warehouse"   // 预报仓库
 
-// export const GET_SKU_OPTIONS = "/shipping/get-warehouse-relation" // 获取sku下拉选项
 export const GET_SKU_OPTIONS = "/shipping/get-warehouse-goods" // 获取sku下拉选项
+export const CHECK_SKUS = "/shipping/get-warehouse-relation" // check sku ok
 
 export const GET_REPO_TABLE_LIST = "/inbound/list"             // 获取入库列表
 export const GET_INBOUND_DETAIL  = "/inbound/detail"           // 获取入库单详情

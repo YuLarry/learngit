@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2021-11-24 11:29:42
- * @LastEditTime: 2022-03-07 17:03:27
+ * @LastEditTime: 2022-03-14 17:14:16
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -103,6 +103,10 @@ export const getWaitShippingList = (id) => ax.get(`${REQUEST_URLS.GET_WAITING_SH
 
 // 获取sku下拉列表
 export const getSkuOptionsList = (query) => ax.get(REQUEST_URLS.GET_SKU_OPTIONS, { params: query });
+
+// 检查skus 
+export const checkskus = (query) => ax.get(REQUEST_URLS.CHECK_SKUS, { params: query });
+
 
 // 创建|更新发货单
 export const editShippingOrder = (body)=> ax.post(`${REQUEST_URLS.SAVE_SHIPPING_ORDER}`, { ...body })

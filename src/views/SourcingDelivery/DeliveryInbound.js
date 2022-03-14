@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-21 15:28:14
- * @LastEditTime: 2022-03-14 15:32:38
+ * @LastEditTime: 2022-03-14 17:55:07
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -9,7 +9,7 @@
 import { Autocomplete, Button, Card, Form, FormLayout, IndexTable, Modal, Page, Select, TextField, TextStyle, Thumbnail, useIndexResourceState } from "@shopify/polaris";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { getClientAccount, getShippingDetail, getSkuOptionsList, getWaitShippingList, getWarehouseArea, inboundCommit } from "../../api/requests";
+import { checkskus, getClientAccount, getShippingDetail, getSkuOptionsList, getWaitShippingList, getWarehouseArea, inboundCommit } from "../../api/requests";
 import { ProductInfoPopover } from "../../components/ProductInfoPopover/ProductInfoPopover";
 import { LoadingContext } from "../../context/LoadingContext";
 import { ModalContext } from "../../context/ModalContext";
@@ -436,7 +436,8 @@ function DeliveryInbound(props) {
           const optionsArr = [];
           const skuMap = new Map();
           list.map((skuItem) => {
-            const { id, sku, warehouse_sku, goods: { cn_name, en_name }, service_provider_name, client_account_name } = skuItem
+            const { id, sku, warehouse_sku, goods, service_provider_name, client_account_name } = skuItem;
+            const { cn_name = "", en_name = "" } = goods || {};
             optionsArr.push({ id, value: warehouse_sku, label: `${warehouse_sku} | ${cn_name} ${service_provider_name} | ${client_account_name}` })
             skuMap.set(sku, skuItem);
           })
@@ -461,8 +462,21 @@ function DeliveryInbound(props) {
     }
   }, [clientSelected, inputSku, querySku]);
 
+  const checkSkusOk = useCallback(()=>{
+    const skus = selectedResources.map((id) => {
+      const item = goodsMap.get(id);
+      return item.sku
+    });
+    
+    return checkskus({
+      client_account_code: clientSelected,
+      sku: [...skus],
+    })
+  }
+  ,[clientSelected, goodsMap, selectedResources])
+
   const moveToInboundTable = useCallback(
-    () => {
+    async () => {
       if (selectedResources.length < 1) return;
       if (type !== INBOUND_TYPE.PCS && !boxCardCount) {
         toastContext.toast({
@@ -479,10 +493,26 @@ function DeliveryInbound(props) {
         })
         return;
       }
+      if (type !== INBOUND_TYPE.PCS && !modValid) {
+        toastContext.toast({
+          active: true,
+          message: `请输入可以被 ${numArr.join(',')} 整除的数量！`
+        })
+        return;
+      }
       const _tempMap = new Map(inboundGoodsMap);
 
       const numArr = [];
       let modValid = true;
+      try {
+        loadingContext.loading(true)
+        await checkSkusOk()
+      } catch (error) {
+        return 
+      } finally{
+        loadingContext.loading(false)
+      }
+
       selectedResources.map((id) => {
         const item = goodsMap.get(id);
         const { shipping_num } = item;
@@ -513,18 +543,12 @@ function DeliveryInbound(props) {
         }
         _tempMap.set(id, { ...item, ...boxCardInfo });
       })
-      if (type !== INBOUND_TYPE.PCS && !modValid) {
-        toastContext.toast({
-          active: true,
-          message: `请输入可以被 ${numArr.join(',')} 整除的数量！`
-        })
-        return;
-      }
+      
       setInboundGoodsMap(_tempMap)
       clearSelectedResources();
       setInboundModalOpen(false);
     },
-    [boxCardCount, clearSelectedResources, goodsMap, inboundGoodsMap, selectedResources, selectedSku, type]
+    [boxCardCount, checkSkusOk, clearSelectedResources, goodsMap, inboundGoodsMap, selectedResources, selectedSku, type]
   );
 
   useEffect(() => {
