@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-21 15:28:14
- * @LastEditTime: 2022-03-14 15:14:11
+ * @LastEditTime: 2022-03-14 15:32:38
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -178,7 +178,7 @@ function DeliveryInbound(props) {
 
   const inboundListMarkup = useMemo(() => {
     return inboundGoodsList.map(
-      ({ id, sku, po_no, shipping_num, box_qty, goods }, index) => (
+      ({ id, sku, po_no, shipping_num, box_qty,pallet_qty, goods }, index) => (
         <IndexTable.Row
           id={id}
           key={id}
@@ -195,7 +195,7 @@ function DeliveryInbound(props) {
                   plain
                   monochrome
                   onClick={() => {
-                    modalSkuInfo([{ id, sku, goods, box_qty, shipping_num }]);
+                    modalSkuInfo([{ id, sku, goods, box_qty, pallet_qty, shipping_num }]);
                   }}
                 >
                   <TextStyle variation="strong">{sku}</TextStyle>
@@ -234,31 +234,35 @@ function DeliveryInbound(props) {
 
   const skuList = useMemo(() => {
     return detailModalTableList.map(
-      ({ id, sku, goods, box_qty, shipping_num }, index) => (
-        <IndexTable.Row
-          id={id}
-          key={id}
-          position={index}
-          selectable={false}
-        >
-          <IndexTable.Cell>
-            <TextStyle variation="strong">{sku}</TextStyle>
-          </IndexTable.Cell>
-          <IndexTable.Cell>
-            <ProductInfoPopover popoverNode={productInfo(goods)}>
-              <div>{goods && goods.cn_name}</div>
-              <div>{goods && goods.en_name}</div>
-            </ProductInfoPopover>
-          </IndexTable.Cell>
-          <IndexTable.Cell>
-            {shipping_num}
-          </IndexTable.Cell>
-          <IndexTable.Cell>
-            {Number(shipping_num) / Number(box_qty)}
-          </IndexTable.Cell>
+      (item, index) => {
+        const { id, sku, goods, box_qty,pallet_qty, shipping_num } = item;
+        return (
+          <IndexTable.Row
+            id={id}
+            key={id}
+            position={index}
+            selectable={false}
+          >
+            <IndexTable.Cell>
+              <TextStyle variation="strong">{sku}</TextStyle>
+            </IndexTable.Cell>
+            <IndexTable.Cell>
+              <ProductInfoPopover popoverNode={productInfo(goods)}>
+                <div>{goods && goods.cn_name}</div>
+                <div>{goods && goods.en_name}</div>
+              </ProductInfoPopover>
+            </IndexTable.Cell>
+            <IndexTable.Cell>
+              {shipping_num}
+            </IndexTable.Cell>
+            <IndexTable.Cell>
+              { box_qty && Number(shipping_num) / Number(box_qty)}
+              { pallet_qty && Number(shipping_num) / Number(pallet_qty)}
+            </IndexTable.Cell>
 
-        </IndexTable.Row>
-      ),
+          </IndexTable.Row>
+        )
+      },
     )
   },
     [detailModalTableList]
