@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-19 17:05:46
- * @LastEditTime: 2022-03-14 16:40:19
+ * @LastEditTime: 2022-03-15 14:02:39
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -330,7 +330,7 @@ function PayRequest(props) {
 
   return (
     <Page
-      breadcrumbs={[{ content: '采购实施列表', url: '/sourcing' }]}
+      breadcrumbs={[{ content: '采购实施列表', onAction: ()=>{ navigate(-1) } }]}
       title="申请付款"
       titleMetadata={ badgesMarkup }
       subtitle={order && order.create_message || ""}
