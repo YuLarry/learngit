@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-24 16:02:59
- * @LastEditTime: 2022-03-11 11:44:47
+ * @LastEditTime: 2022-03-15 15:29:34
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -68,7 +68,7 @@ function InRepositoryManualModal(props) {
         po_no,
         shipping_no,
         goods,
-        inbound_qty = "1",
+        inbound_qty = "",
         sku }, index) => (
         <IndexTable.Row
           id={id}

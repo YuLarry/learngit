@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-03-15 14:46:42
+ * @LastEditTime: 2022-03-15 15:37:08
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -285,6 +285,21 @@ function RepositoryList(props) {
     () => {
       const { inbound_no } = tableList.find(item => item.id === selectedResources[0])
       const inbound_item = modalSkuList.map(({ po_item_id, inbound_qty }) => ({ po_item_id, inbound_qty: parseInt(inbound_qty) }))
+
+      let invalid = false;
+      inbound_item.forEach((item)=>{
+        if( !item.inbound_qty ){ invalid = true }
+      })
+
+      if( invalid ){
+        toastContext.toast({
+          active: true,
+          message: "入库数量应为大于 0 的整数",
+          duration: "1000"
+        })
+        return;
+      }
+
       const data = {
         inbound_no,
         inbound_item,
@@ -372,7 +387,7 @@ function RepositoryList(props) {
         modalOpenChange={(openStatus) => { setModalOpen(openStatus) }}
         tableList={modalSkuList}
         tableListChange={(list) => { setModalSkuList(list) }}
-        onCommit={(list) => { console.log(list); commitModal() }}
+        onCommit={(list) => { commitModal() }}
       />
 
     </Page>

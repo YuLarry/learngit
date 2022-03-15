@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-03-14 18:35:22
+ * @LastEditTime: 2022-03-15 15:56:50
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -481,7 +481,7 @@ function SourcingList(props) {
       .finally(() => {
         setListLoading(false)
       })
-  }, [filter, pageIndex, queryListStatus, refresh, searchParams, setSearchParams])
+  }, [filter, pageIndex, queryListStatus, refresh])
 
 
   // export modal

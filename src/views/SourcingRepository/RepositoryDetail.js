@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-24 15:50:14
- * @LastEditTime: 2022-03-15 10:36:56
+ * @LastEditTime: 2022-03-15 15:37:57
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -122,6 +122,21 @@ function RepositoryDetail(props) {
   const commitModal = useCallback(
     () => {
       const inbound_item = modalSkuList.map(({ po_item_id, inbound_qty }) => ({ po_item_id, inbound_qty: parseInt(inbound_qty) }))
+
+      let invalid = false;
+      inbound_item.forEach((item)=>{
+        if( !item.inbound_qty ){ invalid = true }
+      })
+
+      if( invalid ){
+        toastContext.toast({
+          active: true,
+          message: "入库数量应为大于 0 的整数",
+          duration: "1000"
+        })
+        return;
+      }
+      
       const data = {
         inbound_no: detail.inbound_no,
         inbound_item,
