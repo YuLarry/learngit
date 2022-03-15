@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-03-14 18:48:33
+ * @LastEditTime: 2022-03-15 14:46:42
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -27,17 +27,14 @@ function RepositoryList(props) {
   const [searchParams, setSearchParams] = useSearchParams();
   const queryParamObj = useMemo(() => {
     return (
-      searchParams.get("querys") && JSON.parse( decodeURIComponent( atob( searchParams.get("querys") ) )) || {}
+      searchParams.get("querys") && JSON.parse(decodeURIComponent(atob(searchParams.get("querys")))) || {}
     )
   }
     , [searchParams])
   let {
     provider_id = "",
     warehouse_code = "",
-    create_date = {
-      start: new Date(),
-      end: new Date(),
-    },
+    create_date,
     common_search = "",
     client_account_code = "",
     warehouse_area = "",
@@ -54,7 +51,11 @@ function RepositoryList(props) {
   const [filter, setFilter] = useState({
     provider_id,
     warehouse_code,
-    create_date,
+    
+    create_date:
+      create_date && create_date ?
+        { start: new Date(create_date.start), end: new Date(create_date.end) } :
+        { start: new Date(), end: new Date() },
     common_search,
     client_account_code,
     warehouse_area,
@@ -205,13 +206,13 @@ function RepositoryList(props) {
     , [tabs]
   );
 
-  useEffect(()=>{
-    if( status ){
-      const index = tabs.findIndex(item=>(item.id === status))
+  useEffect(() => {
+    if (status) {
+      const index = tabs.findIndex(item => (item.id === status))
       handleTabChange(index);
     }
   }
-  ,[])
+    , [])
 
   const [refresh, setRefresh] = useState(0);
 
@@ -228,7 +229,11 @@ function RepositoryList(props) {
       per_page: pageSize,
       page: pageIndex,
     }
-    setSearchParams({ querys: btoa( encodeURIComponent( JSON.stringify(data) ) ) });
+    setSearchParams({
+      querys: btoa(encodeURIComponent(JSON.stringify(
+        { ...data, create_date: dateOn ? { start: start.getTime(), end: end.getTime() } : "" }
+      )))
+    });
     clearSelectedResources();
     getRepoTableList(data)
       .then(res => {

@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 15:00:29
- * @LastEditTime: 2022-03-09 18:04:54
+ * @LastEditTime: 2022-03-15 14:22:52
  * @LastEditors: lijunwei
  * @Description: s
  */
@@ -209,7 +209,6 @@ function RepositoryListFilter(props) {
     const filters = [];
     for (const key of filterConfig.keys()) {
       const { type, label, dataPool } = filterConfig.get(key);
-      if( !dataPool || dataPool.size === 0 ) break;
       if (type === "date" && filterData.dateOn && filterData[key]) {
         // console.log(filterData[key])
         const data = filterData[key];
@@ -223,10 +222,9 @@ function RepositoryListFilter(props) {
 
       }
       else if (type === "radio" && filterData[key]) {
+      if( !dataPool || dataPool.size === 0 ) break;
         const { textKey } = filterConfig.get(key);
-
         const _temObj = dataPool.get(filterData[key]);
-
         const text = textKey === null ? _temObj : _temObj[textKey];
         filters.push({
           key: key,

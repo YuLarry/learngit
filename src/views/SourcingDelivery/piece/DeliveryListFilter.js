@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 15:00:29
- * @LastEditTime: 2022-03-09 18:03:16
+ * @LastEditTime: 2022-03-15 14:22:12
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -44,7 +44,7 @@ function DeliveryListFilter(props) {
       }
     }
   }, [common_search]);
-  
+
   const toastContext = useContext(ToastContext);
   const [providerList, setProviderList] = useState([]);
   const [wareHouseList, setWareHouseList] = useState([]);
@@ -147,7 +147,6 @@ function DeliveryListFilter(props) {
     const filters = [];
     for (const key of filterConfig.keys()) {
       const { type, label, dataPool } = filterConfig.get(key);
-      if( !dataPool || dataPool.size === 0 ) break;
       if (type === "date" && filterData.dateOn && filterData[key]) {
         const data = filterData[key];
         if (data.start && data.end) {
@@ -159,10 +158,9 @@ function DeliveryListFilter(props) {
         }
 
       } else if (type === "radio" && filterData[key]) {
+        if (!dataPool || dataPool.size === 0) break;
         const { textKey } = filterConfig.get(key);
-
         const _temObj = dataPool.get(filterData[key]);
-
         const text = textKey === null ? _temObj : _temObj[textKey];
         filters.push({
           key: key,
@@ -311,7 +309,7 @@ function DeliveryListFilter(props) {
   },
     [])
 
-  
+
 
   return (
     <Filters

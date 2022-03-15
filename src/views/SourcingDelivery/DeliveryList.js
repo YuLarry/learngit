@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-03-14 18:37:46
+ * @LastEditTime: 2022-03-15 14:43:22
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -26,20 +26,16 @@ function DeliveryList(props) {
   const [searchParams, setSearchParams] = useSearchParams();
   const queryParamObj = useMemo(() => {
     return (
-      searchParams.get("querys") && JSON.parse( decodeURIComponent( atob(searchParams.get("querys")))) || {}
+      searchParams.get("querys") && JSON.parse(decodeURIComponent(atob(searchParams.get("querys")))) || {}
     )
   }
     , [searchParams])
   let {
     provider_id = "",
     warehouse_code = "",
-    shipping_date = {
-      start: new Date(),
-      end: new Date(),
-    },
+    shipping_date,
     dateOn = false,
     common_search = "",
-
     per_page,
     page = 1,
     status = REPO_STATUS_ALL
@@ -61,7 +57,10 @@ function DeliveryList(props) {
   const [filter, setFilter] = useState({
     provider_id,
     warehouse_code,
-    shipping_date,
+    shipping_date:
+      shipping_date && shipping_date ?
+        { start: new Date(shipping_date.start), end: new Date(shipping_date.end) } :
+        { start: new Date(), end: new Date() },
     dateOn,
     common_search,
   });
@@ -107,13 +106,13 @@ function DeliveryList(props) {
     }, [tabs]
   );
 
-  useEffect(()=>{
-    if( status ){
-      const index = tabs.findIndex(item=>(item.id === status))
+  useEffect(() => {
+    if (status) {
+      const index = tabs.findIndex(item => (item.id === status))
       handleTabChange(index);
     }
   }
-  ,[])
+    , [])
 
   const pageStatus = useMemo(() => {
     const status = {
@@ -233,7 +232,7 @@ function DeliveryList(props) {
         onAction: () => { navigate(`inbound?shipping_code=${codeBase64}&type=${INBOUND_TYPE.PALLET}`) },
         disabled: !inboundEnable,
       },
-      
+
     ];
   }, [deliveryListMap, inboundEnable, navigate, selectedResources])
 
@@ -312,7 +311,11 @@ function DeliveryList(props) {
       page: pageIndex,
       status: queryListStatus,
     }
-    setSearchParams( {querys :btoa( encodeURIComponent( JSON.stringify( queryData )))} );
+    setSearchParams({
+      querys: btoa(encodeURIComponent(JSON.stringify(
+        { ...queryData, shipping_date: dateOn ? { start: start.getTime(), end: end.getTime() } : "" }
+      )))
+    });
     getShipingList(queryData)
       .then(res => {
         const { data: { list, meta: { pagination: { total = 0 } } } } = res;
@@ -356,7 +359,7 @@ function DeliveryList(props) {
           // onSelectionChange={handleSelectionChange}
           onSelectionChange={(a, b, c) => { handleSelectionChange(a, b, c) }}
           promotedBulkActions={promotedBulkActions}
-          bulkActions={ bulkActions }
+          bulkActions={bulkActions}
           headings={[
             { title: "发货单号" },
             { title: "供应商" },
