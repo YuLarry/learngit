@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-03-15 15:56:50
+ * @LastEditTime: 2022-03-15 17:08:06
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -444,7 +444,8 @@ function SourcingList(props) {
     , [goodsItemNode, selectedResources, sourcingList]);
 
 
-  useEffect(() => {
+  const mainTableList = useCallback(() => {
+    if( listLoading ) return;
     setListLoading(true);
     const {
       provider_id = "",
@@ -481,7 +482,21 @@ function SourcingList(props) {
       .finally(() => {
         setListLoading(false)
       })
-  }, [filter, pageIndex, queryListStatus, refresh])
+  }, [filter, listLoading, pageIndex, queryListStatus, setSearchParams])
+
+  useEffect(()=>{
+    if( pageIndex === 1 ){
+      setRefresh( refresh + 1 )
+    }else{
+      setPageIndex(1);
+    }
+  }
+  ,[filter, queryListStatus])
+
+  useEffect(()=>{
+    mainTableList()
+  }
+  ,[pageIndex, refresh])
 
 
   // export modal

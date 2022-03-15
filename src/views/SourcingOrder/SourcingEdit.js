@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-03-14 16:14:13
+ * @LastEditTime: 2022-03-15 16:01:23
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -624,7 +624,7 @@ function SourcingEdit(props) {
                     value={sourcingOrderForm.brand_code}
                     id="brand_code"
                     onChange={formChangeHandler}
-                    placeholder="请选择项目"
+                    placeholder=" "
                   />
                   <Select
                     label="采购方"
@@ -632,7 +632,7 @@ function SourcingEdit(props) {
                     value={sourcingOrderForm.subject_code}
                     id="subject_code"
                     onChange={formChangeHandler}
-                    placeholder="请选择采购方"
+                    placeholder=" "
                   />
                 </FormLayout.Group>
                 <FormLayout.Group>
@@ -645,7 +645,7 @@ function SourcingEdit(props) {
                       setProvider_id(value);
                       setGoodsTableDataMap(new Map())
                     }}
-                    placeholder="请选择供应商"
+                    placeholder=" "
                   />
                   <Select
                     label="收款账户"
@@ -653,7 +653,7 @@ function SourcingEdit(props) {
                     value={accountInfo && accountInfo.id.toString() || ""}
                     id="account_id"
                     onChange={accountHandler}
-                    placeholder="请选择收款账户"
+                    placeholder=" "
                   />
                 </FormLayout.Group>
                 <FormLayout.Group>
@@ -663,7 +663,7 @@ function SourcingEdit(props) {
                     value={sourcingOrderForm.warehouse_code}
                     id="warehouse_code"
                     onChange={formChangeHandler}
-                    placeholder="请选择收货仓库"
+                    placeholder=" "
                   />
                   <Select
                     label="事业部"
@@ -671,7 +671,7 @@ function SourcingEdit(props) {
                     value={sourcingOrderForm.division}
                     id="division"
                     onChange={formChangeHandler}
-                    placeholder="请选择事业部"
+                    placeholder=" "
                   />
                 </FormLayout.Group>
                 <FormLayout.Group>
@@ -681,7 +681,7 @@ function SourcingEdit(props) {
                     value={sourcingOrderForm.business_type}
                     id="business_type"
                     onChange={formChangeHandler}
-                    placeholder="请选择业务类型"
+                    placeholder=" "
                   />
                   <Select
                     label="平台（选填）"
@@ -689,7 +689,7 @@ function SourcingEdit(props) {
                     value={sourcingOrderForm.platform}
                     id="platform"
                     onChange={formChangeHandler}
-                  // placeholder="请选择平台"
+                  // placeholder=" "
                   />
                 </FormLayout.Group>
 

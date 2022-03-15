@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-03-15 15:37:08
+ * @LastEditTime: 2022-03-15 17:07:45
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -216,7 +216,8 @@ function RepositoryList(props) {
 
   const [refresh, setRefresh] = useState(0);
 
-  useEffect(() => {
+  const mainTableList = useCallback(() => {
+    if(listLoading)return;
     setListLoading(true)
     const { dateOn, create_date: { start, end } } = filter;
     const data = {
@@ -237,17 +238,32 @@ function RepositoryList(props) {
     clearSelectedResources();
     getRepoTableList(data)
       .then(res => {
-        const { data: { list } } = res;
+        const { data: { list, meta: { pagination: { total = 0 } } } } = res;
         const _map = new Map();
         list.map((item) => {
           _map.set(item.id, item);
         })
         setTableListMap(_map);
+        setTotal( total )
       })
       .finally(() => {
         setListLoading(false)
       })
-  }, [filter, pageIndex, queryListStatus, refresh]);
+  }, [clearSelectedResources, filter, listLoading, pageIndex, queryListStatus, setSearchParams]);
+
+  useEffect(()=>{
+    if( pageIndex === 1 ){
+      setRefresh( refresh + 1 )
+    }else{
+      setPageIndex(1);
+    }
+  }
+  ,[filter, queryListStatus])
+
+  useEffect(()=>{
+    mainTableList()
+  }
+  ,[pageIndex, refresh])
 
   const [modalSkuList, setModalSkuList] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);

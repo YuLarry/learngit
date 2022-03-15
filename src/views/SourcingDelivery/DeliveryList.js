@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-03-15 14:43:22
+ * @LastEditTime: 2022-03-15 17:08:23
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -291,7 +291,8 @@ function DeliveryList(props) {
     , [goodsItemNode, selectedResources, deliveryList]);
 
 
-  useEffect(() => {
+  const mainTableList = useCallback(() => {
+    if( listLoading ) return;
     setListLoading(true);
     clearSelectedResources();
     const { dateOn, shipping_date: { start, end } } = filter;
@@ -325,8 +326,21 @@ function DeliveryList(props) {
       .finally(() => {
         setListLoading(false)
       })
-  }, [filter, pageIndex, queryListStatus])
+  }, [clearSelectedResources, filter, listLoading, pageIndex, queryListStatus, setSearchParams])
 
+  useEffect(()=>{
+    if( pageIndex === 1 ){
+      setRefresh( refresh + 1 )
+    }else{
+      setPageIndex(1);
+    }
+  }
+  ,[pageIndex, queryListStatus])
+
+  useEffect(()=>{
+    mainTableList()
+  }
+  ,[pageIndex, refresh])
 
   return (
     <Page
