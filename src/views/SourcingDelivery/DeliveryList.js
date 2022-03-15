@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-03-15 17:08:23
+ * @LastEditTime: 2022-03-15 18:55:52
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -335,7 +335,7 @@ function DeliveryList(props) {
       setPageIndex(1);
     }
   }
-  ,[pageIndex, queryListStatus])
+  ,[filter, queryListStatus])
 
   useEffect(()=>{
     mainTableList()
