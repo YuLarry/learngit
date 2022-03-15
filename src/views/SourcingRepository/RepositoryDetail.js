@@ -1,12 +1,12 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-24 15:50:14
- * @LastEditTime: 2022-03-09 17:35:56
+ * @LastEditTime: 2022-03-15 10:36:56
  * @LastEditors: lijunwei
  * @Description: 
  */
 
-import { Badge, Card, IndexTable, Layout, Page, Thumbnail } from "@shopify/polaris";
+import { Badge, Button, Card, IndexTable, Layout, Page, Thumbnail } from "@shopify/polaris";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { confirmInbound, getInboundDetail } from "../../api/requests";
@@ -77,11 +77,22 @@ function RepositoryDetail(props) {
               {actual_qty}
             </IndexTable.Cell>
             <IndexTable.Cell>
+            <Button
+              plain
+              url={`/sourcing/detail/${btoa(encodeURIComponent(po_no))}`}
+            >
               {po_no}
-            </IndexTable.Cell>
-            <IndexTable.Cell>
+            </Button>
+          </IndexTable.Cell>
+          <IndexTable.Cell>
+            <Button
+              plain
+              url={`/delivery/detail/${btoa(encodeURIComponent(shipping_no))}`}
+            >
               {shipping_no}
-            </IndexTable.Cell>
+            </Button>
+
+          </IndexTable.Cell>
           </IndexTable.Row>
         )
       }
