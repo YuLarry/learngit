@@ -1,12 +1,12 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-20 16:16:03
- * @LastEditTime: 2022-03-14 16:57:59
+ * @LastEditTime: 2022-03-15 12:18:48
  * @LastEditors: lijunwei
  * @Description: 
  */
 
-import { Card, IndexTable, Layout, Page, Thumbnail } from "@shopify/polaris";
+import { Button, Card, IndexTable, Layout, Page, Thumbnail } from "@shopify/polaris";
 import { useContext } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -21,7 +21,8 @@ import { BadgeAuditStatus } from "../../components/StatusBadges/BadgeAuditStatus
 import { BadgeDeliveryStatus } from "../../components/StatusBadges/BadgeDeliveryStatus";
 import { BadgePaymentStatus } from "../../components/StatusBadges/BadgePaymentStatus";
 import { LoadingContext } from "../../context/LoadingContext";
-import { AUDIT_FAILURE, AUDIT_REVOKED, AUDIT_UNAUDITED } from "../../utils/StaticData";
+import { AUDIT_FAILURE, AUDIT_REVOKED, AUDIT_UNAUDITED, PO_STATUS_FINISH } from "../../utils/StaticData";
+import { PopoverNoLink } from "./piece/PopoverNoLink";
 
 function SourcingDetail(props) {
   const navigate = useNavigate();
@@ -54,10 +55,25 @@ function SourcingDetail(props) {
     )
   }
 
+  const headTitle = useMemo(() => {
+    const title1 = [
+      { title: '系统SKU' },
+      { title: '采购数量' },
+      { title: '采购价格' },
+    ]
+    const title2 = (order && order.po_status === PO_STATUS_FINISH) ? 
+    [
+      {title: "关联发货单"},
+      {title: "关联入库单"},
+    ] : [];
+    return title1.concat(title2);
+  }
+  ,[order])
+
   const rowMarkup = useMemo(() => {
     if (!order) return null;
     return order.item.map(
-      ({ sku, purchase_num, goods, purchase_price }, idx) => (
+      ({ sku, purchase_num, goods, purchase_price, inbounds, shippings  }, idx) => (
         <IndexTable.Row
           id={idx}
           key={idx}
@@ -77,9 +93,12 @@ function SourcingDetail(props) {
           <IndexTable.Cell>
             {purchase_price}
           </IndexTable.Cell>
-          {/* <IndexTable.Cell>
-
-          </IndexTable.Cell> */}
+          { order && (order.po_status === PO_STATUS_FINISH) && <IndexTable.Cell>
+            <PopoverNoLink linkListOptions={ shippings.map(item=>({content: item, url: `/delivery/detail/${btoa(encodeURIComponent(item))}`})) } />
+          </IndexTable.Cell> }
+          { order && (order.po_status === PO_STATUS_FINISH) && <IndexTable.Cell>
+            <PopoverNoLink linkListOptions={ inbounds.map(item=>({content: item, url: `/repository/detail/${item}`})) } />
+          </IndexTable.Cell> }
         </IndexTable.Row>
       ),
     )
@@ -168,12 +187,7 @@ function SourcingDetail(props) {
             <div>
               <IndexTable
                 itemCount={order && order.item.length || 0}
-                headings={[
-                  { title: '系统SKU' },
-                  { title: '采购数量' },
-                  { title: '金额' },
-
-                ]}
+                headings={headTitle}
                 selectable={false}
               >
                 {rowMarkup}

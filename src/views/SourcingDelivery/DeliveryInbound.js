@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-21 15:28:14
- * @LastEditTime: 2022-03-14 19:00:38
+ * @LastEditTime: 2022-03-14 19:02:50
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -178,7 +178,7 @@ function DeliveryInbound(props) {
 
   const inboundListMarkup = useMemo(() => {
     return inboundGoodsList.map(
-      ({ id, sku, po_no, shipping_num, box_qty,pallet_qty, goods }, index) => (
+      ({ id, sku, po_no, shipping_num, box_qty, pallet_qty, goods }, index) => (
         <IndexTable.Row
           id={id}
           key={id}
@@ -235,7 +235,7 @@ function DeliveryInbound(props) {
   const skuList = useMemo(() => {
     return detailModalTableList.map(
       (item, index) => {
-        const { id, sku, goods, box_qty,pallet_qty, shipping_num } = item;
+        const { id, sku, goods, box_qty, pallet_qty, shipping_num } = item;
         return (
           <IndexTable.Row
             id={id}
@@ -256,8 +256,8 @@ function DeliveryInbound(props) {
               {shipping_num}
             </IndexTable.Cell>
             <IndexTable.Cell>
-              { box_qty && Number(shipping_num) / Number(box_qty)}
-              { pallet_qty && Number(shipping_num) / Number(pallet_qty)}
+              {box_qty && Number(shipping_num) / Number(box_qty)}
+              {pallet_qty && Number(shipping_num) / Number(pallet_qty)}
             </IndexTable.Cell>
 
           </IndexTable.Row>
@@ -462,18 +462,18 @@ function DeliveryInbound(props) {
     }
   }, [clientSelected, inputSku, querySku]);
 
-  const checkSkusOk = useCallback(()=>{
+  const checkSkusOk = useCallback(() => {
     const skus = selectedResources.map((id) => {
       const item = goodsMap.get(id);
       return item.sku
     });
-    
+
     return checkskus({
       client_account_code: clientSelected,
       sku: [...skus],
     })
   }
-  ,[clientSelected, goodsMap, selectedResources])
+    , [clientSelected, goodsMap, selectedResources])
 
   const moveToInboundTable = useCallback(
     async () => {
@@ -497,15 +497,17 @@ function DeliveryInbound(props) {
 
       const numArr = [];
       let modValid = true;
-      try {
-        loadingContext.loading(true)
-        await checkSkusOk()
-      } catch (error) {
-        return 
-      } finally{
-        loadingContext.loading(false)
+      if (type === INBOUND_TYPE.PCS) {
+        try {
+          loadingContext.loading(true)
+          await checkSkusOk()
+        } catch (error) {
+          return
+        } finally {
+          loadingContext.loading(false)
+        }
       }
-
+      
       selectedResources.map((id) => {
         const item = goodsMap.get(id);
         const { shipping_num } = item;
@@ -543,7 +545,7 @@ function DeliveryInbound(props) {
         })
         return;
       }
-      
+
       setInboundGoodsMap(_tempMap)
       clearSelectedResources();
       setInboundModalOpen(false);
