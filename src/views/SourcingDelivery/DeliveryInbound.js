@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-21 15:28:14
- * @LastEditTime: 2022-03-14 19:02:50
+ * @LastEditTime: 2022-03-15 15:10:51
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -178,7 +178,7 @@ function DeliveryInbound(props) {
 
   const inboundListMarkup = useMemo(() => {
     return inboundGoodsList.map(
-      ({ id, sku, po_no, shipping_num, box_qty, pallet_qty, goods }, index) => (
+      ({ id, sku, po_no, shipping_num, box_qty, pallet_qty, goods, box_no }, index) => (
         <IndexTable.Row
           id={id}
           key={id}
@@ -189,7 +189,7 @@ function DeliveryInbound(props) {
             {
               type === INBOUND_TYPE.PCS
                 ?
-                <TextStyle variation="strong">{sku}</TextStyle>
+                <TextStyle variation="strong">{box_no}</TextStyle>
                 :
                 <Button
                   plain
@@ -198,7 +198,7 @@ function DeliveryInbound(props) {
                     modalSkuInfo([{ id, sku, goods, box_qty, pallet_qty, shipping_num }]);
                   }}
                 >
-                  <TextStyle variation="strong">{sku}</TextStyle>
+                  <TextStyle variation="strong">{box_no}</TextStyle>
                 </Button>
             }
 
@@ -463,14 +463,31 @@ function DeliveryInbound(props) {
   }, [clientSelected, inputSku, querySku]);
 
   const checkSkusOk = useCallback(() => {
+    const skuToId = new Map();
     const skus = selectedResources.map((id) => {
       const item = goodsMap.get(id);
+      skuToId.set( item.sku, id )
       return item.sku
     });
 
     return checkskus({
       client_account_code: clientSelected,
       sku: [...skus],
+    })
+    .then(res=>{
+      console.log(res);
+      const { data } = res;
+      Object.keys(data).map((sku)=>{
+        const box_no = data[sku];
+        const id = skuToId.get(sku);
+        const _item = goodsMap.get( id )
+        // const _tMap = new Map( goodsMap );
+        // _tMap.set( id, _item );
+        _item["box_no"] = box_no
+        
+      })
+      
+
     })
   }
     , [clientSelected, goodsMap, selectedResources])
