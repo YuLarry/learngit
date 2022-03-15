@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-03-14 16:41:37
+ * @LastEditTime: 2022-03-15 17:34:54
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -206,7 +206,7 @@ function DeliveryEdit(props) {
           <IndexTable.Cell>
             <div style={{ width: "8em" }}>
               {
-                id
+                idURIDecode
                   ?
                   <div>{count || shipping_num.toString()}</div>
                   :
@@ -221,7 +221,7 @@ function DeliveryEdit(props) {
             </div>
           </IndexTable.Cell>
           <IndexTable.Cell>
-            {!id &&
+            {!idURIDecode &&
               <Button
                 icon={DeleteMinor}
                 onClick={() => { handleDeleteGoods(symb) }}

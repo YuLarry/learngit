@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-21 15:28:14
- * @LastEditTime: 2022-03-15 15:10:51
+ * @LastEditTime: 2022-03-15 17:27:06
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -71,8 +71,7 @@ function DeliveryInbound(props) {
   //   warehouseArea.size > 0 && setWarehouseSelected(warehouseArea.keys().next().value)
   // }, [warehouseArea])
 
-
-  const [boxCardCount, setBoxCardCount] = useState("1");
+  const [boxCardCount, setBoxCardCount] = useState("");
 
 
   // =====
@@ -623,13 +622,10 @@ function DeliveryInbound(props) {
       if (type === INBOUND_TYPE.PCS) {
         moveToInboundTable();
       } else {
-        const { shipping_num } = goodsMap.get(selectedResources[0]);
-        // console.log( item );
-        setBoxCardCount(shipping_num.toString());
         setInboundModalOpen(true);
       }
     },
-    [goodsMap, moveToInboundTable, selectedResources, type],
+    [moveToInboundTable, type],
   );
 
   const promotedBulkActions = useMemo(() => (
