@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-03-16 10:20:19
+ * @LastEditTime: 2022-03-16 15:23:53
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -519,6 +519,14 @@ function SourcingEdit(props) {
     query: ""
   });
 
+  useEffect(()=>{
+    if( !active )return;
+    setTreeQueryForm({
+      type: "goods_sku",
+      query: ""
+    })
+  },[active])
+
   const treeQueryFormChangeHandler = useCallback(
     (val, id) => {
       setTreeQueryForm({ ...treeQueryForm, [id]: val })
@@ -568,6 +576,7 @@ function SourcingEdit(props) {
 
   const queryGoodsRequest = useCallback(
     () => {
+      if( treeLoading ) return;
       const { type, query } = treeQueryForm;
       setTreeLoading(true);
       getGoodsQuery({
@@ -587,7 +596,7 @@ function SourcingEdit(props) {
           setTreeLoading(false)
         })
     },
-    [provider_id, treeQueryForm],
+    [provider_id, treeLoading, treeQueryForm],
   );
 
   useEffect(() => {
@@ -599,7 +608,7 @@ function SourcingEdit(props) {
       clearTimeout(timer);
     }
   },
-    [active, queryGoodsRequest]
+    [treeQueryForm.query]
   );
 
   const badgesMarkup = useMemo(() => {

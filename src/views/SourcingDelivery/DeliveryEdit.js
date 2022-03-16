@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-03-16 14:35:19
+ * @LastEditTime: 2022-03-16 15:27:34
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -40,9 +40,6 @@ function DeliveryEdit(props) {
   const { id } = useParams();
   const idDecode = id && atob(id);
   const idURIDecode = idDecode && decodeURIComponent(idDecode);
-
-  const location = useLocation();
-
 
   const navigate = useNavigate();
   const loadingContext = useContext(LoadingContext);
@@ -330,10 +327,34 @@ function DeliveryEdit(props) {
 
   const [searchKey, setSearchKey] = useState("provider_name");
   const [searchVal, setSearchVal] = useState("");
+
+
+  const [treeQueryForm, setTreeQueryForm] = useState({
+    searchKey: "provider_name",
+    searchVal: ""
+  });
+
+  const treeQueryFormChangeHandler = useCallback(
+    (val, id) => {
+      setTreeQueryForm({ ...treeQueryForm, [id]: val })
+    },
+    [treeQueryForm],
+  );
+
+  useEffect(()=>{
+    if( !active )return;
+    setTreeQueryForm({
+      searchKey: "goods_sku",
+      searchVal: ""
+    })
+  },[active])
   const [querying, setQuerying] = useState(false);
 
   const queryModalList = useCallback(
     () => {
+      const { searchKey, searchVal } = treeQueryForm;
+      if( querying ) return;
+      setQuerying( true );
       getPoItemList({
         provider_name: "",
         warehouse_name: "",
@@ -357,34 +378,20 @@ function DeliveryEdit(props) {
           setQuerying(false)
         })
     },
-    [searchKey, searchVal],
+    [querying, treeQueryForm],
   );
 
 
   useEffect(() => {
     if (!active) return;
-    if (tree && !searchVal) return;
     const timer = setTimeout(() => {
-      setQuerying(true)
       queryModalList();
     }, 1000);
     return () => {
       clearTimeout(timer);
-      setQuerying(false)
     }
-  }, [searchKey, searchVal]);
+  }, [treeQueryForm]);
 
-  useEffect(() => {
-    if (!active || (active && tree)) return;
-    const timer = setTimeout(() => {
-      setQuerying(true)
-      queryModalList();
-    }, 1000);
-    return () => {
-      clearTimeout(timer);
-      setQuerying(false)
-    }
-  }, [active]);
 
   const saveDeliveryOrder = useCallback(() => {
     loadingContext.loading(true);
@@ -732,10 +739,11 @@ function DeliveryEdit(props) {
           <div style={{ padding: "1em" }}>
 
             <TextField
+              id="searchVal"
               type="text"
               placeholder="搜索商品"
-              value={searchVal}
-              onChange={(val) => { setSearchVal(val) }}
+              value={treeQueryForm.searchVal}
+              onChange={treeQueryFormChangeHandler}
               prefix={<Icon
                 source={SearchMinor}
                 color="subdued"
@@ -743,8 +751,9 @@ function DeliveryEdit(props) {
               }
               connectedLeft={
                 <Select
-                  value={searchKey}
-                  onChange={(val) => { setSearchKey(val) }}
+                  id="searchKey"
+                  value={treeQueryForm.searchKey}
+                  onChange={ treeQueryFormChangeHandler }
                   options={[
                     { label: "供应商", value: "provider_name" },
                     { label: "采购单 ", value: "po_no" },
