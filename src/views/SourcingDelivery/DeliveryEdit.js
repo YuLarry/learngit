@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-03-16 10:17:45
+ * @LastEditTime: 2022-03-16 14:35:19
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -107,7 +107,7 @@ function DeliveryEdit(props) {
 
   const goodsFormChangeHandler = useCallback(
     (symb, val, key) => {
-      if (val && !fstlnTool.INT_MORE_THAN_ZERO_REG.test(val)) return;
+      if (val !== "" && !fstlnTool.INT_MORE_THAN_ZERO_REG.test(val)) return;
       const _tempGoodItem = goodsTableDataMap.get(symb);
       _tempGoodItem[key] = val
       const tempMap = new Map(goodsTableDataMap);
@@ -208,11 +208,11 @@ function DeliveryEdit(props) {
               {
                 idURIDecode
                   ?
-                  <div>{count || shipping_num.toString()}</div>
+                  <div>{count}</div>
                   :
                   <TextField
                     type="number"
-                    value={count || shipping_num.toString()}
+                    value={count}
                     prefix=""
                     onChange={(v) => { goodsFormChangeHandler(symb, v, "count") }}
                   />
