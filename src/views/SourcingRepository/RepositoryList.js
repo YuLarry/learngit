@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-03-15 17:07:45
+ * @LastEditTime: 2022-03-16 15:47:41
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -300,8 +300,8 @@ function RepositoryList(props) {
   const commitModal = useCallback(
     () => {
       const { inbound_no } = tableList.find(item => item.id === selectedResources[0])
-      const inbound_item = modalSkuList.map(({ po_item_id, inbound_qty }) => ({ po_item_id, inbound_qty: parseInt(inbound_qty) }))
-
+      const inbound_item = modalSkuList.map(({ po_item_id, inbound_qty, actual_qty }) => ({ po_item_id, inbound_qty: inbound_qty ? parseInt(inbound_qty) : actual_qty }))
+console.log(modalSkuList);
       let invalid = false;
       inbound_item.forEach((item)=>{
         if( !item.inbound_qty ){ invalid = true }
@@ -336,7 +336,7 @@ function RepositoryList(props) {
 
         })
     },
-    [tableList, modalSkuList, selectedResources],
+    [tableList, modalSkuList, selectedResources, refresh],
   );
 
   return (

@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-24 16:02:59
- * @LastEditTime: 2022-03-16 15:04:43
+ * @LastEditTime: 2022-03-16 15:43:36
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -26,17 +26,15 @@ function InRepositoryManualModal(props) {
     plural: '商品',
   };
 
-
   const goodsFormChangeHandler = useCallback(
     (idx, val, key) => {
       if (val !== "" && !fstlnTool.INT_MORE_THAN_ZERO_REG.test(val)) return;
       const _table = [...tableList];
 
       _table[idx][key] = val
-      console.log(_table);
       tableListChange(_table);
     },
-    [tableListChange],
+    [tableList, tableListChange],
   );
 
   const productInfo = (product) => {
@@ -58,8 +56,6 @@ function InRepositoryManualModal(props) {
       </div>
     )
   }
-
-
 
   const rowMarkup = useMemo(() => {
     return tableList.map(
