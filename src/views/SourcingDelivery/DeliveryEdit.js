@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-03-15 18:44:38
+ * @LastEditTime: 2022-03-16 10:17:45
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -427,7 +427,6 @@ function DeliveryEdit(props) {
 
 
   useEffect(() => {
-    if( id ) return;
     unsavedChangeContext.remind({
       active: true,
       message: "未保存的修改",
@@ -571,7 +570,7 @@ function DeliveryEdit(props) {
           navigate(-1);
         }
       }]}
-      title={idURIDecode ? "查看发货单" : "新建发货单"}
+      title={idURIDecode ? idURIDecode : "新建发货单"}
       titleMetadata={ badgesMarkup }
       subtitle={detail && detail.create_message || ""}
     >

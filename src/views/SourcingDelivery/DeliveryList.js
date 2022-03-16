@@ -257,7 +257,7 @@ function DeliveryList(props) {
   }, [])
 
   const rowMarkup = useMemo(() => deliveryList.map(
-    ({ id, shipping_no, provider: { business_name }, warehouse: { name }, status, item, shipping_date, expected_date }, index) => {
+    ({ id, shipping_no, provider: { business_name }, warehouse: { name }, status, item, shipping_date, expected_date, }, index) => {
 
       const prodNod = item.map((goodsItem, idx) => (goodsItemNode(goodsItem, idx)))
       const soBase64 = window.btoa(encodeURIComponent(shipping_no));

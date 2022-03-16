@@ -1,13 +1,13 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-20 14:31:27
- * @LastEditTime: 2022-03-10 16:42:40
+ * @LastEditTime: 2022-03-16 10:42:05
  * @LastEditors: lijunwei
  * @Description: 
  */
 
 import { Icon, Popover } from "@shopify/polaris";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import "./productInfoPopover.scss"
 import {
   CaretDownMinor
@@ -27,38 +27,42 @@ function ProductInfoPopover(props) {
   const activator = useMemo(() => (
     <div
       className="prod-activator"
-      onClick={(e)=>{
+      onClick={(e) => {
         togglePopoverActive();
-        e.stopPropagation()
+        // e.stopPropagation()
       }}
     >
       <div className="text">
         {children}
       </div>
-      <Icon 
+      <Icon
         source={CaretDownMinor}
         color="subdued"
-        />
+      />
     </div>
-    
+
   ),
-  [children, togglePopoverActive]
+    [children, togglePopoverActive]
   );
 
+  useEffect(() => {
+    // window.__EVENT_ADD_ = true;
+    document.onclick=()=>{
+      setPopoverActive(false);
+    }
+  },[])
 
 
   return (
     <Popover
-      active={  popoverNode ? popoverActive : false }
+      active={popoverNode ? popoverActive : false}
       activator={activator}
       onClose={togglePopoverActive}
       ariaHaspopup={false}
       sectioned
       preferredAlignment="left"
     >
-
-      { popoverNode }
-
+      {popoverNode}
     </Popover>
   );
 }

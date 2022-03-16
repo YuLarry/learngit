@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-03-15 17:08:06
+ * @LastEditTime: 2022-03-16 14:23:58
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -168,8 +168,9 @@ function SourcingList(props) {
   // 编辑采购单
   const editEdable = useMemo(() => {
     if (selectedResources.length !== 1) { return false };
-    const enableArr = [AUDIT_UNAUDITED, AUDIT_FAILURE, AUDIT_REVOKED];
     const selectedKey = selectedResources[0];
+    if (sourcingListMap.get(selectedKey).po_status === PO_STATUS_CANCEL) return false;
+    const enableArr = [AUDIT_UNAUDITED, AUDIT_FAILURE, AUDIT_REVOKED];
     // if (sourcingListMap.get(selectedKey).po_status === PO_STATUS_CANCEL) return false;
 
     return enableArr.indexOf(sourcingListMap.get(selectedKey).audit_status) !== -1
@@ -399,8 +400,8 @@ function SourcingList(props) {
   }, [])
 
   const rowMarkup = useMemo(() => sourcingList.map(
-    ({ id, po_no, provider = {}, warehouse = {}, subject = {}, audit_status, payment_status, delivery_status, item }, index) => {
-
+    ({ id, po_no, provider = {}, warehouse = {}, subject = {}, audit_status, payment_status, delivery_status, item, po_status }, index) => {
+      const isCancel = po_status === PO_STATUS_CANCEL;
       const prodNod = item.map((goodsItem, idx) => (goodsItemNode(goodsItem, idx)))
       const poBase64 = window.btoa(encodeURIComponent(po_no));
       // console.log(poBase64);
@@ -415,13 +416,14 @@ function SourcingList(props) {
             plain
             monochrome
             url={`detail/${poBase64}`}
+            removeUnderline={ isCancel }
           >
-            <TextStyle variation="strong">{po_no}</TextStyle>
+            <TextStyle variation="strong">{ isCancel ? <span style={{textDecoration: "line-through"}}>{po_no}</span>  : po_no }</TextStyle>
           </Button>
         </IndexTable.Cell>
-        <IndexTable.Cell>{subject && subject.title || ""}</IndexTable.Cell>
-        <IndexTable.Cell>{provider && provider.business_name || ""}</IndexTable.Cell>
-        <IndexTable.Cell>{warehouse && warehouse.name || ""}</IndexTable.Cell>
+        <IndexTable.Cell>{ isCancel ? <span style={{textDecoration: "line-through"}}>{ subject && subject.title || "" }</span>  : (subject && subject.title || "" ) }</IndexTable.Cell>
+        <IndexTable.Cell>{ isCancel ? <span style={{textDecoration: "line-through"}}>{ provider && provider.business_name || "" }</span>  : (provider && provider.business_name || "" ) }</IndexTable.Cell>
+        <IndexTable.Cell>{ isCancel ? <span style={{textDecoration: "line-through"}}>{ warehouse && warehouse.name || "" }</span>  : (warehouse && warehouse.name || "" ) }</IndexTable.Cell>
         <IndexTable.Cell>
           {<BadgeAuditStatus status={audit_status} />}
         </IndexTable.Cell>
@@ -435,7 +437,7 @@ function SourcingList(props) {
           <ProductInfoPopover
             popoverNode={item.length > 0 ? prodNod : null}
           >
-            {`${item.length}商品`}
+          { isCancel ? <span style={{textDecoration: "line-through"}}>{ `${item.length}商品` }</span>  : (`${item.length}商品` ) }
           </ProductInfoPopover>
         </IndexTable.Cell>
       </IndexTable.Row >)

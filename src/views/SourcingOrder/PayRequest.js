@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-19 17:05:46
- * @LastEditTime: 2022-03-15 14:02:39
+ * @LastEditTime: 2022-03-16 10:44:14
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -257,6 +257,7 @@ function PayRequest(props) {
             message: "提交成功",
             duration: 1000,
             onDismiss: () => {
+              toastContext.toast({active: false});
               navigate(-1)
             }
           })
