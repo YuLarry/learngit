@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-19 17:05:46
- * @LastEditTime: 2022-03-16 10:44:14
+ * @LastEditTime: 2022-03-16 16:29:02
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -35,6 +35,7 @@ function PayRequest(props) {
 
   const idDecode = atob(id);
   const idURIEncode = encodeURIComponent(idDecode);
+  const idURIDecode = idDecode && decodeURIComponent(idDecode);
 
   const loadingContext = useContext(LoadingContext);
   const unsavedChangeContext = useContext(UnsavedChangeContext)
@@ -332,7 +333,7 @@ function PayRequest(props) {
   return (
     <Page
       breadcrumbs={[{ content: '采购实施列表', onAction: ()=>{ navigate(-1) } }]}
-      title="申请付款"
+      title={ `申请付款${ (idURIDecode) ? ("-" + idURIDecode) : "" }` }
       titleMetadata={ badgesMarkup }
       subtitle={order && order.create_message || ""}
     >

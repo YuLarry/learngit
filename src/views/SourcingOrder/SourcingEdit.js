@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-03-16 15:23:53
+ * @LastEditTime: 2022-03-16 16:21:56
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -27,6 +27,7 @@ import { LoadingContext } from "../../context/LoadingContext";
 import { ModalContext } from "../../context/ModalContext";
 import { ToastContext } from "../../context/ToastContext";
 import { UnsavedChangeContext } from "../../context/UnsavedChangeContext";
+import { CURRENCY_TYPE } from "../../utils/StaticData";
 import { fstlnTool } from "../../utils/Tools";
 import "./style/sourcingEdit.scss";
 
@@ -81,7 +82,6 @@ function SourcingEdit(props) {
     (id) => {
       if (accountList.length === 0) return;
       const accountInfo = accountList.find(item => item.id.toString() === id);
-      console.log(accountInfo);
       setAccountInfo(accountInfo)
     }
     , [accountList]
@@ -494,7 +494,7 @@ function SourcingEdit(props) {
               <TextField
                 type="number"
                 value={price || purchase_price}
-                prefix="$"
+                prefix={ accountInfo && CURRENCY_TYPE[accountInfo.currency] }
                 onChange={(v) => { goodsFormChangeHandler(symb, v, "price") }}
               />
             </IndexTable.Cell>
@@ -509,7 +509,7 @@ function SourcingEdit(props) {
     })
 
   }
-    , [goodsFormChangeHandler, handleDeleteGoods, selectedGoods, selectedResources]
+    , [accountInfo, goodsFormChangeHandler, handleDeleteGoods, selectedGoods, selectedResources]
   )
 
 
@@ -608,7 +608,7 @@ function SourcingEdit(props) {
       clearTimeout(timer);
     }
   },
-    [treeQueryForm.query]
+    [treeQueryForm]
   );
 
   const badgesMarkup = useMemo(() => {
@@ -632,7 +632,7 @@ function SourcingEdit(props) {
           }
         }
       ]}
-      title={id ? idURIDecode : "创建采购单"}
+      title={id ? `编辑采购单-${idURIDecode}` : "创建采购单"}
       subtitle={order && order.create_message || ""}
       titleMetadata={ badgesMarkup }
     >

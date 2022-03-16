@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-20 14:31:27
- * @LastEditTime: 2022-03-16 10:42:05
+ * @LastEditTime: 2022-03-16 16:15:16
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -44,14 +44,6 @@ function ProductInfoPopover(props) {
   ),
     [children, togglePopoverActive]
   );
-
-  useEffect(() => {
-    // window.__EVENT_ADD_ = true;
-    document.onclick=()=>{
-      setPopoverActive(false);
-    }
-  },[])
-
 
   return (
     <Popover

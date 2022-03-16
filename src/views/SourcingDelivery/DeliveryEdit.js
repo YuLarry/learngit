@@ -577,7 +577,7 @@ function DeliveryEdit(props) {
           navigate(-1);
         }
       }]}
-      title={idURIDecode ? idURIDecode : "新建发货单"}
+      title={idURIDecode ? `发货单详情-${idURIDecode}` : "新建发货单"}
       titleMetadata={ badgesMarkup }
       subtitle={detail && detail.create_message || ""}
     >

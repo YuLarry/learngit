@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-21 15:28:14
- * @LastEditTime: 2022-03-16 15:39:07
+ * @LastEditTime: 2022-03-16 16:16:13
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -204,7 +204,8 @@ function DeliveryInbound(props) {
           </IndexTable.Cell>
           <IndexTable.Cell>
             <ProductInfoPopover popoverNode={productInfo(goods)}>
-              {goods && goods.cn_name}
+              <div>{goods && goods.cn_name}</div>
+              <div>{goods && goods.en_name}</div>
             </ProductInfoPopover>
           </IndexTable.Cell>
           <IndexTable.Cell>
@@ -770,7 +771,7 @@ function DeliveryInbound(props) {
                 selected={selectedSku}
                 onSelect={updateSelectedSku}
                 textField={textField}
-                loading={ queryingSkus }
+                loading={queryingSkus}
               />
               <TextField
                 type="number"

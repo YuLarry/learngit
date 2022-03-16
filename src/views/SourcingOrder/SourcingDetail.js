@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-20 16:16:03
- * @LastEditTime: 2022-03-15 12:18:48
+ * @LastEditTime: 2022-03-16 16:21:02
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -175,7 +175,7 @@ function SourcingDetail(props) {
           :
           []
       }
-      title={idURIDecode}
+      title={`采购单详情-${idURIDecode}`}
       titleMetadata={badgesMarkup}
       subtitle={order && order.create_message || ""}
     >

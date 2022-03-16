@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-24 15:50:14
- * @LastEditTime: 2022-03-15 15:37:57
+ * @LastEditTime: 2022-03-16 16:32:36
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -17,6 +17,7 @@ import { BadgeInboundStatus } from "../../components/StatusBadges/BadgeInboundSt
 import { LoadingContext } from "../../context/LoadingContext";
 import { ModalContext } from "../../context/ModalContext";
 import { ToastContext } from "../../context/ToastContext";
+import { INBOUND_STATUS_FINISH } from "../../utils/StaticData";
 import { InRepositoryManualModal } from "./piece/InRepositoryManualModal";
 
 function RepositoryDetail(props) {
@@ -68,6 +69,7 @@ function RepositoryDetail(props) {
                 popoverNode={productInfo(goods)}
               >
                 <div>{cn_name}</div>
+                <div>{en_name}</div>
               </ProductInfoPopover>
             </IndexTable.Cell>
             <IndexTable.Cell>
@@ -77,22 +79,22 @@ function RepositoryDetail(props) {
               {actual_qty}
             </IndexTable.Cell>
             <IndexTable.Cell>
-            <Button
-              plain
-              url={`/sourcing/detail/${btoa(encodeURIComponent(po_no))}`}
-            >
-              {po_no}
-            </Button>
-          </IndexTable.Cell>
-          <IndexTable.Cell>
-            <Button
-              plain
-              url={`/delivery/detail/${btoa(encodeURIComponent(shipping_no))}`}
-            >
-              {shipping_no}
-            </Button>
+              <Button
+                plain
+                url={`/sourcing/detail/${btoa(encodeURIComponent(po_no))}`}
+              >
+                {po_no}
+              </Button>
+            </IndexTable.Cell>
+            <IndexTable.Cell>
+              <Button
+                plain
+                url={`/delivery/detail/${btoa(encodeURIComponent(shipping_no))}`}
+              >
+                {shipping_no}
+              </Button>
 
-          </IndexTable.Cell>
+            </IndexTable.Cell>
           </IndexTable.Row>
         )
       }
@@ -124,11 +126,11 @@ function RepositoryDetail(props) {
       const inbound_item = modalSkuList.map(({ po_item_id, inbound_qty }) => ({ po_item_id, inbound_qty: parseInt(inbound_qty) }))
 
       let invalid = false;
-      inbound_item.forEach((item)=>{
-        if( !item.inbound_qty ){ invalid = true }
+      inbound_item.forEach((item) => {
+        if (!item.inbound_qty) { invalid = true }
       })
 
-      if( invalid ){
+      if (invalid) {
         toastContext.toast({
           active: true,
           message: "入库数量应为大于 0 的整数",
@@ -136,7 +138,7 @@ function RepositoryDetail(props) {
         })
         return;
       }
-      
+
       const data = {
         inbound_no: detail.inbound_no,
         inbound_item,
@@ -162,24 +164,27 @@ function RepositoryDetail(props) {
 
   return (
     <Page
-      breadcrumbs={[{ 
+      breadcrumbs={[{
         content: '入库单列表',
-        onAction: ()=>{
-          navigate( -1 )
+        onAction: () => {
+          navigate(-1)
         }
       }]}
-      title={id}
+      title={`入库单详情-${id}`}
       titleMetadata={<BadgeInboundStatus status={detail && detail.status} />}
       subtitle={detail && detail.create_message || ""}
-      secondaryActions={[
-        {
-          content: '手动确定入库',
-          onAction: () => {
-            setModalSkuList(detail.item)
-            setModalOpen(true)
-          },
-        },
-      ]}
+      secondaryActions={
+        !(detail && detail.status === INBOUND_STATUS_FINISH)
+          ?
+          [{
+            content: '手动确定入库',
+            onAction: () => {
+              setModalSkuList(detail.item)
+              setModalOpen(true)
+            },
+          }]
+          : []
+      }
     >
       <Layout>
         <Layout.Section>
@@ -228,7 +233,7 @@ function RepositoryDetail(props) {
           <Card title="基本信息">
             <SourcingCardSection title="入库单号" text={detail && detail.inbound_no} />
             <SourcingCardSection title="单据类型" text={detail && detail.type} />
-            <SourcingCardSection title="货主" text={detail && detail.provider_name} />
+            <SourcingCardSection title="货主" text={detail && detail.client_account && detail.client_account.name} />
             <SourcingCardSection title="货区" text={detail && detail.warehouse_area} />
             <SourcingCardSection title="供应商" text={detail && detail.provider_name} />
             <SourcingCardSection title="收货仓库" text={detail && detail.warehouse_name} />
