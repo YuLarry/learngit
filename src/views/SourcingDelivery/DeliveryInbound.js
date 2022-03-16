@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-21 15:28:14
- * @LastEditTime: 2022-03-15 17:27:06
+ * @LastEditTime: 2022-03-16 15:39:07
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -423,10 +423,13 @@ function DeliveryInbound(props) {
       })
   }, [shipping_code]);
 
+  const [queryingSkus, setQueryingSkus] = useState(false);
   const querySku = useCallback(
     () => {
+      if (queryingSkus) return;
+      setQueryingSkus(true);
       getSkuOptionsList({
-        // warehouse_sku: inputSku,
+        warehouse_sku: inputSku,
         client_account_code: clientSelected,
       })
         .then((res) => {
@@ -446,26 +449,28 @@ function DeliveryInbound(props) {
 
         })
         .finally(() => {
+          setQueryingSkus(false);
+
         })
     },
-    [clientSelected, inputSku],
+    [clientSelected, inputSku, queryingSkus],
   );
 
   useEffect(() => {
-    if (!clientSelected) return;
+    if (!clientSelected || !inboundModalOpen) return;
     const timer = setTimeout(() => {
       querySku();
     }, 800);
     return () => {
       clearTimeout(timer)
     }
-  }, [clientSelected, inputSku, querySku]);
+  }, [inputSku, inboundModalOpen]);
 
   const checkSkusOk = useCallback(() => {
     const skuToId = new Map();
     const skus = selectedResources.map((id) => {
       const item = goodsMap.get(id);
-      skuToId.set( item.sku, id )
+      skuToId.set(item.sku, id)
       return item.sku
     });
 
@@ -473,21 +478,21 @@ function DeliveryInbound(props) {
       client_account_code: clientSelected,
       sku: [...skus],
     })
-    .then(res=>{
-      console.log(res);
-      const { data } = res;
-      Object.keys(data).map((sku)=>{
-        const box_no = data[sku];
-        const id = skuToId.get(sku);
-        const _item = goodsMap.get( id )
-        // const _tMap = new Map( goodsMap );
-        // _tMap.set( id, _item );
-        _item["box_no"] = box_no
-        
-      })
-      
+      .then(res => {
+        // console.log(res);
+        const { data } = res;
+        Object.keys(data).map((sku) => {
+          const box_no = data[sku];
+          const id = skuToId.get(sku);
+          const _item = goodsMap.get(id)
+          // const _tMap = new Map( goodsMap );
+          // _tMap.set( id, _item );
+          _item["box_no"] = box_no
 
-    })
+        })
+
+
+      })
   }
     , [clientSelected, goodsMap, selectedResources])
 
@@ -523,7 +528,7 @@ function DeliveryInbound(props) {
           loadingContext.loading(false)
         }
       }
-      
+
       selectedResources.map((id) => {
         const item = goodsMap.get(id);
         const { shipping_num } = item;
@@ -765,6 +770,7 @@ function DeliveryInbound(props) {
                 selected={selectedSku}
                 onSelect={updateSelectedSku}
                 textField={textField}
+                loading={ queryingSkus }
               />
               <TextField
                 type="number"
