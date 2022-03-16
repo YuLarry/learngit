@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-24 16:02:59
- * @LastEditTime: 2022-03-15 15:29:34
+ * @LastEditTime: 2022-03-16 15:04:43
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -29,13 +29,14 @@ function InRepositoryManualModal(props) {
 
   const goodsFormChangeHandler = useCallback(
     (idx, val, key) => {
-      if (val && key === "inbound_qty" && !fstlnTool.INT_MORE_THAN_ZERO_REG.test(val)) return;
-      const a = [...tableList];
+      if (val !== "" && !fstlnTool.INT_MORE_THAN_ZERO_REG.test(val)) return;
+      const _table = [...tableList];
 
-      a[idx][key] = val
-      tableListChange(a);
+      _table[idx][key] = val
+      console.log(_table);
+      tableListChange(_table);
     },
-    [tableList, tableListChange],
+    [tableListChange],
   );
 
   const productInfo = (product) => {
@@ -68,7 +69,8 @@ function InRepositoryManualModal(props) {
         po_no,
         shipping_no,
         goods,
-        inbound_qty = "",
+        actual_qty = "",
+        inbound_qty,
         sku }, index) => (
         <IndexTable.Row
           id={id}
@@ -91,12 +93,20 @@ function InRepositoryManualModal(props) {
             {plan_qty}
           </IndexTable.Cell>
           <IndexTable.Cell>
-            <TextField
+            {
+              actual_qty === plan_qty
+              ?
+              <div>{ actual_qty }</div>
+              :
+              <TextField
               type="number"
-              value={inbound_qty}
-              // prefix="$"
+              value={ (inbound_qty !== undefined) ? inbound_qty : actual_qty.toString()}
+              min={ actual_qty }
+              max={ plan_qty }
               onChange={(v) => { goodsFormChangeHandler(index, v, "inbound_qty") }}
             />
+            }
+            
           </IndexTable.Cell>
           <IndexTable.Cell>
             <Button
@@ -122,9 +132,6 @@ function InRepositoryManualModal(props) {
   },
     [goodsFormChangeHandler, tableList]
   );
-  // ====-=
-
-
 
   return (
     <Modal
