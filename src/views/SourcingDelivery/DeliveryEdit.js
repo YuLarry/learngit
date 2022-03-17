@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-03-16 15:27:34
+ * @LastEditTime: 2022-03-17 11:24:03
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -253,7 +253,7 @@ function DeliveryEdit(props) {
         <div>{sku}</div>
         <div>{cn_name}</div>
         <div>{en_name}</div>
-        <div>{purchase_num - shipping_num}</div>
+        <div>{purchase_num}</div>
       </div>
     )
   }
@@ -344,7 +344,7 @@ function DeliveryEdit(props) {
   useEffect(()=>{
     if( !active )return;
     setTreeQueryForm({
-      searchKey: "goods_sku",
+      searchKey: "provider_name",
       searchVal: ""
     })
   },[active])
