@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-21 15:28:14
- * @LastEditTime: 2022-03-17 20:02:17
+ * @LastEditTime: 2022-03-17 21:41:49
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -17,6 +17,7 @@ import { ToastContext } from "../../context/ToastContext";
 import { UnsavedChangeContext } from "../../context/UnsavedChangeContext";
 import { INBOUND_TYPE } from "../../utils/StaticData";
 import { fstlnTool } from "../../utils/Tools";
+import { v4 as uuidv4 } from 'uuid';
 
 function DeliveryInbound(props) {
   const navigate = useNavigate();
@@ -104,7 +105,7 @@ function DeliveryInbound(props) {
   const clearSelectedResources = useCallback(
     () => {
       selectedResources.map((id) => {
-        handleSelectionChange("single", false, id)
+        handleSelectionChange("single", false, id);
       })
     },
     [handleSelectionChange, selectedResources],
@@ -216,14 +217,16 @@ function DeliveryInbound(props) {
     else {
       const nodes = [];
       inboundGoodsMap.forEach((val, wareSku) => {
-        // console.log(selectSkuObj);
+        console.log(val);
+        console.log(selectSkuObj);
         const { itemMap, count } = val
-        const { id,sku, po_no, shipping_num, goods } = selectSkuObj;
+        const { id,warehouse_sku, sku, po_no, shipping_num, goods, cn_name, en_name } = selectSkuObj;
+        const uid = uuidv4();
         nodes.push(
           <IndexTable.Row
-            id={id || sku}
-            key={id || sku}
-            position={id || sku}
+            id={uid}
+            key={uid}
+            position={uid}
           >
             <IndexTable.Cell>
               <Button
@@ -233,14 +236,14 @@ function DeliveryInbound(props) {
                   modalSkuInfo([...itemMap.values()]);
                 }}
               >
-                <TextStyle variation="strong">{sku}</TextStyle>
+                <TextStyle variation="strong">{warehouse_sku}</TextStyle>
               </Button>
 
             </IndexTable.Cell>
             <IndexTable.Cell>
               <ProductInfoPopover popoverNode={productInfo(goods)}>
-                <div>{goods && goods.cn_name}</div>
-                <div>{goods && goods.en_name}</div>
+                <div>{cn_name}</div>
+                <div>{en_name}</div>
               </ProductInfoPopover>
             </IndexTable.Cell>
             <IndexTable.Cell>
@@ -338,7 +341,8 @@ function DeliveryInbound(props) {
       });
 
       setSelectedSku(selected);
-      // console.log([...skuOptionsMap.values()]);
+      console.log([...skuOptionsMap.values()]);
+      
       const obj = [...skuOptionsMap.values()].find(item=> (item.warehouse_sku === selected[0]) )
       setSelectSkuObj( obj );
       setInputSku(selectedValue[0]);
@@ -490,7 +494,7 @@ function DeliveryInbound(props) {
             const { id, sku, warehouse_sku, goods, service_provider_name, client_account_name } = skuItem;
             const { cn_name = "", en_name = "" } = goods || {};
             optionsArr.push({ id, value: warehouse_sku, label: `${warehouse_sku} | ${cn_name} ${service_provider_name} | ${client_account_name}` })
-            skuMap.set(sku, skuItem);
+            skuMap.set(id, skuItem);
           })
           setSkuOptions(optionsArr);
           setSkuOptionsBackup(optionsArr);
@@ -588,7 +592,7 @@ function DeliveryInbound(props) {
         return;
       }
       const rltMap = new Map();
-      const _tempMap = new Map(inboundGoodsMap);
+      const _tempMap = new Map();
 
       const numArr = [];
       let modValid = true;
@@ -630,9 +634,11 @@ function DeliveryInbound(props) {
         })
         return;
       }
-      rltMap.set(selectedSku[0], { itemMap: _tempMap, count: boxCardCount })
+      
+      rltMap.set( Symbol(), { itemMap: _tempMap, count: boxCardCount })
 
-      setInboundGoodsMap(rltMap)
+      
+      setInboundGoodsMap(new Map([...inboundGoodsMap, ...rltMap]));
       setCheckHasMap(_tempMap)
       clearSelectedResources();
       setInboundModalOpen(false)
