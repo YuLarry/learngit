@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-03-17 15:45:01
+ * @LastEditTime: 2022-03-17 19:16:22
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -134,7 +134,7 @@ function RepositoryList(props) {
   }, [])
 
   const rowMarkup = tableList.map(
-    ({ id, inbound_no, plan_total_qty, actual_total_qty, client_account_code, item, provider_name, warehouse_area, warehouse_name, status }, index) => {
+    ({ id, inbound_no, plan_total_qty, actual_total_qty, client_account, item, provider_name, warehouse_area, warehouse_name, status }, index) => {
 
       const prodNod = item.map((goodsItem, idx) => (goodsItemNode(goodsItem, idx)))
       return (
@@ -153,7 +153,7 @@ function RepositoryList(props) {
               <TextStyle variation="strong">{inbound_no}</TextStyle>
             </Button>
           </IndexTable.Cell>
-          <IndexTable.Cell>{client_account_code}</IndexTable.Cell>
+          <IndexTable.Cell>{client_account && client_account.name || ""}</IndexTable.Cell>
           <IndexTable.Cell>{provider_name}</IndexTable.Cell>
           <IndexTable.Cell>{warehouse_name}</IndexTable.Cell>
           <IndexTable.Cell>{warehouse_area}</IndexTable.Cell>
