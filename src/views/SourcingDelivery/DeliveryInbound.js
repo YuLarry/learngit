@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-21 15:28:14
- * @LastEditTime: 2022-03-17 17:41:54
+ * @LastEditTime: 2022-03-17 19:08:26
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -74,13 +74,15 @@ function DeliveryInbound(props) {
   const [boxCardCount, setBoxCardCount] = useState("");
 
   // autocomplete ===
+  const [selectSkuObj, setSelectSkuObj] = useState(null);
   const [selectedSku, setSelectedSku] = useState([]);
+
   const [inputSku, setInputSku] = useState('');
   const [skuOptions, setSkuOptions] = useState([]);
   const [skuOptionsBackup, setSkuOptionsBackup] = useState([]);
   const [skuOptionsMap, setSkuOptionsMap] = useState(new Map());
 
-  // =====
+  
   const [goodsMap, setGoodsMap] = useState(new Map());
   const goodsList = useMemo(() => {
     const arr = [];
@@ -163,6 +165,7 @@ function DeliveryInbound(props) {
   );
 
   const [inboundGoodsMap, setInboundGoodsMap] = useState(new Map());
+  const [checkHasMap, setCheckHasMap] = useState(new Map());
   const inboundGoodsList = useMemo(() => {
     const arr = [];
     for (const [key, item] of inboundGoodsMap) {
@@ -192,22 +195,7 @@ function DeliveryInbound(props) {
             position={index}
           >
             <IndexTable.Cell>
-              {
-                type === INBOUND_TYPE.PCS
-                  ?
-                  <TextStyle variation="strong">{box_no || pallet_no}</TextStyle>
-                  :
-                  <Button
-                    plain
-                    monochrome
-                    onClick={() => {
-                      modalSkuInfo([{ id, sku, goods, box_qty, pallet_qty, shipping_num }]);
-                    }}
-                  >
-                    <TextStyle variation="strong">{box_no || pallet_no}</TextStyle>
-                  </Button>
-              }
-
+              <TextStyle variation="strong">{box_no || pallet_no}</TextStyle>
             </IndexTable.Cell>
             <IndexTable.Cell>
               <ProductInfoPopover popoverNode={productInfo(goods)}>
@@ -228,17 +216,14 @@ function DeliveryInbound(props) {
     else {
       const nodes = [];
       inboundGoodsMap.forEach((val, wareSku) => {
-        console.log(val);
+        // console.log(selectSkuObj);
         const { itemMap, count } = val
-        const skuItem = skuOptionsMap.get(wareSku)
-        const { id, sku, po_no, shipping_num, goods } = skuItem;
-        console.log(skuItem);
+        const { id,sku, po_no, shipping_num, goods } = selectSkuObj;
         nodes.push(
           <IndexTable.Row
-            id={id}
-            key={id}
-            selected={selectedResources.includes(id)}
-            position={id}
+            id={id || sku}
+            key={id || sku}
+            position={id || sku}
           >
             <IndexTable.Cell>
               <Button
@@ -270,11 +255,11 @@ function DeliveryInbound(props) {
       return nodes
     }
   },
-    [inboundGoodsList, modalSkuInfo, selectedResources, type]
+    [inboundGoodsList, inboundGoodsMap, modalSkuInfo, selectSkuObj, selectedResources, type]
   );
 
   useEffect(() => {
-    [...inboundGoodsMap.keys()].map((key) => {
+    [...checkHasMap.keys()].map((key) => {
       // console.log(key);
       if (goodsMap.has(key)) {
         const _map = new Map(goodsMap);
@@ -282,7 +267,7 @@ function DeliveryInbound(props) {
         setGoodsMap(_map);
       }
     })
-  }, [goodsMap, inboundGoodsMap])
+  }, [goodsMap, checkHasMap])
 
   const skuList = useMemo(() => {
     return detailModalTableList.map(
@@ -353,9 +338,12 @@ function DeliveryInbound(props) {
       });
 
       setSelectedSku(selected);
+      // console.log([...skuOptionsMap.values()]);
+      const obj = [...skuOptionsMap.values()].find(item=> (item.warehouse_sku === selected[0]) )
+      setSelectSkuObj( obj );
       setInputSku(selectedValue[0]);
     },
-    [skuOptions],
+    [setSelectSkuObj, skuOptions, skuOptionsMap],
   );
   const textField = (
     <Autocomplete.TextField
@@ -371,12 +359,12 @@ function DeliveryInbound(props) {
     loadingContext.loading(true);
     let totalCount = 0;
     let allArray = [];
-    if( type === INBOUND_TYPE.PALLET ){
-      inboundGoodsList.forEach((item)=>{
+    if (type === INBOUND_TYPE.PALLET) {
+      inboundGoodsList.forEach((item) => {
         // console.log([...item.itemMap.values()]);
         allArray = [...allArray, ...item.itemMap.values()]
       })
-    }else{
+    } else {
       allArray = inboundGoodsList;
     }
     // console.log(allArray);
@@ -560,7 +548,6 @@ function DeliveryInbound(props) {
     async () => {
       if (selectedResources.length < 1) return;
       const _tempMap = new Map(inboundGoodsMap);
-
       try {
         loadingContext.loading(true)
         await checkSkusOk()
@@ -570,11 +557,17 @@ function DeliveryInbound(props) {
         loadingContext.loading(false)
       }
 
+      selectedResources.map((id) => {
+        const item = goodsMap.get(id);
+        _tempMap.set(id, { ...item });
+      })
+
       setInboundGoodsMap(_tempMap)
+      setCheckHasMap(_tempMap)
       clearSelectedResources();
       setInboundModalOpen(false);
     },
-    [checkSkusOk, clearSelectedResources, inboundGoodsMap, selectedResources]
+    [checkSkusOk, clearSelectedResources, goodsMap, inboundGoodsMap, selectedResources]
   );
 
   const moveToInboundTableBoxPallet = useCallback(
@@ -639,11 +632,8 @@ function DeliveryInbound(props) {
       }
       rltMap.set(selectedSku[0], { itemMap: _tempMap, count: boxCardCount })
 
-      /* setInboundGoodsMap(_tempMap)
-      clearSelectedResources();
-      setInboundModalOpen(false); */
-
       setInboundGoodsMap(rltMap)
+      setCheckHasMap(_tempMap)
       clearSelectedResources();
       setInboundModalOpen(false)
 
@@ -707,17 +697,17 @@ function DeliveryInbound(props) {
       })
     }
   },
-    [saveInbound])
+    [navigate, saveInbound])
 
   const tableInboundActionHandler = useCallback(
     () => {
       if (type === INBOUND_TYPE.PCS) {
-        moveToInboundTable();
+        moveToInboundTablePCS();
       } else {
         setInboundModalOpen(true);
       }
     },
-    [moveToInboundTable, type],
+    [moveToInboundTablePCS, type],
   );
 
   const promotedBulkActions = useMemo(() => (
