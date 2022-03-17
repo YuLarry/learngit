@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-21 15:28:14
- * @LastEditTime: 2022-03-17 21:41:49
+ * @LastEditTime: 2022-03-17 22:29:29
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -217,10 +217,10 @@ function DeliveryInbound(props) {
     else {
       const nodes = [];
       inboundGoodsMap.forEach((val, wareSku) => {
-        console.log(val);
-        console.log(selectSkuObj);
-        const { itemMap, count } = val
-        const { id,warehouse_sku, sku, po_no, shipping_num, goods, cn_name, en_name } = selectSkuObj;
+        // console.log(val);
+        // console.log(selectSkuObj);
+        const { itemMap, count, wareSkuInfo } = val
+        const { id,warehouse_sku, sku, po_no, shipping_num, goods, cn_name, en_name } = wareSkuInfo;
         const uid = uuidv4();
         nodes.push(
           <IndexTable.Row
@@ -341,7 +341,7 @@ function DeliveryInbound(props) {
       });
 
       setSelectedSku(selected);
-      console.log([...skuOptionsMap.values()]);
+      // console.log([...skuOptionsMap.values()]);
       
       const obj = [...skuOptionsMap.values()].find(item=> (item.warehouse_sku === selected[0]) )
       setSelectSkuObj( obj );
@@ -634,8 +634,8 @@ function DeliveryInbound(props) {
         })
         return;
       }
-      
-      rltMap.set( Symbol(), { itemMap: _tempMap, count: boxCardCount })
+      const { id,warehouse_sku, sku, po_no, shipping_num, goods, cn_name, en_name } = selectSkuObj;
+      rltMap.set( Symbol(), { itemMap: _tempMap, count: boxCardCount, wareSkuInfo: { id,warehouse_sku, sku, po_no, shipping_num, goods, cn_name, en_name } })
 
       
       setInboundGoodsMap(new Map([...inboundGoodsMap, ...rltMap]));
