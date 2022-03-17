@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-19 17:05:46
- * @LastEditTime: 2022-03-16 16:29:02
+ * @LastEditTime: 2022-03-17 09:39:46
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -187,7 +187,7 @@ function PayRequest(props) {
               </div>
               <div className="invoice-col" style={{ display: (file ? "" : "none") }}>
                 <p>发票文件</p>
-                <div style={{ minHeight: "2em", overflow:"hidden", whiteSpace: "nowrap", textOverflow: "ellipsis"}} >{file && file.name}</div>
+                <div style={{ minHeight: "2em"}} >{file && file.name}</div>
               </div>
             </div>
             <div className="invoice-del">
