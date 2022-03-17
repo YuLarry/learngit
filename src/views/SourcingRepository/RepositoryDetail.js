@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-24 15:50:14
- * @LastEditTime: 2022-03-17 12:35:57
+ * @LastEditTime: 2022-03-17 12:57:21
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -17,7 +17,7 @@ import { BadgeInboundStatus } from "../../components/StatusBadges/BadgeInboundSt
 import { LoadingContext } from "../../context/LoadingContext";
 import { ModalContext } from "../../context/ModalContext";
 import { ToastContext } from "../../context/ToastContext";
-import { INBOUND_STATUS_FINISH } from "../../utils/StaticData";
+import { CURRENCY_TYPE, INBOUND_STATUS_FINISH } from "../../utils/StaticData";
 import { InRepositoryManualModal } from "./piece/InRepositoryManualModal";
 
 function RepositoryDetail(props) {
@@ -117,7 +117,7 @@ function RepositoryDetail(props) {
       })
   }, [id, refresh]);
 
-
+  
   const [modalSkuList, setModalSkuList] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -240,12 +240,12 @@ function RepositoryDetail(props) {
             <SourcingCardSection title="第三方仓库" text={detail && detail.third_warehouse || ""} />
           </Card>
           <Card title="费用信息">
-            <SourcingCardSection title="运费" text={detail && `${detail.shipping_currency || ""}${detail.shipping_price}`} />
+            <SourcingCardSection title="运费" text={detail && `${  detail.shipping_currency &&  CURRENCY_TYPE[detail.shipping_currency] || ""}${detail.shipping_price}`} />
           </Card>
         </Layout.Section>
       </Layout>
 
-
+      
       <InRepositoryManualModal
         modalOpen={modalOpen}
         modalOpenChange={(openStatus) => { setModalOpen(openStatus) }}
