@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-03-17 15:06:19
+ * @LastEditTime: 2022-03-17 15:45:01
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -340,7 +340,7 @@ function RepositoryList(props) {
 
       const data = {
         inbound_no,
-        inbound_item,
+        inbound_item: arr,
       }
       loadingContext.loading(true);
       confirmInbound(data)

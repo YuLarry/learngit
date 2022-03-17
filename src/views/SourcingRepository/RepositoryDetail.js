@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-24 15:50:14
- * @LastEditTime: 2022-03-17 12:57:21
+ * @LastEditTime: 2022-03-17 15:51:36
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -123,17 +123,29 @@ function RepositoryDetail(props) {
 
   const commitModal = useCallback(
     () => {
-      const inbound_item = modalSkuList.map(({ po_item_id, inbound_qty }) => ({ po_item_id, inbound_qty: parseInt(inbound_qty) }))
-
-      let invalid = false;
+      const inbound_item = modalSkuList.map(({ 
+        po_item_id, 
+        inbound_qty, 
+        actual_qty, 
+        actual_qty_backup 
+      }) => ({ 
+        po_item_id, 
+        inbound_qty: inbound_qty ? parseInt(inbound_qty) - actual_qty_backup : 0, 
+      }))
+      // console.log(inbound_item);
+      let invalid = true;
+      const arr = [];
       inbound_item.forEach((item) => {
-        if (!item.inbound_qty) { invalid = true }
+        if (item.inbound_qty > 0) { 
+          invalid = false;
+          arr.push(item);
+        }
       })
 
       if (invalid) {
         toastContext.toast({
           active: true,
-          message: "入库数量应为大于 0 的整数",
+          message: "请检查入库数量",
           duration: "1000"
         })
         return;
@@ -141,7 +153,7 @@ function RepositoryDetail(props) {
 
       const data = {
         inbound_no: detail.inbound_no,
-        inbound_item,
+        inbound_item: arr,
       }
       loadingContext.loading(true);
       confirmInbound(data)
@@ -179,6 +191,9 @@ function RepositoryDetail(props) {
           [{
             content: '手动确定入库',
             onAction: () => {
+              detail.item.forEach((it)=>{
+                it["actual_qty_backup"] = it.actual_qty;
+              })
               setModalSkuList(detail.item)
               setModalOpen(true)
             },
