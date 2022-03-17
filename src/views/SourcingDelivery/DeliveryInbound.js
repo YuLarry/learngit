@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-21 15:28:14
- * @LastEditTime: 2022-03-17 19:11:50
+ * @LastEditTime: 2022-03-17 20:02:17
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -516,29 +516,29 @@ function DeliveryInbound(props) {
   }, [inputSku, inboundModalOpen]);
 
   const checkSkusOk = useCallback(() => {
-    const skuToId = new Map();
+    // const skuToId = new Map();
     const skus = selectedResources.map((id) => {
       const item = goodsMap.get(id);
-      skuToId.set(item.sku, id)
+      // skuToId.set(item.sku, id)
       return item.sku
     });
+
+    console.log(selectedResources);
 
     return checkskus({
       client_account_code: clientSelected,
       sku: [...skus],
     })
       .then(res => {
-        // console.log(res);
         const { data } = res;
-        Object.keys(data).map((sku) => {
-          const box_no = data[sku];
-          const id = skuToId.get(sku);
-          const _item = goodsMap.get(id)
-          // const _tMap = new Map( goodsMap );
-          // _tMap.set( id, _item );
-          _item["box_no"] = box_no
+        
+        selectedResources.forEach((id) => {
+          const item = goodsMap.get(id);
+          const _sku = item.sku;
+          const box_no = data[_sku];
+          item["box_no"] = box_no;
+        });
 
-        })
       })
   }
     , [clientSelected, goodsMap, selectedResources])
