@@ -1,18 +1,17 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-03-17 11:46:29
+ * @LastEditTime: 2022-03-17 14:06:41
  * @LastEditors: lijunwei
  * @Description: 
  */
 
 import { Button, Card, IndexTable, Link, Page, Pagination, Tabs, TextStyle, Thumbnail, useIndexResourceState } from "@shopify/polaris";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { confirmInbound, getRepoTableList } from "../../api/requests";
 import { BadgeInboundStatus } from "../../components/StatusBadges/BadgeInboundStatus";
 import { LoadingContext } from "../../context/LoadingContext";
-import { ModalContext } from "../../context/ModalContext";
 import { ToastContext } from "../../context/ToastContext";
 import { INBOUND_STATUS_ALL, INBOUND_STATUS_FINISH, INBOUND_STATUS_PENDING, INBOUND_STATUS_PORTION } from "../../utils/StaticData";
 import { InRepositoryManualModal } from "./piece/InRepositoryManualModal";
@@ -46,8 +45,15 @@ function RepositoryList(props) {
 
   const loadingContext = useContext(LoadingContext);
   const toastContext = useContext(ToastContext);
-  const [listLoading, setListLoading] = useState(false);
 
+  const [isFirstTime, setisFirstTime] = useState(true);
+  const [refresh, setRefresh] = useState(0);
+
+  const pageSize = 20;
+  const [pageIndex, setPageIndex] = useState(page || 1);
+  const [total_pages, setTotal_pages] = useState(0);
+  
+  const [listLoading, setListLoading] = useState(false);
   const [filter, setFilter] = useState({
     provider_id,
     warehouse_code,
@@ -62,9 +68,6 @@ function RepositoryList(props) {
     dateOn,
   });
 
-  const [pageIndex, setPageIndex] = useState(page);
-  const pageSize = 20;
-  const [total, setTotal] = useState(0);
 
   const pageStatus = useMemo(() => {
     const status = {
@@ -74,11 +77,11 @@ function RepositoryList(props) {
     if (pageIndex > 1) {
       status.hasPrevious = true;
     }
-    if (Math.ceil(total / pageSize) > pageIndex) {
+    if ( pageIndex < total_pages ) {
       status.hasNext = true;
     }
     return status
-  }, [pageIndex, total]);
+  }, [pageIndex, total_pages]);
 
   const [tableListMap, setTableListMap] = useState(new Map());
 
@@ -214,7 +217,6 @@ function RepositoryList(props) {
   }
     , [])
 
-  const [refresh, setRefresh] = useState(0);
 
   const mainTableList = useCallback(() => {
     // if(listLoading)return;
@@ -238,13 +240,14 @@ function RepositoryList(props) {
     clearSelectedResources();
     getRepoTableList(data)
       .then(res => {
-        const { data: { list, meta: { pagination: { total = 0 } } } } = res;
+        const { data: { list, meta: { pagination: { total = 0, total_pages, current_page } } } } = res;
         const _map = new Map();
         list.map((item) => {
           _map.set(item.id, item);
         })
         setTableListMap(_map);
-        setTotal( total )
+        setisFirstTime( false );
+        setTotal_pages( total_pages );
       })
       .finally(() => {
         setListLoading(false)
@@ -252,10 +255,12 @@ function RepositoryList(props) {
   }, [clearSelectedResources, filter, listLoading, pageIndex, queryListStatus, setSearchParams]);
 
   useEffect(()=>{
-    if( pageIndex === 1 ){
+    if( isFirstTime ){
+      return;
+    }else if( pageIndex === 1 ){
       setRefresh( refresh + 1 )
     }else{
-      setPageIndex(1);
+      setPageIndex( 1 );
     }
   }
   ,[filter, queryListStatus])

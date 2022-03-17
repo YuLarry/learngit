@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-03-17 11:46:24
+ * @LastEditTime: 2022-03-17 14:04:15
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -51,10 +51,13 @@ function SourcingList(props) {
   const loadingContext = useContext(LoadingContext);
   const toastContext = useContext(ToastContext);
 
-  const [pageIndex, setPageIndex] = useState(page || 1);
-  const pageSize = 20;
-  const [total, setTotal] = useState(0);
+  const [isFirstTime, setisFirstTime] = useState(true);
   const [refresh, setRefresh] = useState(0);
+
+  const pageSize = 20;
+  const [pageIndex, setPageIndex] = useState(page || 1);
+  const [total_pages, setTotal_pages] = useState(0);
+  
   const [listLoading, setListLoading] = useState(false);
 
 
@@ -124,11 +127,11 @@ function SourcingList(props) {
     if (pageIndex > 1) {
       status.hasPrevious = true;
     }
-    if (Math.ceil(total / pageSize) > pageIndex) {
+    if ( pageIndex < total_pages ) {
       status.hasNext = true;
     }
     return status
-  }, [pageIndex, total]);
+  }, [pageIndex, total_pages]);
 
   const resourceName = {
     singular: '采购单',
@@ -477,9 +480,10 @@ function SourcingList(props) {
     // console.log(searchParams.get("querys"));
     querySourcingList(queryData)
       .then(res => {
-        const { data: { list, meta: { pagination: { total = 0 } } } } = res;
+        const { data: { list, meta: { pagination: { total = 0, total_pages, current_page } } } } = res;
+        setisFirstTime( false );
+        setTotal_pages( total_pages );
         setSourcingList(list);
-        setTotal(total)
       })
       .finally(() => {
         setListLoading(false)
@@ -487,10 +491,12 @@ function SourcingList(props) {
   }, [filter, listLoading, pageIndex, queryListStatus, setSearchParams])
 
   useEffect(()=>{
-    if( pageIndex === 1 ){
+    if( isFirstTime ){
+      return;
+    }else if( pageIndex === 1 ){
       setRefresh( refresh + 1 )
     }else{
-      setPageIndex(1);
+      setPageIndex( 1 );
     }
   }
   ,[filter, queryListStatus])

@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-03-17 11:46:07
+ * @LastEditTime: 2022-03-17 14:04:34
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -10,7 +10,7 @@ import { Button, Card, IndexTable, Page, Pagination, Tabs, TextStyle, Thumbnail,
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { DeliveryListFilter } from "./piece/DeliveryListFilter";
-import { AUDIT_AUDITING, AUDIT_FAILURE, AUDIT_PASS, AUDIT_REVOKED, AUDIT_UNAUDITED, INBOUND_TYPE, PAYMENT_STATUS_FAILURE, REPO_STATUS_ALL, REPO_STATUS_PENDING, REPO_STATUS_PORTION, REPO_STATUS_SUCCESS } from "../../utils/StaticData";
+import { INBOUND_TYPE, REPO_STATUS_ALL, REPO_STATUS_PENDING, REPO_STATUS_PORTION, REPO_STATUS_SUCCESS } from "../../utils/StaticData";
 import { deleteShippingOrder, getShipingList } from "../../api/requests";
 import { BadgeRepoStatus } from "../../components/StatusBadges/BadgeRepoStatus";
 import { LoadingContext } from "../../context/LoadingContext";
@@ -45,12 +45,12 @@ function DeliveryList(props) {
   const loadingContext = useContext(LoadingContext);
   const toastContext = useContext(ToastContext);
 
-
+  const [isFirstTime, setisFirstTime] = useState(true);
   const [refresh, setRefresh] = useState(0);
 
-  const [pageIndex, setPageIndex] = useState(page || 1);
   const pageSize = 20;
-  const [total, setTotal] = useState(0);
+  const [pageIndex, setPageIndex] = useState(page || 1);
+  const [total_pages, setTotal_pages] = useState(0);
 
   const [listLoading, setListLoading] = useState(false);
 
@@ -122,11 +122,11 @@ function DeliveryList(props) {
     if (pageIndex > 1) {
       status.hasPrevious = true;
     }
-    if (Math.ceil(total / pageSize) > pageIndex) {
+    if ( pageIndex < total_pages ) {
       status.hasNext = true;
     }
     return status
-  }, [pageIndex, total]);
+  }, [pageIndex, total_pages]);
 
 
 
@@ -292,7 +292,7 @@ function DeliveryList(props) {
 
 
   const mainTableList = useCallback(() => {
-    // if( listLoading ) return;
+    if( listLoading ) return;
     setListLoading(true);
     clearSelectedResources();
     const { dateOn, shipping_date: { start, end } } = filter;
@@ -319,8 +319,9 @@ function DeliveryList(props) {
     });
     getShipingList(queryData)
       .then(res => {
-        const { data: { list, meta: { pagination: { total = 0 } } } } = res;
-        setTotal(total)
+        const { data: { list, meta: { pagination: { total = 0, total_pages, current_page } } } } = res;
+        setisFirstTime( false );
+        setTotal_pages( total_pages );
         setDeliveryList(list);
       })
       .finally(() => {
@@ -329,10 +330,12 @@ function DeliveryList(props) {
   }, [clearSelectedResources, filter, listLoading, pageIndex, queryListStatus, setSearchParams])
 
   useEffect(()=>{
-    if( pageIndex === 1 ){
+    if( isFirstTime ){
+      return;
+    }else if( pageIndex === 1 ){
       setRefresh( refresh + 1 )
     }else{
-      setPageIndex(1);
+      setPageIndex( 1 );
     }
   }
   ,[filter, queryListStatus])
