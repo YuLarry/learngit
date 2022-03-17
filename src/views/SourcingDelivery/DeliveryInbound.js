@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-21 15:28:14
- * @LastEditTime: 2022-03-17 09:33:49
+ * @LastEditTime: 2022-03-17 09:52:07
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -210,7 +210,7 @@ function DeliveryInbound(props) {
           </IndexTable.Cell>
           <IndexTable.Cell>
             <div style={{ width: "5em", textAlign: "right" }}>
-              {box_qty || shipping_num}
+              {box_qty || pallet_qty || shipping_num}
             </div>
           </IndexTable.Cell>
 
