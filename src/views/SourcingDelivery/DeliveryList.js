@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-03-15 18:55:52
+ * @LastEditTime: 2022-03-17 11:09:33
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -292,7 +292,7 @@ function DeliveryList(props) {
 
 
   const mainTableList = useCallback(() => {
-    if( listLoading ) return;
+    // if( listLoading ) return;
     setListLoading(true);
     clearSelectedResources();
     const { dateOn, shipping_date: { start, end } } = filter;

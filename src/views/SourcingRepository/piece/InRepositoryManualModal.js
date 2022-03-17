@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-24 16:02:59
- * @LastEditTime: 2022-03-16 15:43:36
+ * @LastEditTime: 2022-03-17 11:14:07
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -96,7 +96,7 @@ function InRepositoryManualModal(props) {
               :
               <TextField
               type="number"
-              value={ (inbound_qty !== undefined) ? inbound_qty : actual_qty.toString()}
+              value={ inbound_qty ? inbound_qty : ""}
               min={ actual_qty }
               max={ plan_qty }
               onChange={(v) => { goodsFormChangeHandler(index, v, "inbound_qty") }}

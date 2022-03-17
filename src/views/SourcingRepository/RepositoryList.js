@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-03-16 15:47:41
+ * @LastEditTime: 2022-03-17 11:09:21
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -34,7 +34,7 @@ function RepositoryList(props) {
   let {
     provider_id = "",
     warehouse_code = "",
-    create_date,
+    created_date,
     common_search = "",
     client_account_code = "",
     warehouse_area = "",
@@ -52,9 +52,9 @@ function RepositoryList(props) {
     provider_id,
     warehouse_code,
     
-    create_date:
-      create_date && create_date ?
-        { start: new Date(create_date.start), end: new Date(create_date.end) } :
+    created_date:
+      created_date && created_date ?
+        { start: new Date(created_date.start), end: new Date(created_date.end) } :
         { start: new Date(), end: new Date() },
     common_search,
     client_account_code,
@@ -217,12 +217,12 @@ function RepositoryList(props) {
   const [refresh, setRefresh] = useState(0);
 
   const mainTableList = useCallback(() => {
-    if(listLoading)return;
+    // if(listLoading)return;
     setListLoading(true)
-    const { dateOn, create_date: { start, end } } = filter;
+    const { dateOn, created_date: { start, end } } = filter;
     const data = {
       ...filter,
-      create_date: dateOn ? [
+      created_date: dateOn ? [
         moment(start).format("YYYY-MM-DD"),
         moment(end).format("YYYY-MM-DD")
       ] : [],
@@ -232,7 +232,7 @@ function RepositoryList(props) {
     }
     setSearchParams({
       querys: btoa(encodeURIComponent(JSON.stringify(
-        { ...data, create_date: dateOn ? { start: start.getTime(), end: end.getTime() } : "" }
+        { ...data, created_date: dateOn ? { start: start.getTime(), end: end.getTime() } : "" }
       )))
     });
     clearSelectedResources();
