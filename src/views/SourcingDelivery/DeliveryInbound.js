@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-21 15:28:14
- * @LastEditTime: 2022-03-17 22:29:29
+ * @LastEditTime: 2022-03-17 22:41:05
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -175,7 +175,6 @@ function DeliveryInbound(props) {
     return arr;
   },
     [inboundGoodsMap]);
-
 
   const modalSkuInfo = useCallback(
     (info) => {
