@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-03-17 11:24:03
+ * @LastEditTime: 2022-03-17 12:28:43
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -434,6 +434,7 @@ function DeliveryEdit(props) {
 
 
   useEffect(() => {
+    if( id ) return;
     unsavedChangeContext.remind({
       active: true,
       message: "未保存的修改",

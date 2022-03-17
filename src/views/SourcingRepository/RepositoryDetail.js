@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-24 15:50:14
- * @LastEditTime: 2022-03-16 16:32:36
+ * @LastEditTime: 2022-03-17 12:35:57
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -240,7 +240,7 @@ function RepositoryDetail(props) {
             <SourcingCardSection title="第三方仓库" text={detail && detail.third_warehouse || ""} />
           </Card>
           <Card title="费用信息">
-            <SourcingCardSection title="运费" text={detail && detail.shipping_price} />
+            <SourcingCardSection title="运费" text={detail && `${detail.shipping_currency || ""}${detail.shipping_price}`} />
           </Card>
         </Layout.Section>
       </Layout>
