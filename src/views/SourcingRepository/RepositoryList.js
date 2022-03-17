@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-03-17 11:09:21
+ * @LastEditTime: 2022-03-17 11:46:29
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -371,7 +371,7 @@ console.log(modalSkuList);
             { title: "入库单号" },
             { title: "货主" },
             { title: "供应商" },
-            { title: '收获仓库' },
+            { title: '收货仓库' },
             { title: '货区' },
             { title: '状态' },
             { title: '商品' },
