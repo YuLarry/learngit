@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-24 16:02:59
- * @LastEditTime: 2022-03-17 11:14:07
+ * @LastEditTime: 2022-03-17 14:29:20
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -57,75 +57,76 @@ function InRepositoryManualModal(props) {
     )
   }
 
-  const rowMarkup = useMemo(() => {
-    return tableList.map(
-      ({ id,
-        plan_qty,
-        po_item_id,
-        po_no,
-        shipping_no,
-        goods,
-        actual_qty = "",
-        inbound_qty,
-        sku }, index) => (
-        <IndexTable.Row
-          id={id}
-          key={index}
-          // selected={selectedResources.includes(id)}
-          position={index}
-        >
-          <IndexTable.Cell>
-            <TextStyle variation="strong">{sku}</TextStyle>
-          </IndexTable.Cell>
-          <IndexTable.Cell>
-            <ProductInfoPopover
-              popoverNode={productInfo(goods)}
-            >
-              <div>{goods && goods.cn_name}</div>
-              <div>{goods && goods.en_name}</div>
-            </ProductInfoPopover>
-          </IndexTable.Cell>
-          <IndexTable.Cell>
-            {plan_qty}
-          </IndexTable.Cell>
-          <IndexTable.Cell>
-            {
-              actual_qty === plan_qty
+  const rowMarkup = useMemo(() => tableList.map(
+    ({ id,
+      plan_qty,
+      po_item_id,
+      po_no,
+      shipping_no,
+      goods,
+      actual_qty = "",
+      inbound_qty,
+      sku }, index) => {
+
+      return (<IndexTable.Row
+        id={id}
+        key={index}
+        // selected={selectedResources.includes(id)}
+        position={index}
+      >
+        <IndexTable.Cell>
+          <TextStyle variation="strong">{sku}</TextStyle>
+        </IndexTable.Cell>
+        <IndexTable.Cell>
+          <ProductInfoPopover
+            popoverNode={productInfo(goods)}
+          >
+            <div>{goods && goods.cn_name}</div>
+            <div>{goods && goods.en_name}</div>
+          </ProductInfoPopover>
+        </IndexTable.Cell>
+        <IndexTable.Cell>
+          {plan_qty}
+        </IndexTable.Cell>
+        <IndexTable.Cell>
+          {
+            actual_qty === plan_qty
               ?
-              <div>{ actual_qty }</div>
+              <div>{actual_qty}</div>
               :
               <TextField
-              type="number"
-              value={ inbound_qty ? inbound_qty : ""}
-              min={ actual_qty }
-              max={ plan_qty }
-              onChange={(v) => { goodsFormChangeHandler(index, v, "inbound_qty") }}
-            />
-            }
-            
-          </IndexTable.Cell>
-          <IndexTable.Cell>
-            <Button
-              plain
-              url={`/sourcing/detail/${btoa(encodeURIComponent(po_no))}`}
-            >
-              {po_no}
-            </Button>
-          </IndexTable.Cell>
-          <IndexTable.Cell>
-            <Button
-              plain
-              url={`/delivery/detail/${btoa(encodeURIComponent(shipping_no))}`}
-            >
-              {shipping_no}
-            </Button>
+                type="number"
+                value={inbound_qty !== undefined ? inbound_qty.toString() : actual_qty.toString() }
+                min={actual_qty}
+                max={plan_qty}
+                onChange={(v) => { goodsFormChangeHandler(index, v, "inbound_qty") }}
+              />
+          }
 
-          </IndexTable.Cell>
+        </IndexTable.Cell>
+        <IndexTable.Cell>
+          <Button
+            plain
+            url={`/sourcing/detail/${btoa(encodeURIComponent(po_no))}`}
+          >
+            {po_no}
+          </Button>
+        </IndexTable.Cell>
+        <IndexTable.Cell>
+          <Button
+            plain
+            url={`/delivery/detail/${btoa(encodeURIComponent(shipping_no))}`}
+          >
+            {shipping_no}
+          </Button>
 
-        </IndexTable.Row>
-      ),
-    )
-  },
+        </IndexTable.Cell>
+
+      </IndexTable.Row>
+
+      )
+    },
+  ),
     [goodsFormChangeHandler, tableList]
   );
 

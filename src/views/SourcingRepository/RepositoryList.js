@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-03-17 14:06:41
+ * @LastEditTime: 2022-03-17 15:06:19
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -52,12 +52,12 @@ function RepositoryList(props) {
   const pageSize = 20;
   const [pageIndex, setPageIndex] = useState(page || 1);
   const [total_pages, setTotal_pages] = useState(0);
-  
+
   const [listLoading, setListLoading] = useState(false);
   const [filter, setFilter] = useState({
     provider_id,
     warehouse_code,
-    
+
     created_date:
       created_date && created_date ?
         { start: new Date(created_date.start), end: new Date(created_date.end) } :
@@ -77,7 +77,7 @@ function RepositoryList(props) {
     if (pageIndex > 1) {
       status.hasPrevious = true;
     }
-    if ( pageIndex < total_pages ) {
+    if (pageIndex < total_pages) {
       status.hasNext = true;
     }
     return status
@@ -246,29 +246,29 @@ function RepositoryList(props) {
           _map.set(item.id, item);
         })
         setTableListMap(_map);
-        setisFirstTime( false );
-        setTotal_pages( total_pages );
+        setisFirstTime(false);
+        setTotal_pages(total_pages);
       })
       .finally(() => {
         setListLoading(false)
       })
   }, [clearSelectedResources, filter, listLoading, pageIndex, queryListStatus, setSearchParams]);
 
-  useEffect(()=>{
-    if( isFirstTime ){
+  useEffect(() => {
+    if (isFirstTime) {
       return;
-    }else if( pageIndex === 1 ){
-      setRefresh( refresh + 1 )
-    }else{
-      setPageIndex( 1 );
+    } else if (pageIndex === 1) {
+      setRefresh(refresh + 1)
+    } else {
+      setPageIndex(1);
     }
   }
-  ,[filter, queryListStatus])
+    , [filter, queryListStatus])
 
-  useEffect(()=>{
+  useEffect(() => {
     mainTableList()
   }
-  ,[pageIndex, refresh])
+    , [pageIndex, refresh])
 
   const [modalSkuList, setModalSkuList] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
@@ -291,6 +291,11 @@ function RepositoryList(props) {
           onAction: () => {
             const inboundItem = tableList.find(item => item.id === selectedResources[0])
             if (inboundItem) {
+              // console.log(inboundItem);
+              inboundItem.item.forEach((it)=>{
+                it["actual_qty_backup"] = it.actual_qty;
+              })
+            
               setModalSkuList(inboundItem.item);
             }
             setModalOpen(true);
@@ -305,17 +310,29 @@ function RepositoryList(props) {
   const commitModal = useCallback(
     () => {
       const { inbound_no } = tableList.find(item => item.id === selectedResources[0])
-      const inbound_item = modalSkuList.map(({ po_item_id, inbound_qty, actual_qty }) => ({ po_item_id, inbound_qty: inbound_qty ? parseInt(inbound_qty) : actual_qty }))
-console.log(modalSkuList);
-      let invalid = false;
-      inbound_item.forEach((item)=>{
-        if( !item.inbound_qty ){ invalid = true }
+      const inbound_item = modalSkuList.map(({ 
+        po_item_id, 
+        inbound_qty, 
+        actual_qty, 
+        actual_qty_backup 
+      }) => ({ 
+        po_item_id, 
+        inbound_qty: inbound_qty ? parseInt(inbound_qty) - actual_qty_backup : 0, 
+      }))
+      // console.log(inbound_item);
+      let invalid = true;
+      const arr = [];
+      inbound_item.forEach((item) => {
+        if (item.inbound_qty > 0) { 
+          invalid = false;
+          arr.push(item);
+        }
       })
 
-      if( invalid ){
+      if (invalid) {
         toastContext.toast({
           active: true,
-          message: "入库数量应为大于 0 的整数",
+          message: "请检查入库数量",
           duration: "1000"
         })
         return;
@@ -401,7 +418,6 @@ console.log(modalSkuList);
           />
         </div>
       </Card>
-
 
       <InRepositoryManualModal
         modalOpen={modalOpen}
