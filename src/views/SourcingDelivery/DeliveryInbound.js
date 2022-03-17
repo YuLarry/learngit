@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-21 15:28:14
- * @LastEditTime: 2022-03-17 09:52:07
+ * @LastEditTime: 2022-03-17 17:41:54
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -73,6 +73,12 @@ function DeliveryInbound(props) {
 
   const [boxCardCount, setBoxCardCount] = useState("");
 
+  // autocomplete ===
+  const [selectedSku, setSelectedSku] = useState([]);
+  const [inputSku, setInputSku] = useState('');
+  const [skuOptions, setSkuOptions] = useState([]);
+  const [skuOptionsBackup, setSkuOptionsBackup] = useState([]);
+  const [skuOptionsMap, setSkuOptionsMap] = useState(new Map());
 
   // =====
   const [goodsMap, setGoodsMap] = useState(new Map());
@@ -176,47 +182,93 @@ function DeliveryInbound(props) {
   );
 
   const inboundListMarkup = useMemo(() => {
-    return inboundGoodsList.map(
-      ({ id, sku, po_no, shipping_num, box_qty, pallet_qty, goods, box_no, pallet_no }, index) => (
-        <IndexTable.Row
-          id={id}
-          key={id}
-          selected={selectedResources.includes(id)}
-          position={index}
-        >
-          <IndexTable.Cell>
-            {
-              type === INBOUND_TYPE.PCS
-                ?
-                <TextStyle variation="strong">{ box_no || pallet_no }</TextStyle>
-                :
-                <Button
-                  plain
-                  monochrome
-                  onClick={() => {
-                    modalSkuInfo([{ id, sku, goods, box_qty, pallet_qty, shipping_num }]);
-                  }}
-                >
-                  <TextStyle variation="strong">{ box_no || pallet_no }</TextStyle>
-                </Button>
-            }
+    if (type === INBOUND_TYPE.PCS) {
+      return inboundGoodsList.map(
+        ({ id, sku, po_no, shipping_num, box_qty, pallet_qty, goods, box_no, pallet_no }, index) => (
+          <IndexTable.Row
+            id={id}
+            key={id}
+            selected={selectedResources.includes(id)}
+            position={index}
+          >
+            <IndexTable.Cell>
+              {
+                type === INBOUND_TYPE.PCS
+                  ?
+                  <TextStyle variation="strong">{box_no || pallet_no}</TextStyle>
+                  :
+                  <Button
+                    plain
+                    monochrome
+                    onClick={() => {
+                      modalSkuInfo([{ id, sku, goods, box_qty, pallet_qty, shipping_num }]);
+                    }}
+                  >
+                    <TextStyle variation="strong">{box_no || pallet_no}</TextStyle>
+                  </Button>
+              }
 
-          </IndexTable.Cell>
-          <IndexTable.Cell>
-            <ProductInfoPopover popoverNode={productInfo(goods)}>
-              <div>{goods && goods.cn_name}</div>
-              <div>{goods && goods.en_name}</div>
-            </ProductInfoPopover>
-          </IndexTable.Cell>
-          <IndexTable.Cell>
-            <div style={{ width: "5em", textAlign: "right" }}>
-              {box_qty || pallet_qty || shipping_num}
-            </div>
-          </IndexTable.Cell>
+            </IndexTable.Cell>
+            <IndexTable.Cell>
+              <ProductInfoPopover popoverNode={productInfo(goods)}>
+                <div>{goods && goods.cn_name}</div>
+                <div>{goods && goods.en_name}</div>
+              </ProductInfoPopover>
+            </IndexTable.Cell>
+            <IndexTable.Cell>
+              <div style={{ width: "5em", textAlign: "right" }}>
+                {box_qty || pallet_qty || shipping_num}
+              </div>
+            </IndexTable.Cell>
 
-        </IndexTable.Row>
-      ),
-    )
+          </IndexTable.Row>
+        ),
+      )
+    }
+    else {
+      const nodes = [];
+      inboundGoodsMap.forEach((val, wareSku) => {
+        console.log(val);
+        const { itemMap, count } = val
+        const skuItem = skuOptionsMap.get(wareSku)
+        const { id, sku, po_no, shipping_num, goods } = skuItem;
+        console.log(skuItem);
+        nodes.push(
+          <IndexTable.Row
+            id={id}
+            key={id}
+            selected={selectedResources.includes(id)}
+            position={id}
+          >
+            <IndexTable.Cell>
+              <Button
+                plain
+                monochrome
+                onClick={() => {
+                  modalSkuInfo([...itemMap.values()]);
+                }}
+              >
+                <TextStyle variation="strong">{sku}</TextStyle>
+              </Button>
+
+            </IndexTable.Cell>
+            <IndexTable.Cell>
+              <ProductInfoPopover popoverNode={productInfo(goods)}>
+                <div>{goods && goods.cn_name}</div>
+                <div>{goods && goods.en_name}</div>
+              </ProductInfoPopover>
+            </IndexTable.Cell>
+            <IndexTable.Cell>
+              <div style={{ width: "5em", textAlign: "left" }}>
+                {count}
+              </div>
+            </IndexTable.Cell>
+
+          </IndexTable.Row>
+        )
+      })
+      return nodes
+    }
   },
     [inboundGoodsList, modalSkuInfo, selectedResources, type]
   );
@@ -255,25 +307,23 @@ function DeliveryInbound(props) {
             <IndexTable.Cell>
               {shipping_num}
             </IndexTable.Cell>
-            <IndexTable.Cell>
-              {box_qty && Number(shipping_num) / Number(box_qty)}
-              {pallet_qty && Number(shipping_num) / Number(pallet_qty)}
-            </IndexTable.Cell>
+            {
+              type === INBOUND_TYPE.BOX
+              &&
+              <IndexTable.Cell>
+                {box_qty && Number(shipping_num) / Number(box_qty)}
+              </IndexTable.Cell>
+            }
 
           </IndexTable.Row>
         )
       },
     )
   },
-    [detailModalTableList]
+    [detailModalTableList, type]
   );
 
-  // autocomplete ===
-  const [selectedSku, setSelectedSku] = useState([]);
-  const [inputSku, setInputSku] = useState('');
-  const [skuOptions, setSkuOptions] = useState([]);
-  const [skuOptionsBackup, setSkuOptionsBackup] = useState([]);
-  const [skuOptionsMap, setSkuOptionsMap] = useState(new Map());
+
 
   const updateSkuSelectText = useCallback(
     (value) => {
@@ -320,7 +370,17 @@ function DeliveryInbound(props) {
   const saveInbound = useCallback(() => {
     loadingContext.loading(true);
     let totalCount = 0;
-    const keyTransed = inboundGoodsList.map((item) => {
+    let allArray = [];
+    if( type === INBOUND_TYPE.PALLET ){
+      inboundGoodsList.forEach((item)=>{
+        // console.log([...item.itemMap.values()]);
+        allArray = [...allArray, ...item.itemMap.values()]
+      })
+    }else{
+      allArray = inboundGoodsList;
+    }
+    // console.log(allArray);
+    const keyTransed = allArray.map((item) => {
       totalCount += item.shipping_num;
       const {
         po_no,
@@ -491,13 +551,33 @@ function DeliveryInbound(props) {
           _item["box_no"] = box_no
 
         })
-
-
       })
   }
     , [clientSelected, goodsMap, selectedResources])
 
-  const moveToInboundTable = useCallback(
+
+  const moveToInboundTablePCS = useCallback(
+    async () => {
+      if (selectedResources.length < 1) return;
+      const _tempMap = new Map(inboundGoodsMap);
+
+      try {
+        loadingContext.loading(true)
+        await checkSkusOk()
+      } catch (error) {
+        return
+      } finally {
+        loadingContext.loading(false)
+      }
+
+      setInboundGoodsMap(_tempMap)
+      clearSelectedResources();
+      setInboundModalOpen(false);
+    },
+    [checkSkusOk, clearSelectedResources, inboundGoodsMap, selectedResources]
+  );
+
+  const moveToInboundTableBoxPallet = useCallback(
     async () => {
       if (selectedResources.length < 1) return;
       if (type !== INBOUND_TYPE.PCS && !boxCardCount) {
@@ -507,7 +587,6 @@ function DeliveryInbound(props) {
         })
         return;
       }
-      // console.log(selectedSku);
       if (type !== INBOUND_TYPE.PCS && selectedSku.length === 0) {
         toastContext.toast({
           active: true,
@@ -515,26 +594,16 @@ function DeliveryInbound(props) {
         })
         return;
       }
+      const rltMap = new Map();
       const _tempMap = new Map(inboundGoodsMap);
 
       const numArr = [];
       let modValid = true;
-      if (type === INBOUND_TYPE.PCS) {
-        try {
-          loadingContext.loading(true)
-          await checkSkusOk()
-        } catch (error) {
-          return
-        } finally {
-          loadingContext.loading(false)
-        }
-      }
 
       selectedResources.map((id) => {
         const item = goodsMap.get(id);
         const { shipping_num } = item;
-        // console.log(Number(shipping_num) % Number( boxCardCount ));
-        if (type !== INBOUND_TYPE.PCS && modValid && Number(shipping_num) % Number(boxCardCount) !== 0) {
+        if (modValid && Number(shipping_num) % Number(boxCardCount) !== 0) {
           modValid = false;
         }
         numArr.push(shipping_num);
@@ -559,20 +628,37 @@ function DeliveryInbound(props) {
             break;
         }
         _tempMap.set(id, { ...item, ...boxCardInfo });
+
       })
-      if (type !== INBOUND_TYPE.PCS && !modValid) {
+      if (!modValid) {
         toastContext.toast({
           active: true,
           message: `请输入可以被 ${numArr.join(',')} 整除的数量！`
         })
         return;
       }
+      rltMap.set(selectedSku[0], { itemMap: _tempMap, count: boxCardCount })
 
-      setInboundGoodsMap(_tempMap)
+      /* setInboundGoodsMap(_tempMap)
       clearSelectedResources();
-      setInboundModalOpen(false);
+      setInboundModalOpen(false); */
+
+      setInboundGoodsMap(rltMap)
+      clearSelectedResources();
+      setInboundModalOpen(false)
+
+    }
+    , [boxCardCount, clearSelectedResources, goodsMap, inboundGoodsMap, selectedResources, selectedSku, type])
+
+  const moveToInboundTable = useCallback(
+    () => {
+      if (type === INBOUND_TYPE.PCS) {
+        moveToInboundTablePCS();
+      } else {
+        moveToInboundTableBoxPallet()
+      }
     },
-    [boxCardCount, checkSkusOk, clearSelectedResources, goodsMap, inboundGoodsMap, selectedResources, selectedSku, type]
+    [moveToInboundTableBoxPallet, moveToInboundTablePCS, type],
   );
 
   useEffect(() => {
@@ -796,12 +882,21 @@ function DeliveryInbound(props) {
             resourceName={resourceName}
             itemCount={detailModalTableList.length}
             selectable={false}
-            headings={[
-              { title: '系统SKU' },
-              { title: '商品信息' },
-              { title: '本次发货数量' },
-              { title: 'pcs/箱' },
-            ]}
+            headings={
+              (type === INBOUND_TYPE.BOX
+                ?
+                [
+                  { title: '系统SKU' },
+                  { title: '商品信息' },
+                  { title: '本次发货数量' },
+                  { title: 'pcs/箱' },
+                ]
+                : [
+                  { title: '系统SKU' },
+                  { title: '商品信息' },
+                  { title: '本次发货数量' }
+                ])
+            }
           >
             {skuList}
           </IndexTable>
