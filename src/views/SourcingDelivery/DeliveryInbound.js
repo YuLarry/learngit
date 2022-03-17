@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-21 15:28:14
- * @LastEditTime: 2022-03-17 19:08:26
+ * @LastEditTime: 2022-03-17 19:11:50
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -359,7 +359,7 @@ function DeliveryInbound(props) {
     loadingContext.loading(true);
     let totalCount = 0;
     let allArray = [];
-    if (type === INBOUND_TYPE.PALLET) {
+    if (type !== INBOUND_TYPE.PCS) {
       inboundGoodsList.forEach((item) => {
         // console.log([...item.itemMap.values()]);
         allArray = [...allArray, ...item.itemMap.values()]
