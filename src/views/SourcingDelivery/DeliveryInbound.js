@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-21 15:28:14
- * @LastEditTime: 2022-03-16 16:16:13
+ * @LastEditTime: 2022-03-17 09:33:49
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -177,7 +177,7 @@ function DeliveryInbound(props) {
 
   const inboundListMarkup = useMemo(() => {
     return inboundGoodsList.map(
-      ({ id, sku, po_no, shipping_num, box_qty, pallet_qty, goods, box_no }, index) => (
+      ({ id, sku, po_no, shipping_num, box_qty, pallet_qty, goods, box_no, pallet_no }, index) => (
         <IndexTable.Row
           id={id}
           key={id}
@@ -188,7 +188,7 @@ function DeliveryInbound(props) {
             {
               type === INBOUND_TYPE.PCS
                 ?
-                <TextStyle variation="strong">{box_no}</TextStyle>
+                <TextStyle variation="strong">{ box_no || pallet_no }</TextStyle>
                 :
                 <Button
                   plain
@@ -197,7 +197,7 @@ function DeliveryInbound(props) {
                     modalSkuInfo([{ id, sku, goods, box_qty, pallet_qty, shipping_num }]);
                   }}
                 >
-                  <TextStyle variation="strong">{box_no}</TextStyle>
+                  <TextStyle variation="strong">{ box_no || pallet_no }</TextStyle>
                 </Button>
             }
 
