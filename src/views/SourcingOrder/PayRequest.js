@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-19 17:05:46
- * @LastEditTime: 2022-03-17 09:39:46
+ * @LastEditTime: 2022-03-17 15:16:08
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -91,30 +91,27 @@ function PayRequest(props) {
 
   const items = useMemo(() => (order ? order.item : []), [order])
 
-  const productInfo = useMemo(() => {
-    if (!order) return null;
-    return items.map((goodsItem) => {
-      const { goods: { cn_name, en_name, image_url }, purchase_price, sku } = goodsItem;
-      return (
-        <div key={sku} className="product-container" style={{ maxWidth: "400px", display: "flex", alignItems: "flex-start" }}>
-          <Thumbnail
-            source={image_url || ""}
-            alt={en_name}
-            size="small"
-          />
-          <div style={{ flex: 1, marginLeft: "1em" }}>
-            <h4>{en_name}</h4>
-            <h4>{cn_name}</h4>
-            <span>{purchase_price}</span>
-          </div>
+  
+
+  const productInfo = (goodsItem) => {
+    const { cn_name, en_name, id, image_url, price, sku } = goodsItem;
+    return (
+      <div className="product-container" style={{ maxWidth: "400px", display: "flex", alignItems: "flex-start" }}>
+
+        <Thumbnail
+          source={image_url || ""}
+          alt={en_name}
+          size="small"
+        />
+        <div style={{ flex: 1, marginLeft: "1em" }}>
+          <h4>{en_name}</h4>
+          <h4>{cn_name}</h4>
+          <span>{price}</span>
         </div>
-      )
-    })
+      </div>
+    )
+  }
 
-  },
-    [order])
-
-  const { selectedResources } = useIndexResourceState(items);
 
   const rowMarkup = useMemo(() => {
     return items.map(
@@ -126,7 +123,7 @@ function PayRequest(props) {
             key={sku}
           >
             <IndexTable.Cell>
-              <ProductInfoPopover popoverNode={productInfo}>
+              <ProductInfoPopover popoverNode={ productInfo(goods) }>
                 {sku}
               </ProductInfoPopover>
             </IndexTable.Cell>
