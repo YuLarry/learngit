@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 15:00:29
- * @LastEditTime: 2022-03-15 14:22:52
+ * @LastEditTime: 2022-03-18 10:03:25
  * @LastEditors: lijunwei
  * @Description: s
  */
@@ -20,7 +20,7 @@ function RepositoryListFilter(props) {
     filter = {
       provider_id: "",
       warehouse_code: "",
-      create_date: {
+      created_date: {
         start: new Date(),
         end: new Date(),
       },
@@ -171,7 +171,7 @@ function RepositoryListFilter(props) {
     const config = new Map();
     config.set("provider_id", { label: "供应商", type: "radio", dataPool: providerListMap, textKey: "business_name" });
     config.set("warehouse_code", { label: "收货仓库", type: "radio", dataPool: wareHouseListMap, textKey: "name" });
-    config.set("create_date", { label: "创建时间", type: "date" });
+    config.set("created_date", { label: "创建时间", type: "date" });
     config.set("client_account_code", { label: "货主", type: "radio", dataPool: clientListMap, textKey: null });
     config.set("warehouse_area", { label: "货区", type: "radio", dataPool: warehouseAreaMap, textKey: null });
 
@@ -262,7 +262,7 @@ function RepositoryListFilter(props) {
     setFilterData({
       provider_id: "",
       warehouse_code: "",
-      create_date: {
+      created_date: {
         start: new Date(),
         end: new Date(),
       },
@@ -297,7 +297,7 @@ function RepositoryListFilter(props) {
       },
 
       {
-        key: "create_date",
+        key: "created_date",
         label: "创建时间",
         filter: (
           <div>
@@ -309,19 +309,19 @@ function RepositoryListFilter(props) {
                 (date) => {
                   setFilterData({
                     ...filterData,
-                    create_date: date,
+                    created_date: date,
                     dateOn: true,
                   })
                 }
               }
               onMonthChange={handleMonthChange}
-              selected={filter.create_date}
+              selected={filter.created_date}
               allowRange
             />
           </div>
 
         ),
-        onClearAll: () => { clearFilterItem("create_date") },
+        onClearAll: () => { clearFilterItem("created_date") },
         shortcut: true,
       },
 
@@ -352,7 +352,7 @@ function RepositoryListFilter(props) {
 
     ]
     ,
-    [providerRadios, warehouseRadios, month, year, handleMonthChange, filter.create_date, clientRadios, warehouseAreaRadios, clearFilterItem, filterData]
+    [providerRadios, warehouseRadios, month, year, handleMonthChange, filter.created_date, clientRadios, warehouseAreaRadios, clearFilterItem, filterData]
   )
 
   useEffect(() => {

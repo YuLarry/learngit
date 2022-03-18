@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-24 16:02:59
- * @LastEditTime: 2022-03-17 14:29:20
+ * @LastEditTime: 2022-03-18 10:02:28
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -89,6 +89,7 @@ function InRepositoryManualModal(props) {
           {plan_qty}
         </IndexTable.Cell>
         <IndexTable.Cell>
+          <div style={{ minWidth: "8em" }}>
           {
             actual_qty === plan_qty
               ?
@@ -102,6 +103,7 @@ function InRepositoryManualModal(props) {
                 onChange={(v) => { goodsFormChangeHandler(index, v, "inbound_qty") }}
               />
           }
+          </div>
 
         </IndexTable.Cell>
         <IndexTable.Cell>
