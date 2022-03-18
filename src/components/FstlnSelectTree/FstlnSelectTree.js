@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-19 14:30:33
- * @LastEditTime: 2022-03-07 15:16:11
+ * @LastEditTime: 2022-03-18 10:35:36
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -90,12 +90,14 @@ function FstlnSelectTree(props) {
 
   const rowsTemp = useMemo(() =>
     Object.keys(treeData).map((key) => {
-
       const children = childrenResolver(treeData[key]);
+
+      if( !treeHeadRender(key, treeData[key], children) ) return null;
 
       const innerLis = children.map((item) => {
         // set headkey for compute counts
         item["headKey"] = key;
+        if( !treeRowRender(item) ) return null;
         return (
           <li className="fcsl-li" key={identifier(item)}>
             <label className="fcsl-item">

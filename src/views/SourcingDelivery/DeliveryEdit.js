@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-03-17 12:28:43
+ * @LastEditTime: 2022-03-18 10:31:01
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -233,7 +233,12 @@ function DeliveryEdit(props) {
   )
 
   const treeHeadRender = (rowItem, itemDetail, children) => {
-    const { po_no, warehouse_name, purchase_qty, provider: { business_name } } = itemDetail
+    const { po_no, warehouse_name, purchase_qty, provider: { business_name }, item_list } = itemDetail
+    let totalShiped = 0;
+    item_list.forEach(val=>{
+      totalShiped += val.shipping_num;
+    });
+    if( totalShiped >= purchase_qty )return null;
     return (
       <div className="tree-row">
         <div>{po_no}</div>
@@ -246,6 +251,7 @@ function DeliveryEdit(props) {
 
   const treeRowRender = (child) => {
     const { sku, purchase_num, shipping_num, goods = {} } = child
+    if( shipping_num >= purchase_num ) return null;
     const { cn_name = "", en_name = "" } = goods;
     return (
       <div className="tree-row">
