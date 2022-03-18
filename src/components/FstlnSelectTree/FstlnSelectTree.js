@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-19 14:30:33
- * @LastEditTime: 2022-03-18 10:35:36
+ * @LastEditTime: 2022-03-18 11:49:00
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -22,6 +22,17 @@ function FstlnSelectTree(props) {
     selectValidtor = ()=> true,
   } = props;
 
+  const _treeData = useMemo(() => {
+    const obj = {};
+    for (const key in treeData) {
+      if( treeData[key] ){
+        obj[key] = treeData[key]
+      }
+    }
+    return obj;
+  }
+  ,[treeData])
+
   const [selectedItems, setSelectedItems] = useState(new Map());
 
   const changeSelectedItems = useCallback(
@@ -39,7 +50,7 @@ function FstlnSelectTree(props) {
     (val, key) => {
       // console.log(key);
       const _tempSelected = new Map(selectedItems);
-      const children = childrenResolver(treeData[key])
+      const children = childrenResolver(_treeData[key])
       children.map((item) => {
         if (val) {
           _tempSelected.set(identifier(item), item);
@@ -49,7 +60,7 @@ function FstlnSelectTree(props) {
       })
       changeSelectedItems( _tempSelected );
     },
-    [changeSelectedItems, childrenResolver, identifier, selectedItems, treeData],
+    [changeSelectedItems, childrenResolver, identifier, selectedItems, _treeData],
   );
   const rowChangeHandler = useCallback(
     (val, item) => {
@@ -67,7 +78,7 @@ function FstlnSelectTree(props) {
   const computeHeadsCheckedStatus = useMemo(() => {
     const rlt = {};
     const keyCount = {};
-    Object.keys(treeData).map((key) => {
+    Object.keys(_treeData).map((key) => {
       keyCount[key] = 0;
     })
 
@@ -75,8 +86,8 @@ function FstlnSelectTree(props) {
       keyCount[item["headKey"]] += 1
     })
 
-    Object.keys(treeData).map((key) => {
-      const children = childrenResolver(treeData[key])
+    Object.keys(_treeData).map((key) => {
+      const children = childrenResolver(_treeData[key])
       if (keyCount[key] === children.length) {
         rlt[key] = true;
       } else if (keyCount[key] > 0 && keyCount[key] < children.length) {
@@ -86,13 +97,13 @@ function FstlnSelectTree(props) {
       }
     })
     return rlt
-  }, [childrenResolver, selectedItems, treeData])
+  }, [childrenResolver, selectedItems, _treeData])
 
   const rowsTemp = useMemo(() =>
-    Object.keys(treeData).map((key) => {
-      const children = childrenResolver(treeData[key]);
+    Object.keys(_treeData).map((key) => {
+      const children = childrenResolver(_treeData[key]);
 
-      if( !treeHeadRender(key, treeData[key], children) ) return null;
+      if( !treeHeadRender(key, _treeData[key], children) ) return null;
 
       const innerLis = children.map((item) => {
         // set headkey for compute counts
@@ -124,7 +135,7 @@ function FstlnSelectTree(props) {
               onChange={(v) => { headChangeHandler(v, key) }}
             />
             <div className="fcsl-head">
-              {treeHeadRender(key, treeData[key], children)}
+              {treeHeadRender(key, _treeData[key], children)}
             </div>
           </label>
           <ul className="fcsl-ul">
@@ -133,7 +144,7 @@ function FstlnSelectTree(props) {
         </li >)
     })
     ,
-    [childrenResolver, computeHeadsCheckedStatus, headChangeHandler, treeHeadRender, treeRowRender, rowChangeHandler, selectedItems, treeData]
+    [childrenResolver, computeHeadsCheckedStatus, headChangeHandler, treeHeadRender, treeRowRender, rowChangeHandler, selectedItems, _treeData]
   )
 
   useEffect(() => {

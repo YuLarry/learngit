@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-03-18 10:31:01
+ * @LastEditTime: 2022-03-18 11:53:21
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -235,10 +235,10 @@ function DeliveryEdit(props) {
   const treeHeadRender = (rowItem, itemDetail, children) => {
     const { po_no, warehouse_name, purchase_qty, provider: { business_name }, item_list } = itemDetail
     let totalShiped = 0;
-    item_list.forEach(val=>{
+    item_list.forEach(val => {
       totalShiped += val.shipping_num;
     });
-    if( totalShiped >= purchase_qty )return null;
+    if (totalShiped >= purchase_qty) return null;
     return (
       <div className="tree-row">
         <div>{po_no}</div>
@@ -251,7 +251,7 @@ function DeliveryEdit(props) {
 
   const treeRowRender = (child) => {
     const { sku, purchase_num, shipping_num, goods = {} } = child
-    if( shipping_num >= purchase_num ) return null;
+    if (shipping_num >= purchase_num) return null;
     const { cn_name = "", en_name = "" } = goods;
     return (
       <div className="tree-row">
@@ -347,20 +347,20 @@ function DeliveryEdit(props) {
     [treeQueryForm],
   );
 
-  useEffect(()=>{
-    if( !active )return;
+  useEffect(() => {
+    if (!active) return;
     setTreeQueryForm({
       searchKey: "provider_name",
       searchVal: ""
     })
-  },[active])
+  }, [active])
   const [querying, setQuerying] = useState(false);
 
   const queryModalList = useCallback(
     () => {
       const { searchKey, searchVal } = treeQueryForm;
-      if( querying ) return;
-      setQuerying( true );
+      if (querying) return;
+      setQuerying(true);
       getPoItemList({
         provider_name: "",
         warehouse_name: "",
@@ -371,11 +371,30 @@ function DeliveryEdit(props) {
           // console.log(res);
           const { data } = res;
           for (let key in data) {
-            const { provider, warehouse, item_list } = data[key];
-            item_list.map(item => {
+            const { provider, warehouse, item_list, purchase_qty } = data[key];
+
+            // remove shipped good item
+            let totalShiped = 0;
+            item_list.forEach(val => {
+              totalShiped += val.shipping_num;
+            });
+
+            if (totalShiped >= purchase_qty){
+              data[key] = null;
+              // console.log(key);
+            }
+
+            for (let i = item_list.length - 1; i >= 0; i --) {
+              const item = item_list[i];
               item["provider"] = provider;
               item["warehouse"] = warehouse;
-            })
+              if( item.shipping_num >= item.purchase_num ){
+                item_list.splice( i, 1 )
+              }
+            }
+            if (totalShiped >= purchase_qty){
+              delete(data.key);
+            }
           }
           setTree(data);
 
@@ -440,7 +459,7 @@ function DeliveryEdit(props) {
 
 
   useEffect(() => {
-    if( id ) return;
+    if (id) return;
     unsavedChangeContext.remind({
       active: true,
       message: "未保存的修改",
@@ -585,7 +604,7 @@ function DeliveryEdit(props) {
         }
       }]}
       title={idURIDecode ? `发货单详情-${idURIDecode}` : "新建发货单"}
-      titleMetadata={ badgesMarkup }
+      titleMetadata={badgesMarkup}
       subtitle={detail && detail.create_message || ""}
     >
       <Layout>
@@ -699,7 +718,7 @@ function DeliveryEdit(props) {
                     id="binning_no"
                     onChange={handleFormObjectChange}
                     placeholder="请输入入仓号"
-                    disabled={ id }
+                    disabled={id}
 
                   />
                 </FormLayout.Group>
@@ -713,7 +732,7 @@ function DeliveryEdit(props) {
         </Layout.Section>
         <Layout.Section secondary>
 
-          <SourcingProviCard provInfo={id ? formObject.provider : provider} noCardNum={ true } />
+          <SourcingProviCard provInfo={id ? formObject.provider : provider} noCardNum={true} />
           <SourcingRepoCard wareInfo={id ? formObject.warehouse : warehouse} />
           <SourcingRemarkCard
             readOnly={id}
@@ -760,7 +779,7 @@ function DeliveryEdit(props) {
                 <Select
                   id="searchKey"
                   value={treeQueryForm.searchKey}
-                  onChange={ treeQueryFormChangeHandler }
+                  onChange={treeQueryFormChangeHandler}
                   options={[
                     { label: "供应商", value: "provider_name" },
                     { label: "采购单 ", value: "po_no" },
