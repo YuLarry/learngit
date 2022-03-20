@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-26 14:50:48
- * @LastEditTime: 2022-01-27 15:50:16
+ * @LastEditTime: 2022-03-20 15:34:45
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -18,10 +18,10 @@ function BadgeDeliveryStatus(props) {
     case DELIVERY_PENDING:
       progress = "incomplete";
       break;
-    case DELIVERY_TRANSPORT:
-      progress = "incomplete";
-      status = "attention"
-      break;
+    // case DELIVERY_TRANSPORT:
+    //   progress = "incomplete";
+    //   status = "attention"
+    //   break;
     case DELIVERY_PARTIAL_TRANSPORT:
       progress = "partiallyComplete";
       status = "warning"

@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-03-17 19:16:22
+ * @LastEditTime: 2022-03-20 17:02:01
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -107,7 +107,7 @@ function RepositoryList(props) {
     [handleSelectionChange, selectedResources])
   const goodsItemNode = useCallback((item, idx) => {
     if (!item) return null;
-    const { sku, plan_qty, goods } = item;
+    const { warehouseSku: sku, plan_qty, warehouse_goods: goods } = item;
     const { image_url = "", en_name = "", id } = goods || {}
     return (
       <div className="product-container" key={idx} style={{ maxWidth: "400px", display: "flex", alignItems: "flex-start" }}>
@@ -118,15 +118,15 @@ function RepositoryList(props) {
           size="small"
         />
         <div style={{ flex: 1, marginLeft: "1em" }}>
-          <Link
+          {/* <Link
             onClick={
               (e) => {
                 e.stopPropagation();
                 window.open(`${BACKEND_GOODS_DETAIL}/${id}`);
               }
             }
-
-          >{sku}</Link>
+          >{sku}</Link> */}
+          <div>{sku}</div>
           <p>{plan_qty}</p>
         </div>
       </div>
@@ -136,7 +136,11 @@ function RepositoryList(props) {
   const rowMarkup = tableList.map(
     ({ id, inbound_no, plan_total_qty, actual_total_qty, client_account, item, provider_name, warehouse_area, warehouse_name, status }, index) => {
 
-      const prodNod = item.map((goodsItem, idx) => (goodsItemNode(goodsItem, idx)))
+      // const prodNod = item.map((goodsItem, idx) => (goodsItemNode(goodsItem, idx)))
+
+      const warehouseSkus = Object.keys(item);
+      const prodNod = warehouseSkus.map( (wSku,idx)=>( goodsItemNode( {...item[wSku][0], warehouseSku: wSku}, idx ) ) )
+
       return (
         <IndexTable.Row
           id={id}
@@ -162,9 +166,9 @@ function RepositoryList(props) {
           </IndexTable.Cell>
           <IndexTable.Cell>
             <ProductInfoPopover
-              popoverNode={item.length > 0 ? prodNod : null}
+              popoverNode={ item && prodNod }
             >
-              {`${item.length} 商品`}
+              {`${warehouseSkus.length} 商品`}
             </ProductInfoPopover>
           </IndexTable.Cell>
           <IndexTable.Cell>{plan_total_qty}</IndexTable.Cell>
@@ -270,7 +274,7 @@ function RepositoryList(props) {
   }
     , [pageIndex, refresh])
 
-  const [modalSkuList, setModalSkuList] = useState([]);
+  const [modalSkuListObject, setModalSkuListObject] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
 
   // repo action enable control
@@ -292,11 +296,13 @@ function RepositoryList(props) {
             const inboundItem = tableList.find(item => item.id === selectedResources[0])
             if (inboundItem) {
               // console.log(inboundItem);
-              inboundItem.item.forEach((it)=>{
-                it["actual_qty_backup"] = it.actual_qty;
+              Object.keys(inboundItem.item).forEach((k)=>{
+                const it = inboundItem.item[k];
+                it[0]["actual_qty_backup"] = it[0].actual_qty;
+                it[0]["wSku"] = k;
               })
             
-              setModalSkuList(inboundItem.item);
+              setModalSkuListObject(inboundItem.item);
             }
             setModalOpen(true);
           },
@@ -310,16 +316,40 @@ function RepositoryList(props) {
   const commitModal = useCallback(
     () => {
       const { inbound_no } = tableList.find(item => item.id === selectedResources[0])
-      const inbound_item = modalSkuList.map(({ 
-        po_item_id, 
-        inbound_qty, 
-        actual_qty, 
-        actual_qty_backup 
-      }) => ({ 
-        po_item_id, 
-        inbound_qty: inbound_qty ? parseInt(inbound_qty) - actual_qty_backup : 0, 
-      }))
+
+      const inbound_item = [];
+      for (const k in modalSkuListObject) {
+        if (Object.hasOwnProperty.call(modalSkuListObject, k)) {
+          const goods = modalSkuListObject[k];
+          
+          for (let i = 0; i < goods.length; i++) {
+            const { 
+              po_item_id, 
+            } = goods[i];
+            const firstInboundQty = goods[0].inbound_qty;
+            const firstActulBackup = goods[0].actual_qty_backup;
+            inbound_item.push({ 
+              po_item_id,
+              inbound_qty: firstInboundQty ? parseInt(firstInboundQty) - firstActulBackup : 0, 
+             })
+          }
+
+        }
+      }
+
+      // const inbound_item = modalSkuListObject.map(
+      //   ({ 
+      //   po_item_id, 
+      //   inbound_qty, 
+      //   actual_qty, 
+      //   actual_qty_backup 
+      // },) => ({ 
+      //   po_item_id, 
+      //   inbound_qty: inbound_qty ? parseInt(inbound_qty) - actual_qty_backup : 0, 
+      // }))
+
       // console.log(inbound_item);
+      // return;
       let invalid = true;
       const arr = [];
       inbound_item.forEach((item) => {
@@ -358,7 +388,7 @@ function RepositoryList(props) {
 
         })
     },
-    [tableList, modalSkuList, selectedResources, refresh],
+    [tableList, modalSkuListObject, selectedResources, refresh],
   );
 
   return (
@@ -422,8 +452,8 @@ function RepositoryList(props) {
       <InRepositoryManualModal
         modalOpen={modalOpen}
         modalOpenChange={(openStatus) => { setModalOpen(openStatus) }}
-        tableList={modalSkuList}
-        tableListChange={(list) => { setModalSkuList(list) }}
+        tableListObject={modalSkuListObject}
+        tableListObjectChange={(list) => { setModalSkuListObject(list) }}
         onCommit={(list) => { commitModal() }}
       />
 

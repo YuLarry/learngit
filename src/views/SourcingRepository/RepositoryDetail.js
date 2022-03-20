@@ -1,12 +1,12 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-24 15:50:14
- * @LastEditTime: 2022-03-17 15:51:36
+ * @LastEditTime: 2022-03-20 18:16:17
  * @LastEditors: lijunwei
  * @Description: 
  */
 
-import { Badge, Button, Card, IndexTable, Layout, Page, Thumbnail } from "@shopify/polaris";
+import { Button, Card, IndexTable, Layout, Page, Thumbnail } from "@shopify/polaris";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { confirmInbound, getInboundDetail } from "../../api/requests";
@@ -52,53 +52,63 @@ function RepositoryDetail(props) {
 
   const rowMarkup = useMemo(() => {
     if (!detail) return;
-    return detail.item.map(
-      ({ sku, po_no, goods, plan_qty, actual_qty, shipping_no }, index) => {
-        const { cn_name, en_name } = goods || {};
-        return (
-          <IndexTable.Row
-            id={index}
-            key={index}
-            position={index}
-          >
-            <IndexTable.Cell>
-              {sku}
-            </IndexTable.Cell>
-            <IndexTable.Cell>
-              <ProductInfoPopover
-                popoverNode={productInfo(goods)}
-              >
-                <div>{cn_name}</div>
-                <div>{en_name}</div>
-              </ProductInfoPopover>
-            </IndexTable.Cell>
-            <IndexTable.Cell>
-              {plan_qty}
-            </IndexTable.Cell>
-            <IndexTable.Cell>
-              {actual_qty}
-            </IndexTable.Cell>
-            <IndexTable.Cell>
-              <Button
-                plain
-                url={`/sourcing/detail/${btoa(encodeURIComponent(po_no))}`}
-              >
-                {po_no}
-              </Button>
-            </IndexTable.Cell>
-            <IndexTable.Cell>
-              <Button
-                plain
-                url={`/delivery/detail/${btoa(encodeURIComponent(shipping_no))}`}
-              >
-                {shipping_no}
-              </Button>
+    const warehouseSkuKeys = Object.keys(detail.item);
+    return warehouseSkuKeys.map(
+      (wSku, index) => {
+        const { id,
+          plan_qty,
+          po_item_id,
+          po_no,
+          shipping_no,
+          warehouse_goods: goods,
+          actual_qty = "",
+          inbound_qty,
+          warehouse_sku: sku 
+        } = detail.item[wSku][0];
+        return (<IndexTable.Row
+          id={id}
+          key={index}
+          position={index}
+        >
+          <IndexTable.Cell>
+          {sku}
+          </IndexTable.Cell>
+          <IndexTable.Cell>
+            <ProductInfoPopover
+              popoverNode={productInfo(goods)}
+            >
+              <div>{goods && goods.cn_name}</div>
+              <div>{goods && goods.en_name}</div>
+            </ProductInfoPopover>
+          </IndexTable.Cell>
+          <IndexTable.Cell>
+            {plan_qty}
+          </IndexTable.Cell>
+          <IndexTable.Cell>
+            {actual_qty}
+          </IndexTable.Cell>
+          <IndexTable.Cell>
+            <Button
+              plain
+              url={`/sourcing/detail/${btoa(encodeURIComponent(po_no))}`}
+            >
+              {po_no}
+            </Button>
+          </IndexTable.Cell>
+          <IndexTable.Cell>
+            <Button
+              plain
+              url={`/delivery/detail/${btoa(encodeURIComponent(shipping_no))}`}
+            >
+              {shipping_no}
+            </Button>
 
-            </IndexTable.Cell>
-          </IndexTable.Row>
+          </IndexTable.Cell>
+
+        </IndexTable.Row>
+
         )
-      }
-    )
+      })
   },
     [detail]
   );
@@ -117,26 +127,36 @@ function RepositoryDetail(props) {
       })
   }, [id, refresh]);
 
-  
-  const [modalSkuList, setModalSkuList] = useState([]);
+
+  const [modalSkuListObject, setModalSkuListObject] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
 
   const commitModal = useCallback(
     () => {
-      const inbound_item = modalSkuList.map(({ 
-        po_item_id, 
-        inbound_qty, 
-        actual_qty, 
-        actual_qty_backup 
-      }) => ({ 
-        po_item_id, 
-        inbound_qty: inbound_qty ? parseInt(inbound_qty) - actual_qty_backup : 0, 
-      }))
-      // console.log(inbound_item);
+      const inbound_item = [];
+      for (const k in modalSkuListObject) {
+        if (Object.hasOwnProperty.call(modalSkuListObject, k)) {
+          const goods = modalSkuListObject[k];
+
+          for (let i = 0; i < goods.length; i++) {
+            const {
+              po_item_id,
+            } = goods[i];
+            const firstInboundQty = goods[0].inbound_qty;
+            const firstActulBackup = goods[0].actual_qty_backup;
+            inbound_item.push({
+              po_item_id,
+              inbound_qty: firstInboundQty ? parseInt(firstInboundQty) - firstActulBackup : 0,
+            })
+          }
+
+        }
+      }
+
       let invalid = true;
       const arr = [];
       inbound_item.forEach((item) => {
-        if (item.inbound_qty > 0) { 
+        if (item.inbound_qty > 0) {
           invalid = false;
           arr.push(item);
         }
@@ -164,15 +184,20 @@ function RepositoryDetail(props) {
             message: "手动入库成功",
             duration: 1000,
           })
-          setRefresh(refresh + 1)
+          setRefresh(refresh + 1);
         })
         .finally(() => {
           loadingContext.loading(false);
 
         })
     },
-    [detail, modalSkuList],
+    [detail, modalSkuListObject, refresh],
   );
+
+  const resourceName = {
+    singular: '商品',
+    plural: '商品',
+  };
 
   return (
     <Page
@@ -191,11 +216,18 @@ function RepositoryDetail(props) {
           [{
             content: '手动确定入库',
             onAction: () => {
-              detail.item.forEach((it)=>{
-                it["actual_qty_backup"] = it.actual_qty;
-              })
-              setModalSkuList(detail.item)
-              setModalOpen(true)
+              const inboundItem = detail;
+              if (inboundItem) {
+                // console.log(inboundItem);
+                Object.keys(inboundItem.item).forEach((k) => {
+                  const it = inboundItem.item[k];
+                  it[0]["actual_qty_backup"] = it[0].actual_qty;
+                  it[0]["wSku"] = k;
+                })
+
+                setModalSkuListObject(inboundItem.item);
+              }
+              setModalOpen(true);
             },
           }]
           : []
@@ -209,7 +241,7 @@ function RepositoryDetail(props) {
           >
             <div>
               <IndexTable
-                itemCount={detail && detail.item.length}
+                itemCount={ detail ? Object.keys(detail.item).length : 0}
                 headings={[
                   { title: '货品SKU' },
                   { title: '商品信息' },
@@ -220,6 +252,8 @@ function RepositoryDetail(props) {
 
                 ]}
                 selectable={false}
+                resourceName={ resourceName }
+
               >
                 {rowMarkup}
               </IndexTable>
@@ -255,18 +289,18 @@ function RepositoryDetail(props) {
             <SourcingCardSection title="第三方仓库" text={detail && detail.third_warehouse || ""} />
           </Card>
           <Card title="费用信息">
-            <SourcingCardSection title="运费" text={detail && `${  detail.shipping_currency &&  CURRENCY_TYPE[detail.shipping_currency] || ""}${detail.shipping_price}`} />
+            <SourcingCardSection title="运费" text={detail && `${detail.shipping_currency && CURRENCY_TYPE[detail.shipping_currency] || ""}${detail.shipping_price}`} />
           </Card>
         </Layout.Section>
       </Layout>
 
-      
+
       <InRepositoryManualModal
         modalOpen={modalOpen}
         modalOpenChange={(openStatus) => { setModalOpen(openStatus) }}
-        tableList={modalSkuList}
-        tableListChange={(list) => { setModalSkuList(list) }}
-        onCommit={(list) => { console.log(list); commitModal() }}
+        tableListObject={modalSkuListObject}
+        tableListObjectChange={(list) => { setModalSkuListObject(list) }}
+        onCommit={(list) => { commitModal() }}
       />
     </Page>
   );

@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-24 16:02:59
- * @LastEditTime: 2022-03-18 10:02:28
+ * @LastEditTime: 2022-03-20 17:58:35
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -16,8 +16,8 @@ function InRepositoryManualModal(props) {
   const {
     modalOpen = false,
     modalOpenChange = () => { },
-    tableList = [],
-    tableListChange = () => { },
+    tableListObject = null,
+    tableListObjectChange = () => { },
     onCommit = () => { }
   } = props;
 
@@ -27,14 +27,14 @@ function InRepositoryManualModal(props) {
   };
 
   const goodsFormChangeHandler = useCallback(
-    (idx, val, key) => {
+    (wSku, val, key) => {
       if (val !== "" && !fstlnTool.INT_MORE_THAN_ZERO_REG.test(val)) return;
-      const _table = [...tableList];
+      const _table = { ...tableListObject };
 
-      _table[idx][key] = val
-      tableListChange(_table);
+      _table[wSku][0][key] = val
+      tableListObjectChange(_table);
     },
-    [tableList, tableListChange],
+    [tableListObject, tableListObjectChange],
   );
 
   const productInfo = (product) => {
@@ -57,79 +57,82 @@ function InRepositoryManualModal(props) {
     )
   }
 
-  const rowMarkup = useMemo(() => tableList.map(
-    ({ id,
-      plan_qty,
-      po_item_id,
-      po_no,
-      shipping_no,
-      goods,
-      actual_qty = "",
-      inbound_qty,
-      sku }, index) => {
+  const rowMarkup = useMemo(() => {
+    if (!tableListObject) return;
+    const warehouseSkuKeys = Object.keys(tableListObject);
+    return warehouseSkuKeys.map(
+      (wSku, index) => {
+        const { id,
+          plan_qty,
+          po_item_id,
+          po_no,
+          shipping_no,
+          warehouse_goods: goods,
+          actual_qty = "",
+          inbound_qty,
+          sku } = tableListObject[wSku][0];
+        return (<IndexTable.Row
+          id={id}
+          key={index}
+          // selected={selectedResources.includes(id)}
+          position={index}
+        >
+          <IndexTable.Cell>
+            <TextStyle variation="strong">{wSku}</TextStyle>
+          </IndexTable.Cell>
+          <IndexTable.Cell>
+            <ProductInfoPopover
+              popoverNode={productInfo(goods)}
+            >
+              <div>{goods && goods.cn_name}</div>
+              <div>{goods && goods.en_name}</div>
+            </ProductInfoPopover>
+          </IndexTable.Cell>
+          <IndexTable.Cell>
+            {plan_qty}
+          </IndexTable.Cell>
+          <IndexTable.Cell>
+            <div style={{ minWidth: "8em" }}>
+              {
+                actual_qty === plan_qty
+                  ?
+                  <div>{actual_qty}</div>
+                  :
+                  <TextField
+                    type="number"
+                    value={inbound_qty !== undefined ? inbound_qty.toString() : actual_qty.toString()}
+                    min={actual_qty}
+                    max={plan_qty}
+                    onChange={(v) => { goodsFormChangeHandler(wSku, v, "inbound_qty") }}
+                  />
+              }
+            </div>
 
-      return (<IndexTable.Row
-        id={id}
-        key={index}
-        // selected={selectedResources.includes(id)}
-        position={index}
-      >
-        <IndexTable.Cell>
-          <TextStyle variation="strong">{sku}</TextStyle>
-        </IndexTable.Cell>
-        <IndexTable.Cell>
-          <ProductInfoPopover
-            popoverNode={productInfo(goods)}
-          >
-            <div>{goods && goods.cn_name}</div>
-            <div>{goods && goods.en_name}</div>
-          </ProductInfoPopover>
-        </IndexTable.Cell>
-        <IndexTable.Cell>
-          {plan_qty}
-        </IndexTable.Cell>
-        <IndexTable.Cell>
-          <div style={{ minWidth: "8em" }}>
-          {
-            actual_qty === plan_qty
-              ?
-              <div>{actual_qty}</div>
-              :
-              <TextField
-                type="number"
-                value={inbound_qty !== undefined ? inbound_qty.toString() : actual_qty.toString() }
-                min={actual_qty}
-                max={plan_qty}
-                onChange={(v) => { goodsFormChangeHandler(index, v, "inbound_qty") }}
-              />
-          }
-          </div>
+          </IndexTable.Cell>
+          <IndexTable.Cell>
+            <Button
+              plain
+              url={`/sourcing/detail/${btoa(encodeURIComponent(po_no))}`}
+            >
+              {po_no}
+            </Button>
+          </IndexTable.Cell>
+          <IndexTable.Cell>
+            <Button
+              plain
+              url={`/delivery/detail/${btoa(encodeURIComponent(shipping_no))}`}
+            >
+              {shipping_no}
+            </Button>
 
-        </IndexTable.Cell>
-        <IndexTable.Cell>
-          <Button
-            plain
-            url={`/sourcing/detail/${btoa(encodeURIComponent(po_no))}`}
-          >
-            {po_no}
-          </Button>
-        </IndexTable.Cell>
-        <IndexTable.Cell>
-          <Button
-            plain
-            url={`/delivery/detail/${btoa(encodeURIComponent(shipping_no))}`}
-          >
-            {shipping_no}
-          </Button>
+          </IndexTable.Cell>
 
-        </IndexTable.Cell>
+        </IndexTable.Row>
 
-      </IndexTable.Row>
-
-      )
-    },
-  ),
-    [goodsFormChangeHandler, tableList]
+        )
+      })
+  },
+    [goodsFormChangeHandler, tableListObject]
   );
 
   return (
@@ -141,7 +144,7 @@ function InRepositoryManualModal(props) {
       primaryAction={{
         content: '确认',
         onAction: () => {
-          onCommit(tableList)
+          onCommit(tableListObject)
         },
       }}
       secondaryActions={[
@@ -155,7 +158,7 @@ function InRepositoryManualModal(props) {
     >
       <IndexTable
         resourceName={resourceName}
-        itemCount={tableList.length}
+        itemCount={tableListObject ? Object.keys(tableListObject).length : 0}
         // selectedItemsCount={
         //   allResourcesSelected ? 'All' : selectedResources.length
         // }
