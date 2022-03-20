@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-21 15:28:14
- * @LastEditTime: 2022-03-20 15:12:42
+ * @LastEditTime: 2022-03-20 18:21:21
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -413,7 +413,7 @@ function DeliveryInbound(props) {
         po_no,
         shipping_no: atob(shipping_code),
         sku,
-        plan_qty,
+        plan_qty: box_no || pallet_no,
         ...cardBoxInfo
       }
     })
