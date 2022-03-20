@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-21 15:28:14
- * @LastEditTime: 2022-03-20 18:21:21
+ * @LastEditTime: 2022-03-20 18:40:48
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -394,6 +394,7 @@ function DeliveryInbound(props) {
           box_qty,
           single_box_qty,
           warehouse_sku: box_no,
+          plan_qty: box_qty,
         }
       } else if (type === INBOUND_TYPE.PALLET) {
         cardBoxInfo = {
@@ -401,7 +402,7 @@ function DeliveryInbound(props) {
           pallet_qty,
           single_pallet_qty,
           warehouse_sku: pallet_no,
-          
+          plan_qty: box_qty,
         }
       }else if( type === INBOUND_TYPE.PCS ){
         cardBoxInfo = {
@@ -413,7 +414,7 @@ function DeliveryInbound(props) {
         po_no,
         shipping_no: atob(shipping_code),
         sku,
-        plan_qty: box_no || pallet_no,
+        
         ...cardBoxInfo
       }
     })
