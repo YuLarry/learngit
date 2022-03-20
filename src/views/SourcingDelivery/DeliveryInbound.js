@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-21 15:28:14
- * @LastEditTime: 2022-03-17 22:41:05
+ * @LastEditTime: 2022-03-20 15:12:42
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -393,12 +393,19 @@ function DeliveryInbound(props) {
           box_no,
           box_qty,
           single_box_qty,
+          warehouse_sku: box_no,
         }
       } else if (type === INBOUND_TYPE.PALLET) {
         cardBoxInfo = {
           pallet_no,
           pallet_qty,
           single_pallet_qty,
+          warehouse_sku: pallet_no,
+          
+        }
+      }else if( type === INBOUND_TYPE.PCS ){
+        cardBoxInfo = {
+          warehouse_sku: box_no || pallet_no,
         }
       }
       return {
@@ -526,7 +533,7 @@ function DeliveryInbound(props) {
       return item.sku
     });
 
-    console.log(selectedResources);
+    // console.log(selectedResources);
 
     return checkskus({
       client_account_code: clientSelected,

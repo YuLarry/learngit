@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-24 17:49:30
- * @LastEditTime: 2022-03-16 15:56:39
+ * @LastEditTime: 2022-03-18 15:01:42
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -64,7 +64,7 @@ export const PAYMENT_STATUS = new Map([
 
 export const DELIVERY_STATUS = new Map([
   [DELIVERY_PENDING, "未发货"],
-  [DELIVERY_TRANSPORT, "发货中"],
+  // [DELIVERY_TRANSPORT, "发货中"],
   [DELIVERY_PARTIAL_TRANSPORT, "部分发货"],
   [DELIVERY_ALREADY_TRANSPORT, "已发货"],
   [DELIVERY_PARTIAL_FINISH, "部分收货"],
