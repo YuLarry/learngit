@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-21 15:28:14
- * @LastEditTime: 2022-03-20 18:40:48
+ * @LastEditTime: 2022-03-20 19:10:24
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -83,7 +83,7 @@ function DeliveryInbound(props) {
   const [skuOptionsBackup, setSkuOptionsBackup] = useState([]);
   const [skuOptionsMap, setSkuOptionsMap] = useState(new Map());
 
-  
+
   const [goodsMap, setGoodsMap] = useState(new Map());
   const goodsList = useMemo(() => {
     const arr = [];
@@ -219,7 +219,7 @@ function DeliveryInbound(props) {
         // console.log(val);
         // console.log(selectSkuObj);
         const { itemMap, count, wareSkuInfo } = val
-        const { id,warehouse_sku, sku, po_no, shipping_num, goods, cn_name, en_name } = wareSkuInfo;
+        const { id, warehouse_sku, sku, po_no, shipping_num, goods, cn_name, en_name } = wareSkuInfo;
         const uid = uuidv4();
         nodes.push(
           <IndexTable.Row
@@ -341,9 +341,9 @@ function DeliveryInbound(props) {
 
       setSelectedSku(selected);
       // console.log([...skuOptionsMap.values()]);
-      
-      const obj = [...skuOptionsMap.values()].find(item=> (item.warehouse_sku === selected[0]) )
-      setSelectSkuObj( obj );
+
+      const obj = [...skuOptionsMap.values()].find(item => (item.warehouse_sku === selected[0]))
+      setSelectSkuObj(obj);
       setInputSku(selectedValue[0]);
     },
     [setSelectSkuObj, skuOptions, skuOptionsMap],
@@ -370,9 +370,8 @@ function DeliveryInbound(props) {
     } else {
       allArray = inboundGoodsList;
     }
-    // console.log(allArray);
     const keyTransed = allArray.map((item) => {
-      totalCount += item.shipping_num;
+      // totalCount += item.shipping_num;
       const {
         po_no,
         shipping_num: plan_qty,
@@ -396,25 +395,27 @@ function DeliveryInbound(props) {
           warehouse_sku: box_no,
           plan_qty: box_qty,
         }
+        totalCount += parseInt(box_qty);
       } else if (type === INBOUND_TYPE.PALLET) {
         cardBoxInfo = {
           pallet_no,
           pallet_qty,
           single_pallet_qty,
           warehouse_sku: pallet_no,
-          plan_qty: box_qty,
+          plan_qty: pallet_qty,
         }
-      }else if( type === INBOUND_TYPE.PCS ){
+        totalCount += parseInt(pallet_qty);
+      } else if (type === INBOUND_TYPE.PCS) {
         cardBoxInfo = {
           warehouse_sku: box_no || pallet_no,
         }
+        totalCount += parseInt(item.shipping_num);
       }
       return {
         po_item_id,
         po_no,
         shipping_no: atob(shipping_code),
         sku,
-        
         ...cardBoxInfo
       }
     })
@@ -542,7 +543,7 @@ function DeliveryInbound(props) {
     })
       .then(res => {
         const { data } = res;
-        
+
         selectedResources.forEach((id) => {
           const item = goodsMap.get(id);
           const _sku = item.sku;
@@ -641,10 +642,10 @@ function DeliveryInbound(props) {
         })
         return;
       }
-      const { id,warehouse_sku, sku, po_no, shipping_num, goods, cn_name, en_name } = selectSkuObj;
-      rltMap.set( Symbol(), { itemMap: _tempMap, count: boxCardCount, wareSkuInfo: { id,warehouse_sku, sku, po_no, shipping_num, goods, cn_name, en_name } })
+      const { id, warehouse_sku, sku, po_no, shipping_num, goods, cn_name, en_name } = selectSkuObj;
+      rltMap.set(Symbol(), { itemMap: _tempMap, count: boxCardCount, wareSkuInfo: { id, warehouse_sku, sku, po_no, shipping_num, goods, cn_name, en_name } })
 
-      
+
       setInboundGoodsMap(new Map([...inboundGoodsMap, ...rltMap]));
       setCheckHasMap(_tempMap)
       clearSelectedResources();
