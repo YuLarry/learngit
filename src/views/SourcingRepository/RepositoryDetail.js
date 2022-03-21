@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-24 15:50:14
- * @LastEditTime: 2022-03-21 12:01:26
+ * @LastEditTime: 2022-03-21 17:48:16
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -164,7 +164,8 @@ function RepositoryDetail(props) {
         } = item;
         if (item.inbound_qty > 0) {
           invalid = false;
-          obj[ warehouse_sku ] = { po_item_id, inbound_qty }
+          // obj[ warehouse_sku ] = { po_item_id, inbound_qty }
+          obj[ warehouse_sku ] = inbound_qty;
         }
       })
 
