@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-21 15:28:14
- * @LastEditTime: 2022-03-20 19:10:24
+ * @LastEditTime: 2022-03-21 15:59:40
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -187,7 +187,7 @@ function DeliveryInbound(props) {
   const inboundListMarkup = useMemo(() => {
     if (type === INBOUND_TYPE.PCS) {
       return inboundGoodsList.map(
-        ({ id, sku, po_no, shipping_num, box_qty, pallet_qty, goods, box_no, pallet_no }, index) => (
+        ({ id, sku, po_no, shipping_num, plan_qty, goods, warehouse_sku }, index) => (
           <IndexTable.Row
             id={id}
             key={id}
@@ -195,7 +195,7 @@ function DeliveryInbound(props) {
             position={index}
           >
             <IndexTable.Cell>
-              <TextStyle variation="strong">{box_no || pallet_no}</TextStyle>
+              <TextStyle variation="strong">{warehouse_sku}</TextStyle>
             </IndexTable.Cell>
             <IndexTable.Cell>
               <ProductInfoPopover popoverNode={productInfo(goods)}>
@@ -205,7 +205,7 @@ function DeliveryInbound(props) {
             </IndexTable.Cell>
             <IndexTable.Cell>
               <div style={{ width: "5em", textAlign: "right" }}>
-                {box_qty || pallet_qty || shipping_num}
+                {plan_qty || shipping_num}
               </div>
             </IndexTable.Cell>
 
@@ -274,7 +274,7 @@ function DeliveryInbound(props) {
   const skuList = useMemo(() => {
     return detailModalTableList.map(
       (item, index) => {
-        const { id, sku, goods, box_qty, pallet_qty, shipping_num } = item;
+        const { id, sku, goods, plan_qty, shipping_num } = item;
         return (
           <IndexTable.Row
             id={id}
@@ -298,7 +298,7 @@ function DeliveryInbound(props) {
               type === INBOUND_TYPE.BOX
               &&
               <IndexTable.Cell>
-                {box_qty && Number(shipping_num) / Number(box_qty)}
+                {plan_qty && Number(shipping_num) / Number(plan_qty)}
               </IndexTable.Cell>
             }
 
@@ -360,8 +360,8 @@ function DeliveryInbound(props) {
 
   const saveInbound = useCallback(() => {
     loadingContext.loading(true);
-    let totalCount = 0;
     let allArray = [];
+
     if (type !== INBOUND_TYPE.PCS) {
       inboundGoodsList.forEach((item) => {
         // console.log([...item.itemMap.values()]);
@@ -371,46 +371,26 @@ function DeliveryInbound(props) {
       allArray = inboundGoodsList;
     }
     const keyTransed = allArray.map((item) => {
-      // totalCount += item.shipping_num;
       const {
         po_no,
-        shipping_num: plan_qty,
+        // shipping_num: plan_x_qty,
         sku,
         po_item_id,
-
-        box_no,
-        box_qty,
-        single_box_qty,
-
-        pallet_no,
-        pallet_qty,
-        single_pallet_qty,
+        plan_qty,
+        single_qty,
+        warehouse_sku,
       } = item;
-      let cardBoxInfo;
-      if (type === INBOUND_TYPE.BOX) {
-        cardBoxInfo = {
-          box_no,
-          box_qty,
-          single_box_qty,
-          warehouse_sku: box_no,
-          plan_qty: box_qty,
-        }
-        totalCount += parseInt(box_qty);
-      } else if (type === INBOUND_TYPE.PALLET) {
-        cardBoxInfo = {
-          pallet_no,
-          pallet_qty,
-          single_pallet_qty,
-          warehouse_sku: pallet_no,
-          plan_qty: pallet_qty,
-        }
-        totalCount += parseInt(pallet_qty);
-      } else if (type === INBOUND_TYPE.PCS) {
-        cardBoxInfo = {
-          warehouse_sku: box_no || pallet_no,
-        }
-        totalCount += parseInt(item.shipping_num);
+      let cardBoxInfo = {
+        warehouse_sku,
+        plan_qty,
+        single_qty,
       }
+      if (type === INBOUND_TYPE.PCS) {
+        cardBoxInfo = {
+          warehouse_sku
+        }
+      }
+      
       return {
         po_item_id,
         po_no,
@@ -422,13 +402,11 @@ function DeliveryInbound(props) {
     const data = {
       client_account_code: clientSelected,
       warehouse_area: warehouseSelected,
-      // service_provider_code: "wingsing",
       item_type: type,
-      plan_total_qty: totalCount,
+      // plan_total_qty: totalCount,
       inbound_item: keyTransed,
-
     }
-    // console.log(selectedSku);
+    // return;
     inboundCommit(data)
       .then(res => {
         toastContext.toast({
@@ -547,8 +525,8 @@ function DeliveryInbound(props) {
         selectedResources.forEach((id) => {
           const item = goodsMap.get(id);
           const _sku = item.sku;
-          const box_no = data[_sku];
-          item["box_no"] = box_no;
+          const warehouse_sku = data[_sku];
+          item["warehouse_sku"] = warehouse_sku;
         });
 
       })
@@ -613,25 +591,14 @@ function DeliveryInbound(props) {
         }
         numArr.push(shipping_num);
         let boxCardInfo = {};
-        switch (type) {
-          case INBOUND_TYPE.BOX:
-            boxCardInfo = {
-              box_no: selectedSku[0],
-              box_qty: boxCardCount,
-              single_box_qty: (item.shipping_num) / parseInt(boxCardCount)
-            }
-            break;
-          case INBOUND_TYPE.PALLET:
-            boxCardInfo = {
-              pallet_no: selectedSku[0],
-              pallet_qty: boxCardCount,
-              single_pallet_qty: (item.shipping_num) / parseInt(boxCardCount)
-            }
-            break;
-
-          default:
-            break;
+        if( type !== INBOUND_TYPE.PCS ){
+          boxCardInfo = {
+            warehouse_sku: selectedSku[0],
+            plan_qty: boxCardCount,
+            single_qty: (item.shipping_num) / parseInt(boxCardCount)
+          }
         }
+        
         _tempMap.set(id, { ...item, ...boxCardInfo });
 
       })
