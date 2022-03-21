@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-03-21 12:00:34
+ * @LastEditTime: 2022-03-21 17:46:20
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -431,7 +431,8 @@ function RepositoryList(props) {
         } = item;
         if (item.inbound_qty > 0) {
           invalid = false;
-          obj[ warehouse_sku ] = { po_item_id, inbound_qty }
+          // obj[ warehouse_sku ] = { po_item_id, inbound_qty }
+          obj[ warehouse_sku ] = inbound_qty;
         }
       })
 
