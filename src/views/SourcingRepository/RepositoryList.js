@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-03-20 17:02:01
+ * @LastEditTime: 2022-03-21 12:00:34
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -139,7 +139,7 @@ function RepositoryList(props) {
       // const prodNod = item.map((goodsItem, idx) => (goodsItemNode(goodsItem, idx)))
 
       const warehouseSkus = Object.keys(item);
-      const prodNod = warehouseSkus.map( (wSku,idx)=>( goodsItemNode( {...item[wSku][0], warehouseSku: wSku}, idx ) ) )
+      const prodNod = warehouseSkus.map((wSku, idx) => (goodsItemNode({ ...item[wSku][0], warehouseSku: wSku }, idx)))
 
       return (
         <IndexTable.Row
@@ -166,7 +166,7 @@ function RepositoryList(props) {
           </IndexTable.Cell>
           <IndexTable.Cell>
             <ProductInfoPopover
-              popoverNode={ item && prodNod }
+              popoverNode={item && prodNod}
             >
               {`${warehouseSkus.length} 商品`}
             </ProductInfoPopover>
@@ -296,12 +296,12 @@ function RepositoryList(props) {
             const inboundItem = tableList.find(item => item.id === selectedResources[0])
             if (inboundItem) {
               // console.log(inboundItem);
-              Object.keys(inboundItem.item).forEach((k)=>{
+              Object.keys(inboundItem.item).forEach((k) => {
                 const it = inboundItem.item[k];
                 it[0]["actual_qty_backup"] = it[0].actual_qty;
                 it[0]["wSku"] = k;
               })
-            
+
               setModalSkuListObject(inboundItem.item);
             }
             setModalOpen(true);
@@ -313,25 +313,28 @@ function RepositoryList(props) {
     )
   }, [selectedResources, tableList])
 
-  const commitModal = useCallback(
+  const commitModalBackup = useCallback(
     () => {
       const { inbound_no } = tableList.find(item => item.id === selectedResources[0])
 
       const inbound_item = [];
+
+      console.log(tableList);
+
       for (const k in modalSkuListObject) {
         if (Object.hasOwnProperty.call(modalSkuListObject, k)) {
           const goods = modalSkuListObject[k];
-          
+
           for (let i = 0; i < goods.length; i++) {
-            const { 
-              po_item_id, 
+            const {
+              po_item_id,
             } = goods[i];
             const firstInboundQty = goods[0].inbound_qty;
             const firstActulBackup = goods[0].actual_qty_backup;
-            inbound_item.push({ 
+            inbound_item.push({
               po_item_id,
-              inbound_qty: firstInboundQty ? parseInt(firstInboundQty) - firstActulBackup : 0, 
-             })
+              inbound_qty: firstInboundQty ? parseInt(firstInboundQty) - firstActulBackup : 0,
+            })
           }
 
         }
@@ -353,7 +356,7 @@ function RepositoryList(props) {
       let invalid = true;
       const arr = [];
       inbound_item.forEach((item) => {
-        if (item.inbound_qty > 0) { 
+        if (item.inbound_qty > 0) {
           invalid = false;
           arr.push(item);
         }
@@ -372,6 +375,80 @@ function RepositoryList(props) {
         inbound_no,
         inbound_item: arr,
       }
+      loadingContext.loading(true);
+      confirmInbound(data)
+        .then(res => {
+          setModalOpen(false);
+          toastContext.toast({
+            active: true,
+            message: "手动入库成功",
+            duration: 1000,
+          })
+          setRefresh(refresh + 1);
+        })
+        .finally(() => {
+          loadingContext.loading(false);
+
+        })
+    },
+    [tableList, modalSkuListObject, selectedResources, refresh],
+  );
+
+
+  const commitModal = useCallback(
+    () => {
+      const { inbound_no } = tableList.find(item => item.id === selectedResources[0])
+
+      const inbound_item = [];
+      for (const k in modalSkuListObject) {
+        console.log(k);
+        if (Object.hasOwnProperty.call(modalSkuListObject, k)) {
+          const goods = modalSkuListObject[k];
+
+          for (let i = 0; i < goods.length; i++) {
+            const {
+              po_item_id,
+            } = goods[i];
+            const firstInboundQty = goods[0].inbound_qty;
+            const firstActulBackup = goods[0].actual_qty_backup;
+            
+            inbound_item.push({
+              po_item_id,
+              inbound_qty: firstInboundQty ? parseInt(firstInboundQty) - firstActulBackup : 0,
+              warehouse_sku: k,
+            })
+          }
+        }
+      }
+
+      let invalid = true;
+      const obj = {};
+      inbound_item.forEach((item) => {
+        const {
+          po_item_id,
+          inbound_qty,
+          warehouse_sku,
+        } = item;
+        if (item.inbound_qty > 0) {
+          invalid = false;
+          obj[ warehouse_sku ] = { po_item_id, inbound_qty }
+        }
+      })
+
+      if (invalid) {
+        toastContext.toast({
+          active: true,
+          message: "请检查入库数量",
+          duration: "1000"
+        })
+        return;
+      }
+
+      const data = {
+        inbound_no,
+        inbound_item: obj,
+      }
+      console.log(data);
       loadingContext.loading(true);
       confirmInbound(data)
         .then(res => {

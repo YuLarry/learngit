@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-24 15:50:14
- * @LastEditTime: 2022-03-20 18:16:17
+ * @LastEditTime: 2022-03-21 12:01:26
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -147,6 +147,7 @@ function RepositoryDetail(props) {
             inbound_item.push({
               po_item_id,
               inbound_qty: firstInboundQty ? parseInt(firstInboundQty) - firstActulBackup : 0,
+              warehouse_sku: k,
             })
           }
 
@@ -154,11 +155,16 @@ function RepositoryDetail(props) {
       }
 
       let invalid = true;
-      const arr = [];
+      const obj = {};
       inbound_item.forEach((item) => {
+        const {
+          po_item_id,
+          inbound_qty,
+          warehouse_sku,
+        } = item;
         if (item.inbound_qty > 0) {
           invalid = false;
-          arr.push(item);
+          obj[ warehouse_sku ] = { po_item_id, inbound_qty }
         }
       })
 
@@ -173,7 +179,7 @@ function RepositoryDetail(props) {
 
       const data = {
         inbound_no: detail.inbound_no,
-        inbound_item: arr,
+        inbound_item: obj,
       }
       loadingContext.loading(true);
       confirmInbound(data)
