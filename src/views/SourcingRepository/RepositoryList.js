@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-03-21 17:46:20
+ * @LastEditTime: 2022-03-22 14:17:10
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -105,6 +105,14 @@ function RepositoryList(props) {
     })
   },
     [handleSelectionChange, selectedResources])
+  const singlizeSelectionChange = useCallback(
+    (mode, checked, identifier) => {
+      if (mode === "page") return;
+      clearSelectedResources();
+      handleSelectionChange(mode, checked, identifier);
+    },
+    [clearSelectedResources, handleSelectionChange]
+  );
   const goodsItemNode = useCallback((item, idx) => {
     if (!item) return null;
     const { warehouseSku: sku, plan_qty, warehouse_goods: goods } = item;
@@ -411,7 +419,7 @@ function RepositoryList(props) {
             } = goods[i];
             const firstInboundQty = goods[0].inbound_qty;
             const firstActulBackup = goods[0].actual_qty_backup;
-            
+
             inbound_item.push({
               po_item_id,
               inbound_qty: firstInboundQty ? parseInt(firstInboundQty) - firstActulBackup : 0,
@@ -432,7 +440,7 @@ function RepositoryList(props) {
         if (item.inbound_qty > 0) {
           invalid = false;
           // obj[ warehouse_sku ] = { po_item_id, inbound_qty }
-          obj[ warehouse_sku ] = inbound_qty;
+          obj[warehouse_sku] = inbound_qty;
         }
       })
 
@@ -495,7 +503,7 @@ function RepositoryList(props) {
           selectedItemsCount={
             allResourcesSelected ? 'All' : selectedResources.length
           }
-          onSelectionChange={handleSelectionChange}
+          onSelectionChange={singlizeSelectionChange}
           promotedBulkActions={promotedBulkActions}
           headings={[
             { title: "入库单号" },

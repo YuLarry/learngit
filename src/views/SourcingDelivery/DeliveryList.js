@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-03-17 14:04:34
+ * @LastEditTime: 2022-03-22 14:15:56
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -122,7 +122,7 @@ function DeliveryList(props) {
     if (pageIndex > 1) {
       status.hasPrevious = true;
     }
-    if ( pageIndex < total_pages ) {
+    if (pageIndex < total_pages) {
       status.hasNext = true;
     }
     return status
@@ -144,8 +144,11 @@ function DeliveryList(props) {
   }
     , [deliveryList])
 
-  const { selectedResources, allResourcesSelected, handleSelectionChange } = useIndexResourceState(deliveryList);
-
+  const {
+    selectedResources,
+    allResourcesSelected,
+    handleSelectionChange
+  } = useIndexResourceState(deliveryList);
 
   const clearSelectedResources = useCallback(() => {
     selectedResources.map((selectedItem) => {
@@ -153,6 +156,15 @@ function DeliveryList(props) {
     })
   },
     [handleSelectionChange, selectedResources])
+
+  const singlizeSelectionChange = useCallback(
+    (mode, checked, identifier) => {
+      if (mode === "page") return;
+      clearSelectedResources();
+      handleSelectionChange(mode, checked, identifier);
+    },
+    [clearSelectedResources, handleSelectionChange]
+  );
 
   const refreshTrigger = useCallback(() => {
     clearSelectedResources();
@@ -292,7 +304,7 @@ function DeliveryList(props) {
 
 
   const mainTableList = useCallback(() => {
-    if( listLoading ) return;
+    if (listLoading) return;
     setListLoading(true);
     clearSelectedResources();
     const { dateOn, shipping_date: { start, end } } = filter;
@@ -320,8 +332,8 @@ function DeliveryList(props) {
     getShipingList(queryData)
       .then(res => {
         const { data: { list, meta: { pagination: { total = 0, total_pages, current_page } } } } = res;
-        setisFirstTime( false );
-        setTotal_pages( total_pages );
+        setisFirstTime(false);
+        setTotal_pages(total_pages);
         setDeliveryList(list);
       })
       .finally(() => {
@@ -329,21 +341,21 @@ function DeliveryList(props) {
       })
   }, [clearSelectedResources, filter, listLoading, pageIndex, queryListStatus, setSearchParams])
 
-  useEffect(()=>{
-    if( isFirstTime ){
+  useEffect(() => {
+    if (isFirstTime) {
       return;
-    }else if( pageIndex === 1 ){
-      setRefresh( refresh + 1 )
-    }else{
-      setPageIndex( 1 );
+    } else if (pageIndex === 1) {
+      setRefresh(refresh + 1)
+    } else {
+      setPageIndex(1);
     }
   }
-  ,[filter, queryListStatus])
+    , [filter, queryListStatus])
 
-  useEffect(()=>{
+  useEffect(() => {
     mainTableList()
   }
-  ,[pageIndex, refresh])
+    , [pageIndex, refresh])
 
   return (
     <Page
@@ -374,7 +386,7 @@ function DeliveryList(props) {
             allResourcesSelected ? 'All' : selectedResources.length
           }
           // onSelectionChange={handleSelectionChange}
-          onSelectionChange={(a, b, c) => { handleSelectionChange(a, b, c) }}
+          onSelectionChange={singlizeSelectionChange}
           promotedBulkActions={promotedBulkActions}
           bulkActions={bulkActions}
           headings={[

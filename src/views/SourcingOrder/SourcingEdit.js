@@ -1,12 +1,12 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-03-16 16:21:56
+ * @LastEditTime: 2022-03-22 14:28:32
  * @LastEditors: lijunwei
  * @Description: 
  */
 
-import { Button, Card, Form, FormLayout, Icon, IndexTable, Layout, Modal, Page, Select, TextField, TextStyle, useIndexResourceState } from "@shopify/polaris";
+import { Button, ButtonGroup, Card, Form, FormLayout, Icon, IndexTable, Layout, Modal, Page, Select, TextField, TextStyle, useIndexResourceState } from "@shopify/polaris";
 import {
   SearchMinor,
   DeleteMinor
@@ -123,7 +123,6 @@ function SourcingEdit(props) {
 
   const total_purchase_money = useMemo(() => {
     let money = 0;
-    console.log("mo");
     selectedGoods.map((item) => {
       const price = item.price ? Number(item.price) : Number(item.purchase_price);
       const count = Number(item.purchase_num) || 0;
@@ -250,18 +249,6 @@ function SourcingEdit(props) {
         }
         setDepartmentList(depaArr)
 
-        // set initial form value
-        // setSourcingOrderForm({
-        //   ...sourcingOrderForm,
-        //   brand_code: brandListArr[0].value,
-        //   provider_id: provListArr[0].value,
-        //   warehouse_code: wareListArr[0].value,
-        //   subject_code: subjListArr[0].value,
-        //   division: depaArr[0].value,
-        //   business_type: busiArr[0].value,
-        //   platform: platArr[0].value,
-
-        // })
         setSourcingOrderForm({
           ...sourcingOrderForm,
           brand_code: "",
@@ -494,7 +481,7 @@ function SourcingEdit(props) {
               <TextField
                 type="number"
                 value={price || purchase_price}
-                prefix={ accountInfo && CURRENCY_TYPE[accountInfo.currency] }
+                prefix={accountInfo && CURRENCY_TYPE[accountInfo.currency]}
                 onChange={(v) => { goodsFormChangeHandler(symb, v, "price") }}
               />
             </IndexTable.Cell>
@@ -519,13 +506,13 @@ function SourcingEdit(props) {
     query: ""
   });
 
-  useEffect(()=>{
-    if( !active )return;
+  useEffect(() => {
+    if (!active) return;
     setTreeQueryForm({
       type: "goods_sku",
       query: ""
     })
-  },[active])
+  }, [active])
 
   const treeQueryFormChangeHandler = useCallback(
     (val, id) => {
@@ -576,7 +563,7 @@ function SourcingEdit(props) {
 
   const queryGoodsRequest = useCallback(
     () => {
-      if( treeLoading ) return;
+      if (treeLoading) return;
       const { type, query } = treeQueryForm;
       setTreeLoading(true);
       getGoodsQuery({
@@ -634,7 +621,7 @@ function SourcingEdit(props) {
       ]}
       title={id ? `编辑采购单-${idURIDecode}` : "创建采购单"}
       subtitle={order && order.create_message || ""}
-      titleMetadata={ badgesMarkup }
+      titleMetadata={badgesMarkup}
     >
       <Layout>
         <Layout.Section>
@@ -742,11 +729,20 @@ function SourcingEdit(props) {
             >
               {rowMarkup}
             </IndexTable>
-            <div style={{ textAlign: "center" }}>
-              <Button
-                onClick={() => { setActive(true) }}
-                disabled={!(provider_id && accountInfo)}
-              >添加商品</Button>
+            <div style={{display: "flex", justifyContent: "center"}}>
+              <ButtonGroup
+                spacing="loose"
+              >
+                <Button
+                  onClick={() => { setActive(true) }}
+                  disabled={!(provider_id && accountInfo)}
+                >手动添加</Button>
+                <Button
+                  onClick={() => { setActive(true) }}
+                  disabled={!(provider_id && accountInfo)}
+                >批量导入</Button>
+              </ButtonGroup>
+
             </div>
             <br />
           </Card>

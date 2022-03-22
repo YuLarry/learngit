@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-03-17 14:04:15
+ * @LastEditTime: 2022-03-22 14:29:52
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -28,7 +28,7 @@ function SourcingList(props) {
   const [searchParams, setSearchParams] = useSearchParams();
   const queryParamObj = useMemo(() => {
     return (
-      searchParams.get("querys") && JSON.parse(decodeURIComponent( atob(  searchParams.get("querys") ))) || {}
+      searchParams.get("querys") && JSON.parse(decodeURIComponent(atob(searchParams.get("querys")))) || {}
     )
   }
     , [searchParams])
@@ -57,7 +57,7 @@ function SourcingList(props) {
   const pageSize = 20;
   const [pageIndex, setPageIndex] = useState(page || 1);
   const [total_pages, setTotal_pages] = useState(0);
-  
+
   const [listLoading, setListLoading] = useState(false);
 
 
@@ -108,14 +108,14 @@ function SourcingList(props) {
     },
     [tabs]
   );
-  
-  useEffect(()=>{
-    if( po_status ){
-      const index = tabs.findIndex(item=>(item.id === po_status))
+
+  useEffect(() => {
+    if (po_status) {
+      const index = tabs.findIndex(item => (item.id === po_status))
       handleTabChange(index);
     }
   }
-  ,[])
+    , [])
 
   // const [exporting, setExporting] = useState(false);
 
@@ -127,7 +127,7 @@ function SourcingList(props) {
     if (pageIndex > 1) {
       status.hasPrevious = true;
     }
-    if ( pageIndex < total_pages ) {
+    if (pageIndex < total_pages) {
       status.hasNext = true;
     }
     return status
@@ -161,6 +161,15 @@ function SourcingList(props) {
     })
   },
     [handleSelectionChange, selectedResources])
+
+  const singlizeSelectionChange = useCallback(
+    (mode, checked, identifier) => {
+      if (mode === "page") return;
+      clearSelectedResources();
+      handleSelectionChange(mode, checked, identifier);
+    },
+    [clearSelectedResources, handleSelectionChange]
+  );
 
   const refreshTrigger = useCallback(() => {
     clearSelectedResources();
@@ -197,7 +206,7 @@ function SourcingList(props) {
     if (sourcingListMap.get(selectedKey).po_status === PO_STATUS_CANCEL) return false;
     if (sourcingListMap.get(selectedKey).audit_status === AUDIT_REVOKED) return false;
     const item = sourcingListMap.get(selectedKey);
-    return ( item.audit_status === AUDIT_PASS && (item.payment_status === PAYMENT_STATUS_PENDING || item.payment_status === PAYMENT_STATUS_FAILURE ) )
+    return (item.audit_status === AUDIT_PASS && (item.payment_status === PAYMENT_STATUS_PENDING || item.payment_status === PAYMENT_STATUS_FAILURE))
   }, [selectedResources, sourcingListMap])
 
   // cancel enable control
@@ -419,14 +428,14 @@ function SourcingList(props) {
             plain
             monochrome
             url={`detail/${poBase64}`}
-            removeUnderline={ isCancel }
+            removeUnderline={isCancel}
           >
-            <TextStyle variation="strong">{ isCancel ? <span style={{textDecoration: "line-through"}}>{po_no}</span>  : po_no }</TextStyle>
+            <TextStyle variation="strong">{isCancel ? <span style={{ textDecoration: "line-through" }}>{po_no}</span> : po_no}</TextStyle>
           </Button>
         </IndexTable.Cell>
-        <IndexTable.Cell>{ isCancel ? <span style={{textDecoration: "line-through"}}>{ subject && subject.title || "" }</span>  : (subject && subject.title || "" ) }</IndexTable.Cell>
-        <IndexTable.Cell>{ isCancel ? <span style={{textDecoration: "line-through"}}>{ provider && provider.business_name || "" }</span>  : (provider && provider.business_name || "" ) }</IndexTable.Cell>
-        <IndexTable.Cell>{ isCancel ? <span style={{textDecoration: "line-through"}}>{ warehouse && warehouse.name || "" }</span>  : (warehouse && warehouse.name || "" ) }</IndexTable.Cell>
+        <IndexTable.Cell>{isCancel ? <span style={{ textDecoration: "line-through" }}>{subject && subject.title || ""}</span> : (subject && subject.title || "")}</IndexTable.Cell>
+        <IndexTable.Cell>{isCancel ? <span style={{ textDecoration: "line-through" }}>{provider && provider.business_name || ""}</span> : (provider && provider.business_name || "")}</IndexTable.Cell>
+        <IndexTable.Cell>{isCancel ? <span style={{ textDecoration: "line-through" }}>{warehouse && warehouse.name || ""}</span> : (warehouse && warehouse.name || "")}</IndexTable.Cell>
         <IndexTable.Cell>
           {<BadgeAuditStatus status={audit_status} />}
         </IndexTable.Cell>
@@ -440,7 +449,7 @@ function SourcingList(props) {
           <ProductInfoPopover
             popoverNode={item.length > 0 ? prodNod : null}
           >
-          { isCancel ? <span style={{textDecoration: "line-through"}}>{ `${item.length}商品` }</span>  : (`${item.length}商品` ) }
+            {isCancel ? <span style={{ textDecoration: "line-through" }}>{`${item.length}商品`}</span> : (`${item.length}商品`)}
           </ProductInfoPopover>
         </IndexTable.Cell>
       </IndexTable.Row >)
@@ -450,7 +459,7 @@ function SourcingList(props) {
 
 
   const mainTableList = useCallback(() => {
-    if( listLoading ) return;
+    if (listLoading) return;
     setListLoading(true);
     const {
       provider_id = "",
@@ -476,13 +485,13 @@ function SourcingList(props) {
       per_page: pageSize,
       page: pageIndex
     };
-    setSearchParams({ querys: btoa( encodeURIComponent( JSON.stringify(queryData) ) ) })
+    setSearchParams({ querys: btoa(encodeURIComponent(JSON.stringify(queryData))) })
     // console.log(searchParams.get("querys"));
     querySourcingList(queryData)
       .then(res => {
         const { data: { list, meta: { pagination: { total = 0, total_pages, current_page } } } } = res;
-        setisFirstTime( false );
-        setTotal_pages( total_pages );
+        setisFirstTime(false);
+        setTotal_pages(total_pages);
         setSourcingList(list);
       })
       .finally(() => {
@@ -490,21 +499,21 @@ function SourcingList(props) {
       })
   }, [filter, listLoading, pageIndex, queryListStatus, setSearchParams])
 
-  useEffect(()=>{
-    if( isFirstTime ){
+  useEffect(() => {
+    if (isFirstTime) {
       return;
-    }else if( pageIndex === 1 ){
-      setRefresh( refresh + 1 )
-    }else{
-      setPageIndex( 1 );
+    } else if (pageIndex === 1) {
+      setRefresh(refresh + 1)
+    } else {
+      setPageIndex(1);
     }
   }
-  ,[filter, queryListStatus])
+    , [filter, queryListStatus])
 
-  useEffect(()=>{
+  useEffect(() => {
     mainTableList()
   }
-  ,[pageIndex, refresh])
+    , [pageIndex, refresh])
 
 
   // export modal
@@ -630,7 +639,7 @@ function SourcingList(props) {
           selectedItemsCount={
             allResourcesSelected ? 'All' : selectedResources.length
           }
-          onSelectionChange={(a, b, c) => { handleSelectionChange(a, b, c) }}
+          onSelectionChange={singlizeSelectionChange}
           promotedBulkActions={promotedBulkActions}
           bulkActions={bulkActions}
           headings={[
@@ -647,28 +656,6 @@ function SourcingList(props) {
           {rowMarkup}
         </IndexTable>
 
-        {/* <div>
-              <BadgeAuditStatus status="audit_unaudited" />
-              <BadgeAuditStatus status="audit_auditing" />
-              <BadgeAuditStatus status="audit_pass" />
-              <BadgeAuditStatus status="audit_failure" />
-              <BadgeAuditStatus status="audit_revoked" />
-            </div>
-            <div>
-              <BadgePaymentStatus status="payment_pending" />
-              <BadgePaymentStatus status="payment_applying" />
-              <BadgePaymentStatus status="payment_pass" />
-              <BadgePaymentStatus status="payment_paid" />
-              <BadgePaymentStatus status="payment_failure" />
-            </div>
-            <div>
-              <BadgeDeliveryStatus status="delivery_pending" />
-              <BadgeDeliveryStatus status="delivery_transport" />
-              <BadgeDeliveryStatus status="delivery_partial_transport" />
-              <BadgeDeliveryStatus status="delivery_already_transport" />
-              <BadgeDeliveryStatus status="delivery_partial_finish" />
-              <BadgeDeliveryStatus status="delivery_finish" />
-            </div> */}
         <div className="f-list-footer">
           <Pagination
             // label="This is Results"
