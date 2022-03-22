@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-03-22 14:29:52
+ * @LastEditTime: 2022-03-22 14:37:34
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -187,7 +187,7 @@ function SourcingList(props) {
 
     return enableArr.indexOf(sourcingListMap.get(selectedKey).audit_status) !== -1
   },
-    [selectedResources])
+    [selectedResources, sourcingListMap])
 
   // audit enable control
   const auditEnable = useMemo(() => {

@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-19 17:05:46
- * @LastEditTime: 2022-03-17 15:16:08
+ * @LastEditTime: 2022-03-22 14:52:38
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -84,10 +84,15 @@ function PayRequest(props) {
         { ...invoice[idx], [name]: val },
         ...invoice.slice(idx + 1)
       ])
-
     },
     [invoice],
   );
+
+  const toFixInvoiceValue = useCallback(( val )=>{
+    console.log( val );
+    return val + ".00"
+  }
+  ,[])
 
   const items = useMemo(() => (order ? order.item : []), [order])
 
@@ -149,11 +154,12 @@ function PayRequest(props) {
             <div className="invoice-form-item">
               <div className="invoice-col">
                 <p>发票金额</p>
-                <div style={{ maxWidth: "8rem" }}>
+                <div style={{ maxWidth: "8rem"}}>
                   <TextField
                     type="number"
                     value={price}
                     onChange={(val) => { invoiceChangeHandler(index, 'price', val) }}
+                    onBlur={()=>{ invoiceChangeHandler( index, "price", toFixInvoiceValue(price) ) }}
                   />
                 </div>
 

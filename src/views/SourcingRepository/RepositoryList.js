@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-03-22 14:17:10
+ * @LastEditTime: 2022-03-22 14:38:52
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -18,7 +18,6 @@ import { InRepositoryManualModal } from "./piece/InRepositoryManualModal";
 import { RepositoryListFilter } from "./piece/RepositoryListFilter";
 import moment from "moment"
 import { ProductInfoPopover } from "../../components/ProductInfoPopover/ProductInfoPopover";
-import { BACKEND_GOODS_DETAIL } from "../../api/apiUrl";
 
 
 function RepositoryList(props) {
@@ -126,14 +125,6 @@ function RepositoryList(props) {
           size="small"
         />
         <div style={{ flex: 1, marginLeft: "1em" }}>
-          {/* <Link
-            onClick={
-              (e) => {
-                e.stopPropagation();
-                window.open(`${BACKEND_GOODS_DETAIL}/${id}`);
-              }
-            }
-          >{sku}</Link> */}
           <div>{sku}</div>
           <p>{plan_qty}</p>
         </div>
