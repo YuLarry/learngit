@@ -1,12 +1,12 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-03-22 14:28:32
+ * @LastEditTime: 2022-03-22 17:44:26
  * @LastEditors: lijunwei
  * @Description: 
  */
 
-import { Button, ButtonGroup, Card, Form, FormLayout, Icon, IndexTable, Layout, Modal, Page, Select, TextField, TextStyle, useIndexResourceState } from "@shopify/polaris";
+import { Button, ButtonGroup, Card, DropZone, Form, FormLayout, Icon, IndexTable, Layout, Modal, Page, Select, TextField, TextStyle, useIndexResourceState } from "@shopify/polaris";
 import {
   SearchMinor,
   DeleteMinor
@@ -30,6 +30,8 @@ import { UnsavedChangeContext } from "../../context/UnsavedChangeContext";
 import { CURRENCY_TYPE } from "../../utils/StaticData";
 import { fstlnTool } from "../../utils/Tools";
 import "./style/sourcingEdit.scss";
+import readXlsxFile from 'read-excel-file'
+import exampleXlsx from "../../asset/files/example.xlsx"
 
 
 
@@ -399,6 +401,9 @@ function SourcingEdit(props) {
   const [active, setActive] = useState(false);
   const handleChange = useCallback(() => setActive(!active), [active]);
 
+  const [activeImportModal, setActiveImportModal] = useState(true);
+  const handleChangeImportModal = useCallback(() => setActiveImportModal(!activeImportModal), [activeImportModal]);
+
 
   const resourceName = {
     singular: '商品',
@@ -406,7 +411,6 @@ function SourcingEdit(props) {
   };
 
   const { selectedResources, allResourcesSelected, handleSelectionChange } = useIndexResourceState(selectedGoods, { resourceIDResolver: (goods) => goods.sku });
-
 
   const promotedBulkActions = useMemo(() => (
     [
@@ -610,6 +614,52 @@ function SourcingEdit(props) {
     )
   }, [order])
 
+  /* ---- import excel start ---*/
+  const [files, setFiles] = useState([]);
+  const handleDropZoneDrop = useCallback(
+    (_dropFiles, acceptedFiles, _rejectedFiles) => {
+      setFiles((files) => [...files, ...acceptedFiles]);
+    }
+    , []
+  );
+
+  useEffect(() => {
+    console.log( files );
+    if (files.length === 0) return;
+    readXlsxFile(files[0]).then((rows) => {
+      // console.log(rows);
+
+      const rlt = fstlnTool.sortAndValidateExcel( 
+        rows, 
+        new Map([
+          [ "系统SKU", "sku" ],
+          [ "供应商编码", "code" ],
+          [ "价格", "price" ],
+          [ "币制", "currency" ],
+        ]),
+        {
+          validations: {
+            code: {
+              validator: ( val )=>{
+                return val === "";
+              },
+            }
+          }
+        }
+      )
+      console.log(rlt);
+
+    })
+  }, [files]);
+
+  const fileUpload = !files.length && (
+    <DropZone.FileUpload actionHint="Accepts excel file" />
+  );
+
+
+  /* ---- import excel end ---*/
+
+
   return (
     <Page
       breadcrumbs={[
@@ -703,8 +753,18 @@ function SourcingEdit(props) {
                   // placeholder=" "
                   />
                 </FormLayout.Group>
-
+                <FormLayout.Group>
+                  <TextField
+                    label="备注（选填）"
+                    value={sourcingOrderForm.remark || ""}
+                    onChange={(val) => { formChangeHandler(val, "remark") }}
+                    multiline={3}
+                    maxLength={100}
+                  >
+                  </TextField>
+                </FormLayout.Group>
               </FormLayout>
+
             </Form>
 
 
@@ -724,12 +784,12 @@ function SourcingEdit(props) {
                 { title: '采购单价' },
                 { title: '' },
               ]}
-              emptyState={<TextStyle variation="subdued">{`请选择采购单信息！`}</TextStyle>}
+              emptyState={<TextStyle variation="subdued">{`请先选择「供应商」与「采购单信息」然后才能添加商品`}</TextStyle>}
               selectable={false}
             >
               {rowMarkup}
             </IndexTable>
-            <div style={{display: "flex", justifyContent: "center"}}>
+            <div style={{ display: "flex", justifyContent: "center" }}>
               <ButtonGroup
                 spacing="loose"
               >
@@ -738,7 +798,7 @@ function SourcingEdit(props) {
                   disabled={!(provider_id && accountInfo)}
                 >手动添加</Button>
                 <Button
-                  onClick={() => { setActive(true) }}
+                  onClick={() => { setActiveImportModal(true) }}
                   disabled={!(provider_id && accountInfo)}
                 >批量导入</Button>
               </ButtonGroup>
@@ -757,7 +817,7 @@ function SourcingEdit(props) {
           </Card>
           <SourcingProviCard provInfo={{ ...provMap.get(provider_id), account_id: accountInfo ? (accountInfo.label || accountInfo.bank_card_number) : "" }} />
           <SourcingRepoCard wareInfo={wareMap.get(sourcingOrderForm.warehouse_code)} />
-          <SourcingRemarkCard remark={sourcingOrderForm.remark || ""} onChange={(val) => { formChangeHandler(val, "remark") }} />
+          {/* <SourcingRemarkCard remark={sourcingOrderForm.remark || ""} onChange={(val) => { formChangeHandler(val, "remark") }} /> */}
 
 
         </Layout.Section>
@@ -783,7 +843,6 @@ function SourcingEdit(props) {
       >
         <div>
           <div style={{ padding: "1em" }}>
-
             <TextField
               type="text"
               placeholder="搜索商品"
@@ -830,6 +889,36 @@ function SourcingEdit(props) {
         </div>
       </Modal>
 
+      <Modal
+        large={false}
+        open={activeImportModal}
+        // open={true}
+        onClose={handleChangeImportModal}
+        title="导入采购商品"
+        primaryAction={{
+          content: "确认添加",
+          onAction: handleConfirmAddGoods,
+          disabled: selectGoodsMapTemp.size === 0
+        }}
+        secondaryActions={[
+          {
+            content: '取消',
+            onAction: handleChangeImportModal,
+          },
+        ]}
+      >
+        <Modal.Section>
+          <DropZone
+            onDrop={handleDropZoneDrop}
+            variableHeight
+          >
+            {fileUpload}
+          </DropZone>
+        </Modal.Section>
+        <Modal.Section>
+          点击下载模板文件 <a href={ exampleXlsx } download="example.xlsx">example.xlsx</a>
+        </Modal.Section>
+      </Modal>
     </Page>
   );
 }

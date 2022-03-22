@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-19 17:05:46
- * @LastEditTime: 2022-03-22 14:52:38
+ * @LastEditTime: 2022-03-22 14:54:24
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -89,7 +89,7 @@ function PayRequest(props) {
   );
 
   const toFixInvoiceValue = useCallback(( val )=>{
-    console.log( val );
+    // console.log( val );
     return val + ".00"
   }
   ,[])
@@ -212,7 +212,7 @@ function PayRequest(props) {
       ),
     )
   },
-    [deleteHandler, invoice, invoiceChangeHandler]
+    [deleteHandler, invoice, invoiceChangeHandler, toFixInvoiceValue]
   );
 
 
