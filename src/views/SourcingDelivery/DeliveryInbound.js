@@ -104,11 +104,9 @@ function DeliveryInbound(props) {
 
   const clearSelectedResources = useCallback(
     () => {
-      selectedResources.map((id) => {
-        handleSelectionChange("single", false, id);
-      })
+      handleSelectionChange("page", false);
     },
-    [handleSelectionChange, selectedResources],
+    [handleSelectionChange],
   );
 
 

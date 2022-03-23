@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-03-22 14:38:52
+ * @LastEditTime: 2022-03-23 16:14:41
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -99,11 +99,10 @@ function RepositoryList(props) {
 
   const { selectedResources, allResourcesSelected, handleSelectionChange } = useIndexResourceState(tableList);
   const clearSelectedResources = useCallback(() => {
-    selectedResources.map((selectedItem) => {
-      handleSelectionChange("single", false, selectedItem)
-    })
+    handleSelectionChange("page", false);
+
   },
-    [handleSelectionChange, selectedResources])
+    [handleSelectionChange])
   const singlizeSelectionChange = useCallback(
     (mode, checked, identifier) => {
       if (mode === "page") return;

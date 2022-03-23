@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-03-22 17:44:26
+ * @LastEditTime: 2022-03-23 16:19:44
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -48,8 +48,17 @@ function SourcingEdit(props) {
   const [provMap, setProvMap] = useState(new Map());
   const [wareMap, setWareMap] = useState(new Map());
   const [accountList, setAccountList] = useState([]);
-  const [tree, setTree] = useState({});
-  const [selectGoodsMapTemp, setSelectGoodsMapTemp] = useState(new Map());
+  const [tree, setTree] = useState([]);
+  
+  const treeMap = useMemo(() => {
+    const _map = new Map();
+    tree.forEach(goodsItem=>{
+      _map.set( goodsItem.id, {...goodsItem} );
+    })
+    return _map;
+  }
+  ,[tree]);
+
 
   const loadingContext = useContext(LoadingContext);
   const unsavedChangeContext = useContext(UnsavedChangeContext);
@@ -401,9 +410,6 @@ function SourcingEdit(props) {
   const [active, setActive] = useState(false);
   const handleChange = useCallback(() => setActive(!active), [active]);
 
-  const [activeImportModal, setActiveImportModal] = useState(true);
-  const handleChangeImportModal = useCallback(() => setActiveImportModal(!activeImportModal), [activeImportModal]);
-
 
   const resourceName = {
     singular: '商品',
@@ -510,6 +516,42 @@ function SourcingEdit(props) {
     query: ""
   });
 
+
+  /* modal tree indextable start */
+  const { selectedResources: treeSelectedResources, allResourcesSelected: treeAllResourcesSelected, handleSelectionChange: treeHandleSelectionChange } = useIndexResourceState(tree, { resourceIDResolver: (goods) => goods.id });
+
+  const treeMarkup = useMemo(() => {
+    return tree.map((row, idx) => {
+      const { id, sku, currency, price, store } = row;
+      console.log(store);
+      const { name } = store || {};
+      return (
+        <IndexTable.Row
+          id={ id }
+          key={id}
+          selected={treeSelectedResources.includes(id)}
+          position={idx}
+        >
+          <IndexTable.Cell>
+            {sku}
+          </IndexTable.Cell>
+          <IndexTable.Cell>
+            {name}
+          </IndexTable.Cell>
+          <IndexTable.Cell>
+            {price}
+          </IndexTable.Cell>
+          <IndexTable.Cell>
+            {currency}
+          </IndexTable.Cell>
+        </IndexTable.Row>
+      )
+
+    })
+
+  }, [tree, treeSelectedResources]);
+
+  /* modal tree indextable start */
   useEffect(() => {
     if (!active) return;
     setTreeQueryForm({
@@ -525,44 +567,19 @@ function SourcingEdit(props) {
     [treeQueryForm],
   );
 
-  const treeHeadRender = (rowItem, itemDetail, children) => {
-    return (
-      <div>{rowItem}</div>
-    )
-  }
-
-  const treeRowRender = (child) => {
-    const { sku, cn_name, en_name, price } = child
-
-    return (
-      <div className="sourcing-edit-row">
-        <div>{sku}</div>
-        <div>{en_name}</div>
-        <div>{cn_name}</div>
-      </div>
-    )
-  }
-
-  const treeSelectChange = useCallback(
-    (selectsMap) => {
-      // console.log(selectsMap);
-      setSelectGoodsMapTemp(selectsMap);
-    },
-    [],
-  );
-
 
   const handleConfirmAddGoods = useCallback(
     () => {
       const arr = [];
-      selectGoodsMapTemp.forEach((valueItem) => {
-        arr.push([Symbol(valueItem.sku), { ...valueItem }])
+      treeSelectedResources.forEach((goodsId) => {
+        const goods = treeMap.get(goodsId);
+        arr.push([Symbol(goods.sku), { ...goods }])
       })
       setGoodsTableDataMap(new Map([...goodsTableDataMap, ...arr]))
-      setSelectGoodsMapTemp(new Map());
+      treeHandleSelectionChange("page", false);
       setActive(false);
     },
-    [goodsTableDataMap, selectGoodsMapTemp],
+    [goodsTableDataMap, treeHandleSelectionChange, treeMap, treeSelectedResources],
   );
 
   const queryGoodsRequest = useCallback(
@@ -575,19 +592,19 @@ function SourcingEdit(props) {
         brand_name: "",
         goods_name: "",
         provider_id,
-        currency: "USD",
+        currency: accountInfo.currency,
         [type]: query,
       })
         .then(res => {
           const { data } = res;
-          setTree(data);
+          setTree(data.list);
 
         })
         .finally(() => {
           setTreeLoading(false)
         })
     },
-    [provider_id, treeLoading, treeQueryForm],
+    [accountInfo, provider_id, treeLoading, treeQueryForm],
   );
 
   useEffect(() => {
@@ -615,6 +632,9 @@ function SourcingEdit(props) {
   }, [order])
 
   /* ---- import excel start ---*/
+  const [activeImportModal, setActiveImportModal] = useState(false);
+  const handleChangeImportModal = useCallback(() => setActiveImportModal(!activeImportModal), [activeImportModal]);
+
   const [files, setFiles] = useState([]);
   const handleDropZoneDrop = useCallback(
     (_dropFiles, acceptedFiles, _rejectedFiles) => {
@@ -624,23 +644,23 @@ function SourcingEdit(props) {
   );
 
   useEffect(() => {
-    console.log( files );
+    // console.log(files);
     if (files.length === 0) return;
     readXlsxFile(files[0]).then((rows) => {
       // console.log(rows);
 
-      const rlt = fstlnTool.sortAndValidateExcel( 
-        rows, 
+      const rlt = fstlnTool.sortAndValidateExcel(
+        rows,
         new Map([
-          [ "系统SKU", "sku" ],
-          [ "供应商编码", "code" ],
-          [ "价格", "price" ],
-          [ "币制", "currency" ],
+          ["系统SKU", "sku"],
+          ["供应商编码", "code"],
+          ["价格", "price"],
+          ["币制", "currency"],
         ]),
         {
           validations: {
             code: {
-              validator: ( val )=>{
+              validator: (val) => {
                 return val === "";
               },
             }
@@ -655,8 +675,6 @@ function SourcingEdit(props) {
   const fileUpload = !files.length && (
     <DropZone.FileUpload actionHint="Accepts excel file" />
   );
-
-
   /* ---- import excel end ---*/
 
 
@@ -823,7 +841,6 @@ function SourcingEdit(props) {
         </Layout.Section>
       </Layout>
 
-
       <Modal
         large={false}
         open={active}
@@ -832,7 +849,7 @@ function SourcingEdit(props) {
         primaryAction={{
           content: '添加',
           onAction: handleConfirmAddGoods,
-          disabled: selectGoodsMapTemp.size === 0
+          disabled: treeSelectedResources.length === 0
         }}
         secondaryActions={[
           {
@@ -871,20 +888,23 @@ function SourcingEdit(props) {
             />
           </div>
 
-          {
-            treeLoading
-              ?
-              <FstlnLoading />
-              :
-              <FstlnSelectTree
-                treeData={tree}
-                treeHeadRender={treeHeadRender}
-                treeRowRender={treeRowRender}
-                onTreeSelectChange={treeSelectChange}
-                identifier={(item => item.id)}
-              />
-          }
-
+          <IndexTable
+            resourceName={resourceName}
+            itemCount={tree.length}
+            selectedItemsCount={
+              treeAllResourcesSelected ? 'All' : treeSelectedResources.length
+            }
+            onSelectionChange={ treeHandleSelectionChange }
+            headings={[
+              { title: '商品SKU' },
+              { title: '商城名称' },
+              { title: '采购价' },
+              { title: '币制' },
+            ]}
+            loading={ treeLoading }
+          >
+            {treeMarkup}
+          </IndexTable>
 
         </div>
       </Modal>
@@ -898,7 +918,7 @@ function SourcingEdit(props) {
         primaryAction={{
           content: "确认添加",
           onAction: handleConfirmAddGoods,
-          disabled: selectGoodsMapTemp.size === 0
+          disabled: true,
         }}
         secondaryActions={[
           {
@@ -914,9 +934,10 @@ function SourcingEdit(props) {
           >
             {fileUpload}
           </DropZone>
+          <p style={{ marginTop: "1em" }}>点击下载模板文件 <a href={exampleXlsx} download="example.xlsx">example.xlsx</a></p>
         </Modal.Section>
         <Modal.Section>
-          点击下载模板文件 <a href={ exampleXlsx } download="example.xlsx">example.xlsx</a>
+
         </Modal.Section>
       </Modal>
     </Page>

@@ -151,11 +151,9 @@ function DeliveryList(props) {
   } = useIndexResourceState(deliveryList);
 
   const clearSelectedResources = useCallback(() => {
-    selectedResources.map((selectedItem) => {
-      handleSelectionChange("single", false, selectedItem)
-    })
+    handleSelectionChange("page", false);
   },
-    [handleSelectionChange, selectedResources])
+    [handleSelectionChange])
 
   const singlizeSelectionChange = useCallback(
     (mode, checked, identifier) => {
