@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-03-23 16:19:44
+ * @LastEditTime: 2022-03-23 16:26:28
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -523,7 +523,6 @@ function SourcingEdit(props) {
   const treeMarkup = useMemo(() => {
     return tree.map((row, idx) => {
       const { id, sku, currency, price, store } = row;
-      console.log(store);
       const { name } = store || {};
       return (
         <IndexTable.Row
