@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2021-12-14 11:11:31
- * @LastEditTime: 2022-03-22 17:37:26
+ * @LastEditTime: 2022-03-23 16:57:26
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -69,9 +69,9 @@ export const fstlnTool = {
 
         // validate value
         if (validations[_keyname]) {
-          const { validator } = validations[_keyname];
+          const validator = validations[_keyname];
           const rltInvalid = !validator(_row[index]);
-          rltInvalid && errorInfo.push({ rowIndex: rowIndex + 1, column: sortedTitles[i] })
+          rltInvalid && errorInfo.push({ rowIndex: rowIndex, column: sortedTitles[i] })
         }
       })
       return _o;

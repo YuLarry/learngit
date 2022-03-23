@@ -1,12 +1,12 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-03-23 16:26:28
+ * @LastEditTime: 2022-03-23 18:09:47
  * @LastEditors: lijunwei
  * @Description: 
  */
 
-import { Button, ButtonGroup, Card, DropZone, Form, FormLayout, Icon, IndexTable, Layout, Modal, Page, Select, TextField, TextStyle, useIndexResourceState } from "@shopify/polaris";
+import { Banner, Button, ButtonGroup, Card, DropZone, Form, FormLayout, Icon, IndexTable, Layout, List, Modal, Page, Select, TextField, TextStyle, useIndexResourceState } from "@shopify/polaris";
 import {
   SearchMinor,
   DeleteMinor
@@ -14,10 +14,7 @@ import {
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { editSourcingOrder, getBrandList, getBusinessTypeList, getDepartmentList, getGoodsQuery, getPlatformList, getProviderDetail, getProviderList, getSourcingOrderDetail, getSubjectList, getWarehouseList } from "../../api/requests";
-import { FstlnLoading } from "../../components/FstlnLoading";
-import { FstlnSelectTree } from "../../components/FstlnSelectTree/FstlnSelectTree";
 import { SourcingCardSection } from "../../components/SecondaryCard/SourcingCardSection";
-import { SourcingRemarkCard } from "../../components/SecondaryCard/SourcingNoteCard";
 import { SourcingProviCard } from "../../components/SecondaryCard/SourcingProviCard";
 import { SourcingRepoCard } from "../../components/SecondaryCard/SourcingRepoCard";
 import { BadgeAuditStatus } from "../../components/StatusBadges/BadgeAuditStatus";
@@ -49,15 +46,15 @@ function SourcingEdit(props) {
   const [wareMap, setWareMap] = useState(new Map());
   const [accountList, setAccountList] = useState([]);
   const [tree, setTree] = useState([]);
-  
+
   const treeMap = useMemo(() => {
     const _map = new Map();
-    tree.forEach(goodsItem=>{
-      _map.set( goodsItem.id, {...goodsItem} );
+    tree.forEach(goodsItem => {
+      _map.set(goodsItem.id, { ...goodsItem });
     })
     return _map;
   }
-  ,[tree]);
+    , [tree]);
 
 
   const loadingContext = useContext(LoadingContext);
@@ -108,6 +105,11 @@ function SourcingEdit(props) {
 
 
   const [provider_id, setProvider_id] = useState("");
+  const selectProviderInfo = useMemo(() => {
+    if (!provider_id) return null;
+    return provMap.get(provider_id);
+  }
+    , [provMap, provider_id])
 
 
   const formChangeHandler = useCallback(
@@ -117,7 +119,6 @@ function SourcingEdit(props) {
     },
     [sourcingOrderForm],
   );
-
 
 
   const [providerDetailMap, setproviderDetailMap] = useState(new Map());
@@ -526,7 +527,7 @@ function SourcingEdit(props) {
       const { name } = store || {};
       return (
         <IndexTable.Row
-          id={ id }
+          id={id}
           key={id}
           selected={treeSelectedResources.includes(id)}
           position={idx}
@@ -631,49 +632,87 @@ function SourcingEdit(props) {
   }, [order])
 
   /* ---- import excel start ---*/
-  const [activeImportModal, setActiveImportModal] = useState(false);
-  const handleChangeImportModal = useCallback(() => setActiveImportModal(!activeImportModal), [activeImportModal]);
+  const [activeImportModal, setActiveImportModal] = useState(true);
+  const handleChangeImportModal = useCallback(() => {
+    setActiveImportModal(!activeImportModal)
+  }, [activeImportModal]);
 
   const [files, setFiles] = useState([]);
   const handleDropZoneDrop = useCallback(
     (_dropFiles, acceptedFiles, _rejectedFiles) => {
-      setFiles((files) => [...files, ...acceptedFiles]);
+      // console.log("xxxx");
+      setFiles((files) => [...acceptedFiles]);
     }
     , []
   );
 
-  useEffect(() => {
-    // console.log(files);
-    if (files.length === 0) return;
-    readXlsxFile(files[0]).then((rows) => {
-      // console.log(rows);
+  const [excelResolveResult, setExcelResolveResult] = useState(null);
 
+  useEffect(() => {
+    if (files.length === 0) { setExcelResolveResult(null); return; };
+    readXlsxFile(files[0]).then((rows) => {
       const rlt = fstlnTool.sortAndValidateExcel(
         rows,
         new Map([
           ["系统SKU", "sku"],
-          ["供应商编码", "code"],
+          ["供应商编码", "provider_code"],
           ["价格", "price"],
           ["币制", "currency"],
         ]),
         {
           validations: {
-            code: {
-              validator: (val) => {
-                return val === "";
-              },
-            }
-          }
+            provider_code: (val) => {
+              return val === selectProviderInfo.provider_code;
+            },
+            currency: (val) => {
+              return val === accountInfo.currency;
+            },
+          },
         }
       )
-      console.log(rlt);
-
+      setExcelResolveResult(rlt)
     })
-  }, [files]);
+  }, [accountInfo, files, selectProviderInfo]);
 
-  const fileUpload = !files.length && (
-    <DropZone.FileUpload actionHint="Accepts excel file" />
-  );
+
+
+  const updateTemplate = useMemo(() => {
+    return (
+      <>
+        <DropZone
+          onDrop={handleDropZoneDrop}
+          variableHeight
+        >
+          <DropZone.FileUpload actionHint="Accepts excel file" />
+        </DropZone>
+        <p style={{ marginTop: "1em" }}>
+          <TextStyle variation="subdued"> 点击下载模板文件 <a href={exampleXlsx} download="example.xlsx">example.xlsx</a> </TextStyle>
+        </p>
+      </>
+    )
+  }, [handleDropZoneDrop]);
+
+  const errorBanner = useMemo(() => {
+    if (!excelResolveResult) return null;
+    return (
+      <Banner
+        title={`供应商编码应为「${selectProviderInfo.provider_code}」 币制应为「${accountInfo.currency}」请修改后重新导入`}
+        status="warning"
+      >
+        <List>
+          {
+            excelResolveResult.errors.map((err, idx) => (
+              <List.Item key={ idx }>
+                {`Excel数据 第${err.rowIndex + 1}条，${err.column}`}
+              </List.Item>
+            ))
+          }
+        </List>
+      </Banner>
+    )
+  }
+    , [accountInfo, excelResolveResult, selectProviderInfo]);
+
   /* ---- import excel end ---*/
 
 
@@ -834,8 +873,6 @@ function SourcingEdit(props) {
           </Card>
           <SourcingProviCard provInfo={{ ...provMap.get(provider_id), account_id: accountInfo ? (accountInfo.label || accountInfo.bank_card_number) : "" }} />
           <SourcingRepoCard wareInfo={wareMap.get(sourcingOrderForm.warehouse_code)} />
-          {/* <SourcingRemarkCard remark={sourcingOrderForm.remark || ""} onChange={(val) => { formChangeHandler(val, "remark") }} /> */}
-
 
         </Layout.Section>
       </Layout>
@@ -893,14 +930,14 @@ function SourcingEdit(props) {
             selectedItemsCount={
               treeAllResourcesSelected ? 'All' : treeSelectedResources.length
             }
-            onSelectionChange={ treeHandleSelectionChange }
+            onSelectionChange={treeHandleSelectionChange}
             headings={[
               { title: '商品SKU' },
               { title: '商城名称' },
               { title: '采购价' },
               { title: '币制' },
             ]}
-            loading={ treeLoading }
+            loading={treeLoading}
           >
             {treeMarkup}
           </IndexTable>
@@ -912,7 +949,7 @@ function SourcingEdit(props) {
         large={false}
         open={activeImportModal}
         // open={true}
-        onClose={handleChangeImportModal}
+        onClose={()=>{ setFiles([]);handleChangeImportModal() }}
         title="导入采购商品"
         primaryAction={{
           content: "确认添加",
@@ -922,22 +959,17 @@ function SourcingEdit(props) {
         secondaryActions={[
           {
             content: '取消',
-            onAction: handleChangeImportModal,
+            onAction: ()=>{ setFiles([]);handleChangeImportModal() },
           },
         ]}
       >
         <Modal.Section>
-          <DropZone
-            onDrop={handleDropZoneDrop}
-            variableHeight
-          >
-            {fileUpload}
-          </DropZone>
-          <p style={{ marginTop: "1em" }}>点击下载模板文件 <a href={exampleXlsx} download="example.xlsx">example.xlsx</a></p>
-        </Modal.Section>
-        <Modal.Section>
+          {errorBanner}
+          <br></br>
+          {updateTemplate}
 
         </Modal.Section>
+
       </Modal>
     </Page>
   );
