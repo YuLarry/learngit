@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-03-24 15:05:21
+ * @LastEditTime: 2022-03-24 15:40:25
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -525,6 +525,11 @@ function SourcingEdit(props) {
     return tree.map((row, idx) => {
       const { id, sku, currency, price, store } = row;
       const { name } = store || {};
+
+      const { query } = treeQueryForm;
+
+      if( !(sku.indexOf( query ) > -1 || store && store.name.toUpperCase().indexOf( query.toUpperCase() ) > -1) ) return null;
+
       return (
         <IndexTable.Row
           id={id}
@@ -549,20 +554,19 @@ function SourcingEdit(props) {
 
     })
 
-  }, [tree, treeSelectedResources]);
+  }, [tree, treeQueryForm, treeSelectedResources]);
 
   /* modal tree indextable start */
   useEffect(() => {
     if (!active) return;
     setTreeQueryForm({
-      type: "goods_sku",
       query: ""
     })
   }, [active])
 
   const treeQueryFormChangeHandler = useCallback(
     (val, id) => {
-      setTreeQueryForm({ ...treeQueryForm, [id]: val })
+      setTreeQueryForm({ ...treeQueryForm, [id]: val.trim() })
     },
     [treeQueryForm],
   );
@@ -585,15 +589,12 @@ function SourcingEdit(props) {
   const queryGoodsRequest = useCallback(
     () => {
       if (treeLoading) return;
-      const { type, query } = treeQueryForm;
       setTreeLoading(true);
       getGoodsQuery({
         goods_sku: "",
-        brand_name: "",
-        goods_name: "",
+        store_name: "",
         provider_id,
         currency: accountInfo.currency,
-        [type]: query,
       })
         .then(res => {
           const { data } = res;
@@ -604,19 +605,14 @@ function SourcingEdit(props) {
           setTreeLoading(false)
         })
     },
-    [accountInfo, provider_id, treeLoading, treeQueryForm],
+    [accountInfo, provider_id, treeLoading],
   );
 
   useEffect(() => {
     if (active === false) return;
-    const timer = setTimeout(() => {
-      queryGoodsRequest();
-    }, 1000);
-    return () => {
-      clearTimeout(timer);
-    }
+    queryGoodsRequest();
   },
-    [treeQueryForm]
+    [active]
   );
 
   const badgesMarkup = useMemo(() => {
@@ -965,7 +961,7 @@ function SourcingEdit(props) {
           <div style={{ padding: "1em" }}>
             <TextField
               type="text"
-              placeholder="搜索商品"
+              placeholder="请输入商品SKU/商城名称搜索"
               id="query"
               value={treeQueryForm.query}
               onChange={treeQueryFormChangeHandler}
@@ -973,20 +969,6 @@ function SourcingEdit(props) {
                 source={SearchMinor}
                 color="subdued"
               />
-              }
-              connectedLeft={
-                <div style={{ width: "12em" }}>
-                  <Select
-                    onChange={treeQueryFormChangeHandler}
-                    id="type"
-                    value={treeQueryForm.type}
-                    options={[
-                      { label: "商品SKU ", value: "goods_sku" },
-                      { label: "商品中英文名称", value: "goods_name" },
-                      { label: "品牌", value: "brand_name" },
-                    ]}
-                  />
-                </div>
               }
             />
           </div>
