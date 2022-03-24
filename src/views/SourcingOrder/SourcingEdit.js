@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-03-24 14:52:07
+ * @LastEditTime: 2022-03-24 15:00:37
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -640,7 +640,6 @@ function SourcingEdit(props) {
   const [files, setFiles] = useState([]);
   const handleDropZoneDrop = useCallback(
     (_dropFiles, acceptedFiles, _rejectedFiles) => {
-      // console.log("xxxx");
       setFiles((files) => [...acceptedFiles]);
     }
     , []
@@ -655,13 +654,13 @@ function SourcingEdit(props) {
         rows,
         new Map([
           ["系统SKU", "sku"],
-          ["供应商编码", "provider_code"],
+          ["供应商编码", "store_code"],
           ["价格", "price"],
           ["币制", "currency"],
         ]),
         {
           validations: {
-            provider_code: (val) => {
+            store_code: (val) => {
               return val === selectProviderInfo.provider_code;
             },
             currency: (val) => {
@@ -711,7 +710,7 @@ function SourcingEdit(props) {
     if (!excelResolveResult || excelResolveResult.success) return null;
     return (
       <Banner
-        title={`供应商编码应为「${selectProviderInfo.provider_code}」 币制应为「${accountInfo.currency}」请修改后重新导入`}
+        title={`供应商编码应为「${selectProviderInfo.store_code}」 币制应为「${accountInfo.currency}」请修改后重新导入`}
         status="warning"
       >
         <List>
@@ -734,7 +733,7 @@ function SourcingEdit(props) {
     const { data } = excelResolveResult;
     console.log(data);
     const rows = data.map((item, idx) => {
-      const { sku, price, provider_code, currency } = item;
+      const { sku, price, store_code, currency } = item;
 
       return (<IndexTable.Row
         id={idx}
@@ -743,7 +742,7 @@ function SourcingEdit(props) {
         selectable={false}
       >
         <IndexTable.Cell>{sku}</IndexTable.Cell>
-        <IndexTable.Cell>{provider_code}</IndexTable.Cell>
+        <IndexTable.Cell>{store_code}</IndexTable.Cell>
         <IndexTable.Cell>{price}</IndexTable.Cell>
         <IndexTable.Cell>{currency}</IndexTable.Cell>
       </IndexTable.Row>
