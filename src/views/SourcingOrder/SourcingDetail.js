@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-20 16:16:03
- * @LastEditTime: 2022-03-16 16:21:02
+ * @LastEditTime: 2022-03-24 15:53:02
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -56,24 +56,21 @@ function SourcingDetail(props) {
   }
 
   const headTitle = useMemo(() => {
-    const title1 = [
+    const title = [
       { title: '系统SKU' },
       { title: '采购数量' },
       { title: '采购价格' },
-    ]
-    const title2 = (order && order.po_status === PO_STATUS_FINISH) ? 
-    [
-      {title: "关联发货单"},
-      {title: "关联入库单"},
-    ] : [];
-    return title1.concat(title2);
+      { title: "关联发货单" },
+      { title: "关联入库单" },
+    ];
+    return title;
   }
-  ,[order])
+    , [])
 
   const rowMarkup = useMemo(() => {
     if (!order) return null;
     return order.item.map(
-      ({ sku, purchase_num, goods, purchase_price, inbounds, shippings  }, idx) => (
+      ({ sku, purchase_num, goods, purchase_price, inbounds, shippings }, idx) => (
         <IndexTable.Row
           id={idx}
           key={idx}
@@ -93,12 +90,27 @@ function SourcingDetail(props) {
           <IndexTable.Cell>
             {purchase_price}
           </IndexTable.Cell>
-          { order && (order.po_status === PO_STATUS_FINISH) && <IndexTable.Cell>
-            <PopoverNoLink linkListOptions={ shippings.map(item=>({content: item, url: `/delivery/detail/${btoa(encodeURIComponent(item))}`})) } />
-          </IndexTable.Cell> }
-          { order && (order.po_status === PO_STATUS_FINISH) && <IndexTable.Cell>
-            <PopoverNoLink linkListOptions={ inbounds.map(item=>({content: item, url: `/repository/detail/${item}`})) } />
-          </IndexTable.Cell> }
+
+          <IndexTable.Cell>
+            {
+              (order && order.po_status === PO_STATUS_FINISH)
+                ?
+                <PopoverNoLink linkListOptions={shippings.map(item => ({ content: item, url: `/delivery/detail/${btoa(encodeURIComponent(item))}` }))} />
+                :
+                "无"
+            }
+          </IndexTable.Cell>
+
+
+          <IndexTable.Cell>
+            {
+              (order && order.po_status === PO_STATUS_FINISH)
+                ?
+                <PopoverNoLink linkListOptions={inbounds.map(item => ({ content: item, url: `/repository/detail/${item}` }))} />
+                : "无"
+            }
+          </IndexTable.Cell>
+
         </IndexTable.Row>
       ),
     )
