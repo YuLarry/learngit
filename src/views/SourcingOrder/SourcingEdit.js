@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-03-24 15:00:37
+ * @LastEditTime: 2022-03-24 15:05:21
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -710,7 +710,7 @@ function SourcingEdit(props) {
     if (!excelResolveResult || excelResolveResult.success) return null;
     return (
       <Banner
-        title={`供应商编码应为「${selectProviderInfo.store_code}」 币制应为「${accountInfo.currency}」请修改后重新导入`}
+        title={`所选供应商编码应为「${selectProviderInfo.provider_code}」 收款账户币制应为「${accountInfo.currency}」请修改后重新导入`}
         status="warning"
       >
         <List>
@@ -1030,6 +1030,7 @@ function SourcingEdit(props) {
             ?
             <Modal.Section>
               {errorBanner}
+              <br/>
               {uploadTemplate}
             </Modal.Section>
             :
