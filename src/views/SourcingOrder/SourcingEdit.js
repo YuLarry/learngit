@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-03-23 18:09:47
+ * @LastEditTime: 2022-03-24 14:52:07
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -632,7 +632,7 @@ function SourcingEdit(props) {
   }, [order])
 
   /* ---- import excel start ---*/
-  const [activeImportModal, setActiveImportModal] = useState(true);
+  const [activeImportModal, setActiveImportModal] = useState(false);
   const handleChangeImportModal = useCallback(() => {
     setActiveImportModal(!activeImportModal)
   }, [activeImportModal]);
@@ -674,9 +674,24 @@ function SourcingEdit(props) {
     })
   }, [accountInfo, files, selectProviderInfo]);
 
+  const importModalSecondaryActions = useMemo(() => {
+    const actions = [
+      {
+        content: '取消',
+        onAction: () => { setFiles([]); handleChangeImportModal() },
+      }];
+    if (excelResolveResult && excelResolveResult.success) {
+      actions.push({
+        content: '重新选择Excel',
+        onAction: () => { setFiles([]) },
+      })
+    }
 
+    return actions
+  }, [excelResolveResult, handleChangeImportModal]);
 
-  const updateTemplate = useMemo(() => {
+  const uploadTemplate = useMemo(() => {
+    if (excelResolveResult && excelResolveResult.success) return null;
     return (
       <>
         <DropZone
@@ -690,10 +705,10 @@ function SourcingEdit(props) {
         </p>
       </>
     )
-  }, [handleDropZoneDrop]);
+  }, [excelResolveResult, handleDropZoneDrop]);
 
   const errorBanner = useMemo(() => {
-    if (!excelResolveResult) return null;
+    if (!excelResolveResult || excelResolveResult.success) return null;
     return (
       <Banner
         title={`供应商编码应为「${selectProviderInfo.provider_code}」 币制应为「${accountInfo.currency}」请修改后重新导入`}
@@ -702,7 +717,7 @@ function SourcingEdit(props) {
         <List>
           {
             excelResolveResult.errors.map((err, idx) => (
-              <List.Item key={ idx }>
+              <List.Item key={idx}>
                 {`Excel数据 第${err.rowIndex + 1}条，${err.column}`}
               </List.Item>
             ))
@@ -712,6 +727,59 @@ function SourcingEdit(props) {
     )
   }
     , [accountInfo, excelResolveResult, selectProviderInfo]);
+
+
+  const modalImportTable = useMemo(() => {
+    if (!excelResolveResult || !excelResolveResult.success) { return null };
+    const { data } = excelResolveResult;
+    console.log(data);
+    const rows = data.map((item, idx) => {
+      const { sku, price, provider_code, currency } = item;
+
+      return (<IndexTable.Row
+        id={idx}
+        key={idx}
+        position={idx}
+        selectable={false}
+      >
+        <IndexTable.Cell>{sku}</IndexTable.Cell>
+        <IndexTable.Cell>{provider_code}</IndexTable.Cell>
+        <IndexTable.Cell>{price}</IndexTable.Cell>
+        <IndexTable.Cell>{currency}</IndexTable.Cell>
+      </IndexTable.Row>
+      )
+    })
+    return (
+      <IndexTable
+        resourceName={resourceName}
+        itemCount={(excelResolveResult && excelResolveResult.success) ? excelResolveResult.data.length : 0}
+        headings={[
+          { title: '系统SKU' },
+          { title: '供应商编码' },
+          { title: '价格' },
+          { title: '币制' },
+        ]}
+        selectable={false}
+      >
+        {rows}
+      </IndexTable>
+    )
+  }
+    , [excelResolveResult, resourceName]);
+
+  const handleConfirmAddExcelGoods = useCallback(
+    () => {
+      if (!excelResolveResult || !excelResolveResult.success) return null;
+      const arr = [];
+      excelResolveResult.data.forEach((goods) => {
+        arr.push([Symbol(goods.sku), { ...goods }])
+      })
+      setGoodsTableDataMap(new Map([...goodsTableDataMap, ...arr]))
+      setFiles([]);
+      setActiveImportModal(false);
+    },
+    [excelResolveResult, goodsTableDataMap],
+  );
 
   /* ---- import excel end ---*/
 
@@ -949,27 +1017,26 @@ function SourcingEdit(props) {
         large={false}
         open={activeImportModal}
         // open={true}
-        onClose={()=>{ setFiles([]);handleChangeImportModal() }}
+        onClose={() => { setFiles([]); handleChangeImportModal() }}
         title="导入采购商品"
         primaryAction={{
           content: "确认添加",
-          onAction: handleConfirmAddGoods,
-          disabled: true,
+          onAction: handleConfirmAddExcelGoods,
+          disabled: !excelResolveResult || !excelResolveResult.success || !excelResolveResult.data.length > 0,
         }}
-        secondaryActions={[
-          {
-            content: '取消',
-            onAction: ()=>{ setFiles([]);handleChangeImportModal() },
-          },
-        ]}
+        secondaryActions={ importModalSecondaryActions }
       >
-        <Modal.Section>
-          {errorBanner}
-          <br></br>
-          {updateTemplate}
-
-        </Modal.Section>
-
+        {
+          (!excelResolveResult || !excelResolveResult.success)
+            ?
+            <Modal.Section>
+              {errorBanner}
+              {uploadTemplate}
+            </Modal.Section>
+            :
+            null
+        }
+        {modalImportTable}
       </Modal>
     </Page>
   );

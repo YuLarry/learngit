@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2021-12-14 11:11:31
- * @LastEditTime: 2022-03-23 16:57:26
+ * @LastEditTime: 2022-03-24 14:38:41
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -65,7 +65,7 @@ export const fstlnTool = {
 
       sortedIndex.forEach((index, i) => {
         const _keyname = sortedKeyname[i];
-        _o[_keyname] = _row[index];
+        _o[_keyname] = _row[index].toString();
 
         // validate value
         if (validations[_keyname]) {
