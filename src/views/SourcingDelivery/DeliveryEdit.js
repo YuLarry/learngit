@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-03-18 11:53:21
+ * @LastEditTime: 2022-03-25 12:07:18
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -29,7 +29,7 @@ import { ModalContext } from "../../context/ModalContext";
 import { ToastContext } from "../../context/ToastContext";
 import moment from "moment";
 import { FstlnLoading } from "../../components/FstlnLoading";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { fstlnTool } from "../../utils/Tools";
 import { BadgeAuditStatus } from "../../components/StatusBadges/BadgeAuditStatus";
 import { BadgePaymentStatus } from "../../components/StatusBadges/BadgePaymentStatus";
@@ -55,6 +55,7 @@ function DeliveryEdit(props) {
   // = modal =
 
   const [tree, setTree] = useState(null);
+
   const [selectGoodsMapTemp, setSelectGoodsMapTemp] = useState(new Map());
 
   const [goodsTableDataMap, setGoodsTableDataMap] = useState(new Map());
@@ -331,12 +332,9 @@ function DeliveryEdit(props) {
   const warehouse = useMemo(() => (selectedPoItemInfo && selectedPoItemInfo.warehouse), [selectedPoItemInfo])
 
 
-  const [searchKey, setSearchKey] = useState("provider_name");
-  const [searchVal, setSearchVal] = useState("");
-
 
   const [treeQueryForm, setTreeQueryForm] = useState({
-    searchKey: "provider_name",
+    // searchKey: "provider_name",
     searchVal: ""
   });
 
@@ -350,25 +348,47 @@ function DeliveryEdit(props) {
   useEffect(() => {
     if (!active) return;
     setTreeQueryForm({
-      searchKey: "provider_name",
+      // searchKey: "provider_name",
       searchVal: ""
     })
   }, [active])
+
+  // 过滤之后的tree data
+  const treeFilted = useMemo(() => {
+    if( !tree ) return {};
+    const rlt = {};
+    
+    for (const key in tree) {
+      if (Object.hasOwnProperty.call(tree, key)) {
+        const { provider: { business_name }, warehouse_name, } = tree[key];
+        if( 
+          key.toUpperCase().indexOf( treeQueryForm.searchVal.toUpperCase() ) !== -1 ||
+          business_name.toUpperCase().indexOf( treeQueryForm.searchVal.toUpperCase() ) !== -1 ||
+          warehouse_name.toUpperCase().indexOf( treeQueryForm.searchVal.toUpperCase() ) !== -1
+        ){
+          rlt[ key ] = tree[key];
+        }
+      }
+    }
+    return rlt;
+    
+  }
+  ,[tree, treeQueryForm]);
+
   const [querying, setQuerying] = useState(false);
 
   const queryModalList = useCallback(
     () => {
-      const { searchKey, searchVal } = treeQueryForm;
+      // const { searchKey, searchVal } = treeQueryForm;
       if (querying) return;
       setQuerying(true);
       getPoItemList({
         provider_name: "",
         warehouse_name: "",
         po_no: "",
-        [searchKey]: searchVal
+        // [searchKey]: searchVal
       })
         .then(res => {
-          // console.log(res);
           const { data } = res;
           for (let key in data) {
             const { provider, warehouse, item_list, purchase_qty } = data[key];
@@ -380,8 +400,8 @@ function DeliveryEdit(props) {
             });
 
             if (totalShiped >= purchase_qty){
-              data[key] = null;
-              // console.log(key);
+              delete(data[key])
+              // data[key] = null;
             }
 
             for (let i = item_list.length - 1; i >= 0; i --) {
@@ -392,6 +412,7 @@ function DeliveryEdit(props) {
                 item_list.splice( i, 1 )
               }
             }
+
             if (totalShiped >= purchase_qty){
               delete(data.key);
             }
@@ -409,13 +430,13 @@ function DeliveryEdit(props) {
 
   useEffect(() => {
     if (!active) return;
-    const timer = setTimeout(() => {
+    // const timer = setTimeout(() => {
       queryModalList();
-    }, 1000);
-    return () => {
-      clearTimeout(timer);
-    }
-  }, [treeQueryForm]);
+    // }, 1000);
+    // return () => {
+    //   clearTimeout(timer);
+    // }
+  }, [active]);
 
 
   const saveDeliveryOrder = useCallback(() => {
@@ -775,18 +796,18 @@ function DeliveryEdit(props) {
                 color="subdued"
               />
               }
-              connectedLeft={
-                <Select
-                  id="searchKey"
-                  value={treeQueryForm.searchKey}
-                  onChange={treeQueryFormChangeHandler}
-                  options={[
-                    { label: "供应商", value: "provider_name" },
-                    { label: "采购单 ", value: "po_no" },
-                    { label: "收货仓库", value: "warehouse_name" },
-                  ]}
-                />
-              }
+              // connectedLeft={
+              //   <Select
+              //     id="searchKey"
+              //     value={treeQueryForm.searchKey}
+              //     onChange={treeQueryFormChangeHandler}
+              //     options={[
+              //       { label: "供应商", value: "provider_name" },
+              //       { label: "采购单 ", value: "po_no" },
+              //       { label: "收货仓库", value: "warehouse_name" },
+              //     ]}
+              //   />
+              // }
             />
           </div>
 
@@ -796,7 +817,7 @@ function DeliveryEdit(props) {
               <FstlnLoading />
               :
               <FstlnSelectTree
-                treeData={tree || {}}
+                treeData={ treeFilted }
                 treeHeadRender={treeHeadRender}
                 treeRowRender={treeRowRender}
                 onTreeSelectChange={treeSelectChange}
