@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-03-25 12:07:18
+ * @LastEditTime: 2022-03-25 12:17:03
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -788,7 +788,7 @@ function DeliveryEdit(props) {
             <TextField
               id="searchVal"
               type="text"
-              placeholder="搜索商品"
+              placeholder="输入 采购单/供应商/仓库名称 进行搜索"
               value={treeQueryForm.searchVal}
               onChange={treeQueryFormChangeHandler}
               prefix={<Icon
@@ -796,18 +796,6 @@ function DeliveryEdit(props) {
                 color="subdued"
               />
               }
-              // connectedLeft={
-              //   <Select
-              //     id="searchKey"
-              //     value={treeQueryForm.searchKey}
-              //     onChange={treeQueryFormChangeHandler}
-              //     options={[
-              //       { label: "供应商", value: "provider_name" },
-              //       { label: "采购单 ", value: "po_no" },
-              //       { label: "收货仓库", value: "warehouse_name" },
-              //     ]}
-              //   />
-              // }
             />
           </div>
 

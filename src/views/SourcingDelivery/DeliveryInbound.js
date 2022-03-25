@@ -1,11 +1,14 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-21 15:28:14
- * @LastEditTime: 2022-03-21 15:59:40
+ * @LastEditTime: 2022-03-25 17:50:07
  * @LastEditors: lijunwei
  * @Description: 
  */
 
+import {
+  DeleteMinor,
+} from '@shopify/polaris-icons';
 import { Autocomplete, Button, Card, Form, FormLayout, IndexTable, Modal, Page, Select, TextField, TextStyle, Thumbnail, useIndexResourceState } from "@shopify/polaris";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -83,6 +86,14 @@ function DeliveryInbound(props) {
   const [skuOptionsBackup, setSkuOptionsBackup] = useState([]);
   const [skuOptionsMap, setSkuOptionsMap] = useState(new Map());
 
+  useEffect(() => {
+    if( !inboundModalOpen ) return;
+    setInputSku("");
+    setSelectSkuObj(null);
+    setSelectedSku([]);
+    setBoxCardCount("");
+
+  }, [inboundModalOpen]);
 
   const [goodsMap, setGoodsMap] = useState(new Map());
   const goodsList = useMemo(() => {
@@ -182,38 +193,82 @@ function DeliveryInbound(props) {
     [],
   );
 
+  const revertGoodsMoved = useCallback(
+    (item) => {
+      if( !item ) return;
+      const _tempMap = new Map( goodsMap );
+      const _tempMapMoved = new Map( inboundGoodsMap );
+      
+      _tempMap.set( item.id, {...item} );
+      _tempMapMoved.delete( item.id )
+
+      setGoodsMap( _tempMap );
+      setInboundGoodsMap( _tempMapMoved );
+    },
+    [goodsMap, inboundGoodsMap],
+  );
+
+  const revertGoodsMovedBoxPallet = useCallback(
+    ( symb, obj ) => {
+      
+      const _tempMap = new Map( goodsMap );
+      const _tempMapMoved = new Map( inboundGoodsMap );
+      
+      const { itemMap } = obj;
+      for (const [syl, item] of itemMap) {
+        _tempMap.set( syl, {...item} );
+        checkHasMap.delete( syl );
+      }
+
+      _tempMapMoved.delete( symb )
+
+      setGoodsMap( _tempMap );
+      setInboundGoodsMap( _tempMapMoved );
+    },
+    [checkHasMap, goodsMap, inboundGoodsMap],
+  );
+
   const inboundListMarkup = useMemo(() => {
     if (type === INBOUND_TYPE.PCS) {
       return inboundGoodsList.map(
-        ({ id, sku, po_no, shipping_num, plan_qty, goods, warehouse_sku }, index) => (
-          <IndexTable.Row
-            id={id}
-            key={id}
-            selected={selectedResources.includes(id)}
-            position={index}
-          >
-            <IndexTable.Cell>
-              <TextStyle variation="strong">{warehouse_sku}</TextStyle>
-            </IndexTable.Cell>
-            <IndexTable.Cell>
-              <ProductInfoPopover popoverNode={productInfo(goods)}>
-                <div>{goods && goods.cn_name}</div>
-                <div>{goods && goods.en_name}</div>
-              </ProductInfoPopover>
-            </IndexTable.Cell>
-            <IndexTable.Cell>
-              <div style={{ width: "5em", textAlign: "right" }}>
-                {plan_qty || shipping_num}
-              </div>
-            </IndexTable.Cell>
+        (item, index) => {
+          const { id, sku, po_no, shipping_num, plan_qty, goods, warehouse_sku } = item;
+          return (
+            <IndexTable.Row
+              id={id}
+              key={id}
+              selected={selectedResources.includes(id)}
+              position={index}
+            >
+              <IndexTable.Cell>
+                <TextStyle variation="strong">{warehouse_sku}</TextStyle>
+              </IndexTable.Cell>
+              <IndexTable.Cell>
+                <ProductInfoPopover popoverNode={productInfo(goods)}>
+                  <div>{goods && goods.cn_name}</div>
+                  <div>{goods && goods.en_name}</div>
+                </ProductInfoPopover>
+              </IndexTable.Cell>
+              <IndexTable.Cell>
+                <div style={{ width: "5em", textAlign: "right" }}>
+                  {plan_qty || shipping_num}
+                </div>
+              </IndexTable.Cell>
+              <IndexTable.Cell>
+                <Button
+                  icon={DeleteMinor}
+                  onClick={() => { revertGoodsMoved(item) }}
+                ></Button>
+              </IndexTable.Cell>
 
-          </IndexTable.Row>
-        ),
+            </IndexTable.Row>
+          )
+        }
       )
     }
     else {
       const nodes = [];
-      inboundGoodsMap.forEach((val, wareSku) => {
+      inboundGoodsMap.forEach((val, symb) => {
         // console.log(val);
         // console.log(selectSkuObj);
         const { itemMap, count, wareSkuInfo } = val
@@ -248,26 +303,30 @@ function DeliveryInbound(props) {
                 {count}
               </div>
             </IndexTable.Cell>
-
+            <IndexTable.Cell>
+                <Button
+                  icon={DeleteMinor}
+                  onClick={() => { revertGoodsMovedBoxPallet(symb, val) }}
+                ></Button>
+              </IndexTable.Cell>
           </IndexTable.Row>
         )
       })
       return nodes
     }
   },
-    [inboundGoodsList, inboundGoodsMap, modalSkuInfo, selectSkuObj, selectedResources, type]
+    [inboundGoodsList, inboundGoodsMap, modalSkuInfo, revertGoodsMoved, revertGoodsMovedBoxPallet, selectedResources, type]
   );
 
   useEffect(() => {
+    const _map = new Map(goodsMap);
     [...checkHasMap.keys()].map((key) => {
-      // console.log(key);
       if (goodsMap.has(key)) {
-        const _map = new Map(goodsMap);
         _map.delete(key);
-        setGoodsMap(_map);
       }
     })
-  }, [goodsMap, checkHasMap])
+    setGoodsMap(_map);
+  }, [checkHasMap])
 
   const skuList = useMemo(() => {
     return detailModalTableList.map(
@@ -313,16 +372,6 @@ function DeliveryInbound(props) {
   const updateSkuSelectText = useCallback(
     (value) => {
       setInputSku(value);
-      // const valTrim = value.trim();
-      // if (valTrim === '') {
-      //   setSkuOptions(skuOptionsBackup);
-      //   return;
-      // }
-
-      // const resultOptions = skuOptionsBackup.filter((option) =>
-      //   option.label.indexOf(valTrim) > -1,
-      // );
-      // setSkuOptions(resultOptions);
     },
     [],
   );
@@ -338,7 +387,6 @@ function DeliveryInbound(props) {
       });
 
       setSelectedSku(selected);
-      // console.log([...skuOptionsMap.values()]);
 
       const obj = [...skuOptionsMap.values()].find(item => (item.warehouse_sku === selected[0]))
       setSelectSkuObj(obj);
@@ -388,7 +436,7 @@ function DeliveryInbound(props) {
           warehouse_sku
         }
       }
-      
+
       return {
         po_item_id,
         po_no,
@@ -421,8 +469,6 @@ function DeliveryInbound(props) {
         loadingContext.loading(false);
 
       })
-
-
   }, [boxCardCount, clientSelected, inboundGoodsList, navigate, selectedSku, shipping_code, type, warehouseSelected])
 
 
@@ -589,14 +635,14 @@ function DeliveryInbound(props) {
         }
         numArr.push(shipping_num);
         let boxCardInfo = {};
-        if( type !== INBOUND_TYPE.PCS ){
+        if (type !== INBOUND_TYPE.PCS) {
           boxCardInfo = {
             warehouse_sku: selectedSku[0],
             plan_qty: boxCardCount,
             single_qty: (item.shipping_num) / parseInt(boxCardCount)
           }
         }
-        
+
         _tempMap.set(id, { ...item, ...boxCardInfo });
 
       })
@@ -617,7 +663,7 @@ function DeliveryInbound(props) {
       setInboundModalOpen(false)
 
     }
-    , [boxCardCount, clearSelectedResources, goodsMap, inboundGoodsMap, selectedResources, selectedSku, type])
+    , [boxCardCount, clearSelectedResources, goodsMap, inboundGoodsMap, selectSkuObj, selectedResources, selectedSku, type])
 
   const moveToInboundTable = useCallback(
     () => {
@@ -746,6 +792,7 @@ function DeliveryInbound(props) {
                 value={clientSelected}
                 onChange={(val) => { setClientSelected(val) }}
                 placeholder="请选择货主"
+                disabled={inboundGoodsMap.size > 0}
               />
               <Select
                 label="货区"
@@ -753,6 +800,7 @@ function DeliveryInbound(props) {
                 value={warehouseSelected}
                 onChange={(val) => { setWarehouseSelected(val) }}
                 placeholder="请选择货区"
+                disabled={inboundGoodsMap.size > 0}
               />
 
             </FormLayout.Group>
@@ -792,9 +840,10 @@ function DeliveryInbound(props) {
             { title: '货品SKU' },
             { title: '商品信息' },
             { title: '预报数量' },
+            { title: '' },
           ]}
           emptyState={<TextStyle variation="subdued">没有商品</TextStyle>}
-
+          lastColumnSticky={true}
         >
           {inboundListMarkup}
         </IndexTable>
