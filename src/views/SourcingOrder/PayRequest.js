@@ -1,12 +1,12 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-19 17:05:46
- * @LastEditTime: 2022-03-22 14:54:24
+ * @LastEditTime: 2022-03-28 17:26:19
  * @LastEditors: lijunwei
  * @Description: 
  */
 
-import { Badge, Button, Card, DropZone, IndexTable, Layout, Modal, Page, ResourceItem, ResourceList, TextField, TextStyle, Thumbnail, useIndexResourceState } from "@shopify/polaris";
+import { Badge, Banner, Button, Card, DropZone, IndexTable, Layout, List, Modal, Page, ResourceItem, ResourceList, TextField, TextStyle, Thumbnail, useIndexResourceState } from "@shopify/polaris";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { DatePopover } from "../../components/DatePopover/DatePopover";
 import { ProductInfoPopover } from "../../components/ProductInfoPopover/ProductInfoPopover";
@@ -125,7 +125,7 @@ function PayRequest(props) {
         return (
           <IndexTable.Row
             id={sku}
-            key={sku}
+            key={index}
           >
             <IndexTable.Cell>
               <ProductInfoPopover popoverNode={ productInfo(goods) }>
@@ -240,9 +240,44 @@ function PayRequest(props) {
   }, []);
 
 
+    /* ---- 表单校验 ---- */
+    const [needValidation, setNeedValidation] = useState(false);
+
+   
+    const itemsValidation = useMemo(()=>{
+      const _map = new Map();
+      invoice.forEach(( item ,key)=>{
+        const { price, file } = item;
+        if( Number( price ) <= 0 ){
+          _map.set( "price", "请检查发票金额" );
+        }
+        if( !file ){
+          _map.set( "file", "发票文件不能为空" );
+        }
+      })
+      return _map;
+    },
+    [invoice])
+  
+    const invalidations = useMemo(() => {
+     const errors = [];
+     if( itemsValidation.size > 0 ){
+       errors.push( [...itemsValidation.values()].join("，") )
+      }
+      return errors;
+    }
+      , [itemsValidation])
+  
+  
+    /* ---- 表单校验 ---- */
+
+
 
   const savePay = useCallback(
     () => {
+      setNeedValidation( true );
+      if( invalidations.length > 0 ) return;
+
       loadingContext.loading(true)
       const invoiceFormdata = new FormData();
       invoiceFormdata.append("po_id", order.id)
@@ -341,6 +376,25 @@ function PayRequest(props) {
       subtitle={order && order.create_message || ""}
     >
       <Layout>
+      {
+        (needValidation && invalidations.length > 0) &&
+          <Layout.Section>
+            <Banner
+              title="请检查表单数据，再进行提交:"
+              status="warning"
+            >
+              <List>
+                {
+                  invalidations.map((desc,idx) => (
+                    <List.Item key={ idx }>
+                      {desc}
+                    </List.Item>
+                  ))
+                }
+              </List>
+            </Banner>
+          </Layout.Section>
+        }
         <Layout.Section>
           <Card title="发票信息"
           >
