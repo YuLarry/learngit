@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-03-28 14:16:05
+ * @LastEditTime: 2022-03-28 14:22:18
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -663,9 +663,9 @@ function SourcingList(props) {
             { title: "采购单号" },
             { title: "采购方" },
             { title: "供应商" },
+            { title: '收货仓库' },
             { title: "下单金额" },
             { title: "下单时间" },
-            { title: '收货仓库' },
             { title: '审批状态' },
             { title: '付款状态' },
             { title: '发货状态' },
