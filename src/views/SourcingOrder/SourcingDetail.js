@@ -1,7 +1,11 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-20 16:16:03
+<<<<<<< Updated upstream
  * @LastEditTime: 2022-03-24 15:53:02
+=======
+ * @LastEditTime: 2022-03-28 11:39:37
+>>>>>>> Stashed changes
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -21,7 +25,7 @@ import { BadgeAuditStatus } from "../../components/StatusBadges/BadgeAuditStatus
 import { BadgeDeliveryStatus } from "../../components/StatusBadges/BadgeDeliveryStatus";
 import { BadgePaymentStatus } from "../../components/StatusBadges/BadgePaymentStatus";
 import { LoadingContext } from "../../context/LoadingContext";
-import { AUDIT_FAILURE, AUDIT_REVOKED, AUDIT_UNAUDITED, PO_STATUS_FINISH } from "../../utils/StaticData";
+import { AUDIT_FAILURE, AUDIT_PASS, AUDIT_REVOKED, AUDIT_UNAUDITED, PAYMENT_STATUS_FAILURE, PAYMENT_STATUS_PENDING, PO_STATUS_CANCEL, PO_STATUS_FINISH } from "../../utils/StaticData";
 import { PopoverNoLink } from "./piece/PopoverNoLink";
 
 function SourcingDetail(props) {
@@ -166,6 +170,14 @@ function SourcingDetail(props) {
   }
     , [order]);
 
+
+    const applyPayEnable = useMemo(() => {
+      if( !order ) return false;
+      if (order.po_status === PO_STATUS_CANCEL) return false;
+      if (order.audit_status === AUDIT_REVOKED) return false;
+      return ( order.audit_status === AUDIT_PASS && (order.payment_status === PAYMENT_STATUS_PENDING || order.payment_status === PAYMENT_STATUS_FAILURE ) )
+    }, [order])
+
   return (
     <Page
       breadcrumbs={[
@@ -175,6 +187,18 @@ function SourcingDetail(props) {
           }
         }
       ]}
+      primaryAction={
+        applyPayEnable 
+        ?
+        {
+          content: "申请付款",
+            onAction: () => {
+              navigate(`/sourcing/payRequest/${btoa(order.po_no)}`);
+            }
+        }
+        :
+        null
+      }
       secondaryActions={
         enableEdit
           ?

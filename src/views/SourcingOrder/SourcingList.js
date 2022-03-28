@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-03-22 14:37:34
+ * @LastEditTime: 2022-03-28 14:16:05
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -21,6 +21,7 @@ import { SourcingListFilter } from "./piece/SourcingListFilter";
 import moment from "moment";
 import { fstlnTool } from "../../utils/Tools";
 import { BACKEND_GOODS_DETAIL } from "../../api/apiUrl";
+import { FstlnHoverText } from "../../components/FstlnHoverText/FstlnHoverText";
 
 
 function SourcingList(props) {
@@ -410,7 +411,7 @@ function SourcingList(props) {
   }, [])
 
   const rowMarkup = useMemo(() => sourcingList.map(
-    ({ id, po_no, provider = {}, warehouse = {}, subject = {}, audit_status, payment_status, delivery_status, item, po_status }, index) => {
+    ({ id, po_no, provider = {}, warehouse = {}, subject = {}, audit_status, payment_status, delivery_status, item, po_status, created_at, purchase_total }, index) => {
       const isCancel = po_status === PO_STATUS_CANCEL;
       const prodNod = item.map((goodsItem, idx) => (goodsItemNode(goodsItem, idx)))
       const poBase64 = window.btoa(encodeURIComponent(po_no));
@@ -432,8 +433,26 @@ function SourcingList(props) {
           </Button>
         </IndexTable.Cell>
         <IndexTable.Cell>{isCancel ? <span style={{ textDecoration: "line-through" }}>{subject && subject.title || ""}</span> : (subject && subject.title || "")}</IndexTable.Cell>
-        <IndexTable.Cell>{isCancel ? <span style={{ textDecoration: "line-through" }}>{provider && provider.business_name || ""}</span> : (provider && provider.business_name || "")}</IndexTable.Cell>
+        <IndexTable.Cell>
+          {
+            isCancel ?
+              <span style={{ textDecoration: "line-through" }}>{provider && provider.business_name || ""}</span> :
+              (
+                provider &&
+                <FstlnHoverText 
+                  popoverNode={<div>{ provider.business_name }</div> }
+                >
+                  { provider.provider_code || "" }
+                </FstlnHoverText>
+
+              )
+          }
+        </IndexTable.Cell>
         <IndexTable.Cell>{isCancel ? <span style={{ textDecoration: "line-through" }}>{warehouse && warehouse.name || ""}</span> : (warehouse && warehouse.name || "")}</IndexTable.Cell>
+
+        <IndexTable.Cell>{isCancel ? <span style={{ textDecoration: "line-through" }}>{ purchase_total }</span> : (purchase_total || "")}</IndexTable.Cell>
+        <IndexTable.Cell>{isCancel ? <span style={{ textDecoration: "line-through" }}>{ created_at }</span> : created_at}</IndexTable.Cell>
+
         <IndexTable.Cell>
           {<BadgeAuditStatus status={audit_status} />}
         </IndexTable.Cell>
@@ -644,6 +663,8 @@ function SourcingList(props) {
             { title: "采购单号" },
             { title: "采购方" },
             { title: "供应商" },
+            { title: "下单金额" },
+            { title: "下单时间" },
             { title: '收货仓库' },
             { title: '审批状态' },
             { title: '付款状态' },

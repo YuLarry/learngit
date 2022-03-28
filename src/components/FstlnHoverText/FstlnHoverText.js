@@ -1,25 +1,22 @@
 /*
  * @Author: lijunwei
- * @Date: 2022-01-20 14:31:27
- * @LastEditTime: 2022-03-28 14:06:24
+ * @Date: 2022-03-28 12:13:37
+ * @LastEditTime: 2022-03-28 14:09:53
  * @LastEditors: lijunwei
  * @Description: 
  */
 
-import { Icon, Popover } from "@shopify/polaris";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import "./productInfoPopover.scss"
-import {
-  CaretDownMinor
-} from '@shopify/polaris-icons';
+import { Popover } from "@shopify/polaris";
+import { useCallback, useMemo, useState } from "react";
+import "./FstlnHoverText.scss";
 
-function ProductInfoPopover(props) {
-
+function FstlnHoverText(props) {
+  
   const { popoverNode, children } = props
 
   const [popoverActive, setPopoverActive] = useState(false);
   const togglePopoverActive = useCallback(
-    () => setPopoverActive((popoverActive) => !popoverActive),
+    ( val ) => setPopoverActive( val ),
     [],
   );
 
@@ -27,18 +24,17 @@ function ProductInfoPopover(props) {
   const activator = useMemo(() => (
     <div
       className="prod-activator"
-      onClick={(e) => {
-        togglePopoverActive();
-        // e.stopPropagation()
+      onMouseEnter={(e) => {
+        togglePopoverActive(true);
       }}
+      onMouseLeave={(e) => {
+        togglePopoverActive(false);
+      }}
+     
     >
       <div className="text">
         {children}
       </div>
-      <Icon
-        source={CaretDownMinor}
-        color="subdued"
-      />
     </div>
 
   ),
@@ -49,15 +45,14 @@ function ProductInfoPopover(props) {
     <Popover
       active={popoverNode ? popoverActive : false}
       activator={activator}
-      onClose={togglePopoverActive}
+      onClose={()=>{ togglePopoverActive(false) }}
       ariaHaspopup={false}
       sectioned
-      preferredAlignment="left"
+      preferredAlignment="center"
+
     >
       {popoverNode}
     </Popover>
   );
 }
-export { ProductInfoPopover }
-
-
+export { FstlnHoverText }
