@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-03-28 17:04:22
+ * @LastEditTime: 2022-03-28 17:09:21
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -184,11 +184,11 @@ function SourcingEdit(props) {
       _map.set( "empty", "采购商品不能为空" );
     }
     selectedGoods.forEach((item)=>{
-      const { purchase_num = 0, price = 0 } = item;
-      if( Number(purchase_num) <= 0  ){
+      const { purchase_num = 0, price = 0, purchase_price = 0 } = item;
+      if( Number(purchase_num) <= 0 ){
         _map.set( "num", "请检查商品采购数量")
       }
-      if( Number(price) <= 0 ){
+      if( Number(price) <= 0 && Number( purchase_price ) <= 0  ){
         _map.set( "price", "请检查采购单价" )
       }
     })
