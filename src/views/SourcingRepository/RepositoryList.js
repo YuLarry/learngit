@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-03-23 16:14:41
+ * @LastEditTime: 2022-03-28 18:51:52
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -399,7 +399,7 @@ function RepositoryList(props) {
 
       const inbound_item = [];
       for (const k in modalSkuListObject) {
-        console.log(k);
+        // console.log(k);
         if (Object.hasOwnProperty.call(modalSkuListObject, k)) {
           const goods = modalSkuListObject[k];
 
