@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-21 15:28:14
- * @LastEditTime: 2022-03-25 17:50:07
+ * @LastEditTime: 2022-03-28 18:50:13
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -9,7 +9,7 @@
 import {
   DeleteMinor,
 } from '@shopify/polaris-icons';
-import { Autocomplete, Button, Card, Form, FormLayout, IndexTable, Modal, Page, Select, TextField, TextStyle, Thumbnail, useIndexResourceState } from "@shopify/polaris";
+import { Autocomplete, Banner, Button, Card, Form, FormLayout, IndexTable, Layout, List, Modal, Page, Select, TextField, TextStyle, Thumbnail, useIndexResourceState } from "@shopify/polaris";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { checkskus, getClientAccount, getShippingDetail, getSkuOptionsList, getWaitShippingList, getWarehouseArea, inboundCommit } from "../../api/requests";
@@ -87,7 +87,7 @@ function DeliveryInbound(props) {
   const [skuOptionsMap, setSkuOptionsMap] = useState(new Map());
 
   useEffect(() => {
-    if( !inboundModalOpen ) return;
+    if (!inboundModalOpen) return;
     setInputSku("");
     setSelectSkuObj(null);
     setSelectedSku([]);
@@ -195,35 +195,35 @@ function DeliveryInbound(props) {
 
   const revertGoodsMoved = useCallback(
     (item) => {
-      if( !item ) return;
-      const _tempMap = new Map( goodsMap );
-      const _tempMapMoved = new Map( inboundGoodsMap );
-      
-      _tempMap.set( item.id, {...item} );
-      _tempMapMoved.delete( item.id )
+      if (!item) return;
+      const _tempMap = new Map(goodsMap);
+      const _tempMapMoved = new Map(inboundGoodsMap);
 
-      setGoodsMap( _tempMap );
-      setInboundGoodsMap( _tempMapMoved );
+      _tempMap.set(item.id, { ...item });
+      _tempMapMoved.delete(item.id)
+
+      setGoodsMap(_tempMap);
+      setInboundGoodsMap(_tempMapMoved);
     },
     [goodsMap, inboundGoodsMap],
   );
 
   const revertGoodsMovedBoxPallet = useCallback(
-    ( symb, obj ) => {
-      
-      const _tempMap = new Map( goodsMap );
-      const _tempMapMoved = new Map( inboundGoodsMap );
-      
+    (symb, obj) => {
+
+      const _tempMap = new Map(goodsMap);
+      const _tempMapMoved = new Map(inboundGoodsMap);
+
       const { itemMap } = obj;
       for (const [syl, item] of itemMap) {
-        _tempMap.set( syl, {...item} );
-        checkHasMap.delete( syl );
+        _tempMap.set(syl, { ...item });
+        checkHasMap.delete(syl);
       }
 
-      _tempMapMoved.delete( symb )
+      _tempMapMoved.delete(symb)
 
-      setGoodsMap( _tempMap );
-      setInboundGoodsMap( _tempMapMoved );
+      setGoodsMap(_tempMap);
+      setInboundGoodsMap(_tempMapMoved);
     },
     [checkHasMap, goodsMap, inboundGoodsMap],
   );
@@ -304,11 +304,11 @@ function DeliveryInbound(props) {
               </div>
             </IndexTable.Cell>
             <IndexTable.Cell>
-                <Button
-                  icon={DeleteMinor}
-                  onClick={() => { revertGoodsMovedBoxPallet(symb, val) }}
-                ></Button>
-              </IndexTable.Cell>
+              <Button
+                icon={DeleteMinor}
+                onClick={() => { revertGoodsMovedBoxPallet(symb, val) }}
+              ></Button>
+            </IndexTable.Cell>
           </IndexTable.Row>
         )
       })
@@ -404,7 +404,45 @@ function DeliveryInbound(props) {
   );
   // autocomplete ===
 
+  /* ---- 表单校验 ---- */
+  const [needValidation, setNeedValidation] = useState(false);
+
+  const errclientSelected = useMemo(() => (!clientSelected ? "该项为必选项" : null), [clientSelected]);
+  const errwarehouseSelected = useMemo(() => (!warehouseSelected ? "该项为必选项" : null), [warehouseSelected]);
+
+  // 采购单验证信息
+  const formInvalid = useMemo(() => {
+    const _map = new Map();
+
+    errclientSelected ? _map.set("errclientSelected", false) : _map.delete("errclientSelected");
+    errwarehouseSelected ? _map.set("errwarehouseSelected", false) : _map.delete("errwarehouseSelected");
+
+    return _map;
+  }
+    , [errclientSelected, errwarehouseSelected])
+
+
+  const invalidations = useMemo(() => {
+    const errors = [];
+    if (formInvalid.size > 0) {
+      errors.push("仓库信息 验证不通过")
+    }
+    if( inboundGoodsList.length === 0 ){
+      errors.push( "入库信息不能为空" )
+    }
+    return errors;
+  }
+    , [formInvalid, inboundGoodsList])
+
+
+  /* ---- 表单校验 ---- */
+
+
   const saveInbound = useCallback(() => {
+
+    setNeedValidation(true);
+    if (invalidations.length > 0) return;
+
     loadingContext.loading(true);
     let allArray = [];
 
@@ -782,73 +820,103 @@ function DeliveryInbound(props) {
       title={`${atob(shipping_code)} - 按${typeText}预报仓库`}
       narrowWidth
     >
-      <Card title="仓库信息" sectioned>
-        <Form>
-          <FormLayout>
-            <FormLayout.Group>
-              <Select
-                label="货主"
-                options={clientsOptions}
-                value={clientSelected}
-                onChange={(val) => { setClientSelected(val) }}
-                placeholder="请选择货主"
-                disabled={inboundGoodsMap.size > 0}
-              />
-              <Select
-                label="货区"
-                options={warehousesOptions}
-                value={warehouseSelected}
-                onChange={(val) => { setWarehouseSelected(val) }}
-                placeholder="请选择货区"
-                disabled={inboundGoodsMap.size > 0}
-              />
+      <Layout>
 
-            </FormLayout.Group>
 
-          </FormLayout>
-        </Form>
-      </Card>
+        {
+          needValidation && invalidations.length > 0 &&
+          <Layout.Section>
+            <Banner
+              title="请检查表单数据，再进行提交:"
+              status="warning"
+            >
+              <List>
+                {
+                  invalidations.map((desc, idx) => (
+                    <List.Item key={idx}>
+                      {desc}
+                    </List.Item>
+                  ))
+                }
+              </List>
+            </Banner>
+          </Layout.Section>
+        }
+        <Layout.Section>
 
-      <Card title="发货明细">
-        <IndexTable
-          resourceName={resourceName}
-          itemCount={goodsList.length}
-          selectedItemsCount={
-            allResourcesSelected ? 'All' : selectedResources.length
-          }
-          onSelectionChange={handleSelectionChange}
-          promotedBulkActions={promotedBulkActions}
-          headings={[
-            { title: '系统SKU' },
-            { title: '商品信息' },
-            { title: '本次发货数量' },
-          ]}
-          emptyState={<TextStyle variation="subdued">没有商品</TextStyle>}
-        >
-          {rowMarkup}
-        </IndexTable>
+          <Card title="仓库信息" sectioned>
+            <Form>
+              <FormLayout>
+                <FormLayout.Group>
+                  <Select
+                    label="货主"
+                    options={clientsOptions}
+                    value={clientSelected}
+                    onChange={(val) => { setClientSelected(val) }}
+                    placeholder="请选择货主"
+                    disabled={inboundGoodsMap.size > 0}
+                    error={needValidation && errclientSelected}
+                  />
+                  <Select
+                    label="货区"
+                    options={warehousesOptions}
+                    value={warehouseSelected}
+                    onChange={(val) => { setWarehouseSelected(val) }}
+                    placeholder="请选择货区"
+                    disabled={inboundGoodsMap.size > 0}
+                    error={needValidation && errwarehouseSelected}
 
-        <br />
-      </Card>
+                  />
 
-      <Card title="入库信息">
-        <IndexTable
-          resourceName={resourceName}
-          itemCount={inboundGoodsList.length}
-          selectable={false}
-          headings={[
-            { title: '货品SKU' },
-            { title: '商品信息' },
-            { title: '预报数量' },
-            { title: '' },
-          ]}
-          emptyState={<TextStyle variation="subdued">没有商品</TextStyle>}
-          lastColumnSticky={true}
-        >
-          {inboundListMarkup}
-        </IndexTable>
-        <br />
-      </Card>
+                </FormLayout.Group>
+
+              </FormLayout>
+            </Form>
+          </Card>
+
+          <Card title="发货明细">
+            <IndexTable
+              resourceName={resourceName}
+              itemCount={goodsList.length}
+              selectedItemsCount={
+                allResourcesSelected ? 'All' : selectedResources.length
+              }
+              onSelectionChange={handleSelectionChange}
+              promotedBulkActions={promotedBulkActions}
+              headings={[
+                { title: '系统SKU' },
+                { title: '商品信息' },
+                { title: '本次发货数量' },
+              ]}
+              emptyState={<TextStyle variation="subdued">没有商品</TextStyle>}
+            >
+              {rowMarkup}
+            </IndexTable>
+
+            <br />
+          </Card>
+
+          <Card title="入库信息">
+            <IndexTable
+              resourceName={resourceName}
+              itemCount={inboundGoodsList.length}
+              selectable={false}
+              headings={[
+                { title: '货品SKU' },
+                { title: '商品信息' },
+                { title: '预报数量' },
+                { title: '' },
+              ]}
+              emptyState={<TextStyle variation="subdued">没有商品</TextStyle>}
+              lastColumnSticky={true}
+            >
+              {inboundListMarkup}
+            </IndexTable>
+            <br />
+          </Card>
+        </Layout.Section>
+
+      </Layout>
 
       <Modal
         // small
