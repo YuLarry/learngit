@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-03-28 14:22:18
+ * @LastEditTime: 2022-03-28 15:02:06
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -101,13 +101,36 @@ function SourcingList(props) {
 
   const [queryListStatus, setQueryListStatus] = useState(po_status || PO_STATUS_ALL);
 
+  const [sourcingListMap, setSourcingListMap] = useState(new Map());
+  const [sourcingList, setSourcingList] = useState([]);
+
+
+  useEffect(() => {
+    const tempMap = new Map();
+    sourcingList.map((item) => {
+      const { id } = item;
+      tempMap.set(id, item);
+    })
+    setSourcingListMap(tempMap);
+  }
+    , [sourcingList])
+
+  const { selectedResources, allResourcesSelected, handleSelectionChange } = useIndexResourceState(sourcingList);
+
+
+  const clearSelectedResources = useCallback(() => {
+    handleSelectionChange("page", false);
+  },
+    [handleSelectionChange])
+
   const [selectedTab, setSelectedTab] = useState(0);
   const handleTabChange = useCallback(
     (selectedTabIndex) => {
+      clearSelectedResources();
       setSelectedTab(selectedTabIndex);
       setQueryListStatus(tabs[selectedTabIndex].id)
     },
-    [tabs]
+    [clearSelectedResources, tabs]
   );
 
   useEffect(() => {
@@ -138,28 +161,6 @@ function SourcingList(props) {
     singular: '采购单',
     plural: '采购单',
   }
-  const [sourcingListMap, setSourcingListMap] = useState(new Map());
-  const [sourcingList, setSourcingList] = useState([]);
-
-
-  useEffect(() => {
-    const tempMap = new Map();
-    sourcingList.map((item) => {
-      const { id } = item;
-      tempMap.set(id, item);
-    })
-    setSourcingListMap(tempMap);
-  }
-    , [sourcingList])
-
-
-
-  const { selectedResources, allResourcesSelected, handleSelectionChange } = useIndexResourceState(sourcingList);
-
-  const clearSelectedResources = useCallback(() => {
-    handleSelectionChange("page", false);
-  },
-    [handleSelectionChange])
 
   const singlizeSelectionChange = useCallback(
     (mode, checked, identifier) => {

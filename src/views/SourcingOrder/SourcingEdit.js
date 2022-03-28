@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-03-24 15:40:25
+ * @LastEditTime: 2022-03-28 17:04:22
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -85,6 +85,7 @@ function SourcingEdit(props) {
 
 
 
+
   // console.log(accountInfo)
   const accountHandler = useCallback(
     (id) => {
@@ -120,7 +121,6 @@ function SourcingEdit(props) {
     [sourcingOrderForm],
   );
 
-
   const [providerDetailMap, setproviderDetailMap] = useState(new Map());
 
   const [goodsTableDataMap, setGoodsTableDataMap] = useState(new Map());
@@ -152,8 +152,72 @@ function SourcingEdit(props) {
   }
     , [selectedGoods])
 
+
+  /* ---- 表单校验 ---- */
+  const [needValidation, setNeedValidation] = useState(false);
+
+  const errBrandCode = useMemo(() => ( !sourcingOrderForm.brand_code ? "该项为必选项" : null ), [sourcingOrderForm]);
+  const errSubjectCode = useMemo(() => ( !sourcingOrderForm.subject_code ? "该项为必选项" : null ), [sourcingOrderForm]);
+  const errWarehouse = useMemo(() => ( !sourcingOrderForm.warehouse_code ? "该项为必选项" : null ), [sourcingOrderForm]);
+  const errDivision = useMemo(() => ( !sourcingOrderForm.division ? "该项为必选项" : null ), [sourcingOrderForm]);
+  const errBusinessType = useMemo(() => ( !sourcingOrderForm.business_type ? "该项为必选项" : null ), [sourcingOrderForm]);
+  const errProviderId = useMemo(() => ( !selectProviderInfo ? "该项为必选项" : null ), [selectProviderInfo]);
+  const errAccount = useMemo(() => ( !accountInfo ? "该项为必选项" : null ), [accountInfo]);
+  
+  // 采购单验证信息
+  const formInvalid = useMemo(()=>{
+    const _map = new Map();
+    errBrandCode ? _map.set( "errBrandCode", false ) : _map.delete( "errBrandCode" );
+    errSubjectCode ? _map.set( "errSubjectCode", false ) : _map.delete( "errSubjectCode" );
+    errWarehouse ? _map.set( "errWarehouse", false ) : _map.delete( "errWarehouse" );
+    errDivision ? _map.set( "errDivision", false ) : _map.delete( "errDivision" );
+    errBusinessType ? _map.set( "errBusinessType", false ) : _map.delete( "errBusinessType" );
+    errProviderId ? _map.set( "errProviderId", false ) : _map.delete( "errProviderId" );
+    errAccount ? _map.set( "errAccount", false ) : _map.delete( "errAccount" );
+    return _map;
+  }
+  ,[errAccount, errBrandCode, errBusinessType, errDivision, errProviderId, errSubjectCode, errWarehouse])
+
+  const goodsValidation = useMemo(()=>{
+    const _map = new Map();
+    if( selectedGoods.length <= 0 ) {
+      _map.set( "empty", "采购商品不能为空" );
+    }
+    selectedGoods.forEach((item)=>{
+      const { purchase_num = 0, price = 0 } = item;
+      if( Number(purchase_num) <= 0  ){
+        _map.set( "num", "请检查商品采购数量")
+      }
+      if( Number(price) <= 0 ){
+        _map.set( "price", "请检查采购单价" )
+      }
+    })
+    return _map;
+  },
+  [selectedGoods])
+
+  const invalidations = useMemo(() => {
+    const errors = [];
+    if( formInvalid.size > 0 ){
+      errors.push( "采购单信息 验证不通过" )
+    }
+    if( goodsValidation.size > 0 ){
+      errors.push( [...goodsValidation.values()].join("，") )
+    }
+    return errors;
+  }
+    , [formInvalid, goodsValidation])
+
+
+  /* ---- 表单校验 ---- */
+
+
   const saveOrder = useCallback(
     () => {
+      setNeedValidation(true);
+      if( invalidations.length > 0 ){
+        return false;
+      }
       const selectedGoodsFormat = selectedGoods.map(goods => ({
         ...goods,
         purchase_currency: accountInfo.currency,
@@ -412,10 +476,11 @@ function SourcingEdit(props) {
   const handleChange = useCallback(() => setActive(!active), [active]);
 
 
-  const resourceName = {
+  const resourceName = useMemo(() => ({
     singular: '商品',
     plural: '商品',
-  };
+  }),
+    []);
 
   const { selectedResources, allResourcesSelected, handleSelectionChange } = useIndexResourceState(selectedGoods, { resourceIDResolver: (goods) => goods.sku });
 
@@ -528,7 +593,7 @@ function SourcingEdit(props) {
 
       const { query } = treeQueryForm;
 
-      if( !(sku.indexOf( query ) > -1 || store && store.name.toUpperCase().indexOf( query.toUpperCase() ) > -1) ) return null;
+      if (!(sku.indexOf(query) > -1 || store && store.name.toUpperCase().indexOf(query.toUpperCase()) > -1)) return null;
 
       return (
         <IndexTable.Row
@@ -779,6 +844,7 @@ function SourcingEdit(props) {
   /* ---- import excel end ---*/
 
 
+
   return (
     <Page
       breadcrumbs={[
@@ -792,7 +858,28 @@ function SourcingEdit(props) {
       subtitle={order && order.create_message || ""}
       titleMetadata={badgesMarkup}
     >
+
       <Layout>
+        {
+           needValidation && invalidations.length > 0 &&
+          <Layout.Section>
+            <Banner
+              title="请检查表单数据，再进行提交:"
+              status="warning"
+            >
+              <List>
+                {
+                  invalidations.map((desc,idx) => (
+                    <List.Item key={ idx }>
+                      {desc}
+                    </List.Item>
+                  ))
+                }
+              </List>
+            </Banner>
+          </Layout.Section>
+        }
+
         <Layout.Section>
           <Card title="采购单信息" sectioned>
             <Form>
@@ -805,6 +892,8 @@ function SourcingEdit(props) {
                     id="brand_code"
                     onChange={formChangeHandler}
                     placeholder=" "
+                    error={  needValidation && errBrandCode}
+
                   />
                   <Select
                     label="采购方"
@@ -813,6 +902,7 @@ function SourcingEdit(props) {
                     id="subject_code"
                     onChange={formChangeHandler}
                     placeholder=" "
+                    error={  needValidation && errSubjectCode}
                   />
                 </FormLayout.Group>
                 <FormLayout.Group>
@@ -826,6 +916,8 @@ function SourcingEdit(props) {
                       setGoodsTableDataMap(new Map())
                     }}
                     placeholder=" "
+                    error={  needValidation && errProviderId}
+
                   />
                   <Select
                     label="收款账户"
@@ -834,6 +926,7 @@ function SourcingEdit(props) {
                     id="account_id"
                     onChange={accountHandler}
                     placeholder=" "
+                    error={  needValidation && errAccount}
                   />
                 </FormLayout.Group>
                 <FormLayout.Group>
@@ -844,6 +937,8 @@ function SourcingEdit(props) {
                     id="warehouse_code"
                     onChange={formChangeHandler}
                     placeholder=" "
+                    error={  needValidation && errWarehouse}
+
                   />
                   <Select
                     label="事业部"
@@ -852,6 +947,8 @@ function SourcingEdit(props) {
                     id="division"
                     onChange={formChangeHandler}
                     placeholder=" "
+                    error={  needValidation && errDivision}
+
                   />
                 </FormLayout.Group>
                 <FormLayout.Group>
@@ -862,6 +959,8 @@ function SourcingEdit(props) {
                     id="business_type"
                     onChange={formChangeHandler}
                     placeholder=" "
+                    error={  needValidation && errBusinessType}
+
                   />
                   <Select
                     label="平台（选填）"
@@ -1005,14 +1104,14 @@ function SourcingEdit(props) {
           onAction: handleConfirmAddExcelGoods,
           disabled: !excelResolveResult || !excelResolveResult.success || !excelResolveResult.data.length > 0,
         }}
-        secondaryActions={ importModalSecondaryActions }
+        secondaryActions={importModalSecondaryActions}
       >
         {
           (!excelResolveResult || !excelResolveResult.success)
             ?
             <Modal.Section>
               {errorBanner}
-              <br/>
+              <br />
               {uploadTemplate}
             </Modal.Section>
             :
