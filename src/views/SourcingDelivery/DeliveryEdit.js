@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-03-28 17:42:13
+ * @LastEditTime: 2022-03-28 17:47:39
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -442,9 +442,9 @@ function DeliveryEdit(props) {
   /* ---- 表单校验 ---- */
   const [needValidation, setNeedValidation] = useState(false);
 
-  const errshipping_no = useMemo(() => ( !formObject.shipping_no ? "该项为必选项" : null ), [formObject]);
-  const errexpected_days = useMemo(() => ( !formObject.expected_days ? "该项为必选项" : null ), [formObject]);
-  const errbinning_no = useMemo(() => ( !formObject.binning_no ? "该项为必选项" : null ), [formObject]);
+  const errshipping_no = useMemo(() => ( !formObject.shipping_no ? "该项为必填项" : null ), [formObject]);
+  const errexpected_days = useMemo(() => ( !formObject.expected_days ? "该项为必填项" : null ), [formObject]);
+  const errbinning_no = useMemo(() => ( !formObject.binning_no ? "该项为必填项" : null ), [formObject]);
   
   // 采购单验证信息
   const formInvalid = useMemo(()=>{
