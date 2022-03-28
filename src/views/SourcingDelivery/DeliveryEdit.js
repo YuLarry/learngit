@@ -1,12 +1,12 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-03-25 12:17:03
+ * @LastEditTime: 2022-03-28 17:42:13
  * @LastEditors: lijunwei
  * @Description: 
  */
 
-import { Button, Card, DatePicker, Form, FormLayout, Icon, IndexTable, Layout, Modal, Page, Popover, Select, TextField, TextStyle, Thumbnail, useIndexResourceState } from "@shopify/polaris";
+import { Banner, Button, Card, DatePicker, Form, FormLayout, Icon, IndexTable, Layout, List, Modal, Page, Popover, Select, TextField, TextStyle, Thumbnail, useIndexResourceState } from "@shopify/polaris";
 import {
   SearchMinor,
   DeleteMinor,
@@ -150,7 +150,7 @@ function DeliveryEdit(props) {
     ];
     if (!formObject.shipping_price) {
       arr = [
-        { label: "请选择运费币制", value: "" },
+        { label: "", value: "" },
         ...arr
       ]
     }
@@ -439,7 +439,61 @@ function DeliveryEdit(props) {
   }, [active]);
 
 
+  /* ---- 表单校验 ---- */
+  const [needValidation, setNeedValidation] = useState(false);
+
+  const errshipping_no = useMemo(() => ( !formObject.shipping_no ? "该项为必选项" : null ), [formObject]);
+  const errexpected_days = useMemo(() => ( !formObject.expected_days ? "该项为必选项" : null ), [formObject]);
+  const errbinning_no = useMemo(() => ( !formObject.binning_no ? "该项为必选项" : null ), [formObject]);
+  
+  // 采购单验证信息
+  const formInvalid = useMemo(()=>{
+    const _map = new Map();
+    errshipping_no ? _map.set( "errshipping_no", false ) : _map.delete( "errshipping_no" );
+    errexpected_days ? _map.set( "errexpected_days", false ) : _map.delete( "errexpected_days" );
+    errbinning_no ? _map.set( "errbinning_no", false ) : _map.delete( "errbinning_no" );
+    
+    return _map;
+  }
+  ,[errbinning_no, errexpected_days, errshipping_no])
+
+  const goodsValidation = useMemo(()=>{
+    const _map = new Map();
+    if( selectedGoods.length <= 0 ) {
+      _map.set( "empty", "商品明细 不能为空" );
+    }
+    selectedGoods.forEach((item)=>{
+      const { count = 0 } = item;
+      if( Number(count) <= 0 ){
+        _map.set( "num", "请检查 本次发货数量")
+      }
+    })
+    return _map;
+  },
+  [selectedGoods])
+
+  const invalidations = useMemo(() => {
+    const errors = [];
+    if( formInvalid.size > 0 ){
+      errors.push( "物流信息 验证不通过" )
+    }
+    if( goodsValidation.size > 0 ){
+      errors.push( [...goodsValidation.values()].join("，") )
+    }
+    return errors;
+  }
+    , [formInvalid, goodsValidation])
+
+
+  /* ---- 表单校验 ---- */
+
+
+
   const saveDeliveryOrder = useCallback(() => {
+
+    setNeedValidation(true);
+    if( invalidations.length > 0 ) return;
+
     loadingContext.loading(true);
     const shipping_detail = [];
     goodsTableDataMap.forEach((item) => {
@@ -629,6 +683,25 @@ function DeliveryEdit(props) {
       subtitle={detail && detail.create_message || ""}
     >
       <Layout>
+      {
+        needValidation && invalidations.length > 0 && 
+          <Layout.Section>
+            <Banner
+              title="请检查表单数据，再进行提交:"
+              status="warning"
+            >
+              <List>
+                {
+                  invalidations.map((desc,idx) => (
+                    <List.Item key={ idx }>
+                      {desc}
+                    </List.Item>
+                  ))
+                }
+              </List>
+            </Banner>
+          </Layout.Section>
+        }
         <Layout.Section>
 
           <Card title="商品明细">
@@ -677,6 +750,7 @@ function DeliveryEdit(props) {
                     maxLength={50}
                     placeholder="请输入发货单单号"
                     disabled={id}
+                    error={  needValidation && errshipping_no}
                   />
                 </FormLayout.Group>
                 <FormLayout.Group>
@@ -688,6 +762,8 @@ function DeliveryEdit(props) {
                     onChange={handleFormObjectChange}
                     placeholder="0"
                     disabled={id}
+                    error={  needValidation && errexpected_days}
+
                   />
                   <TextField
                     label="物流单号(选填)"
@@ -740,7 +816,7 @@ function DeliveryEdit(props) {
                     onChange={handleFormObjectChange}
                     placeholder="请输入入仓号"
                     disabled={id}
-
+                    error={  needValidation && errbinning_no}
                   />
                 </FormLayout.Group>
 
