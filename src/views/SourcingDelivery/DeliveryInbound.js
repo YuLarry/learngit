@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-21 15:28:14
- * @LastEditTime: 2022-03-28 18:50:13
+ * @LastEditTime: 2022-03-29 19:32:51
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -396,6 +396,7 @@ function DeliveryInbound(props) {
   );
   const textField = (
     <Autocomplete.TextField
+      id={ new Date().getTime() }
       onChange={updateSkuSelectText}
       label="货品SKU"
       value={inputSku}

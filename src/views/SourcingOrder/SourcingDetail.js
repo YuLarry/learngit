@@ -2,7 +2,7 @@
  * @Author: lijunwei
  * @Date: 2022-01-20 16:16:03
 <<<<<<< Updated upstream
- * @LastEditTime: 2022-03-24 15:53:02
+ * @LastEditTime: 2022-03-29 19:28:58
 =======
  * @LastEditTime: 2022-03-28 11:39:37
 >>>>>>> Stashed changes
@@ -97,7 +97,7 @@ function SourcingDetail(props) {
 
           <IndexTable.Cell>
             {
-              (order && order.po_status === PO_STATUS_FINISH)
+              (shippings.length > 0)
                 ?
                 <PopoverNoLink linkListOptions={shippings.map(item => ({ content: item, url: `/delivery/detail/${btoa(encodeURIComponent(item))}` }))} />
                 :
@@ -108,7 +108,7 @@ function SourcingDetail(props) {
 
           <IndexTable.Cell>
             {
-              (order && order.po_status === PO_STATUS_FINISH)
+              (inbounds.length > 0)
                 ?
                 <PopoverNoLink linkListOptions={inbounds.map(item => ({ content: item, url: `/repository/detail/${item}` }))} />
                 : "无"

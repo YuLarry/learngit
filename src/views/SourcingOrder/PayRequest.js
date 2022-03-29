@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-19 17:05:46
- * @LastEditTime: 2022-03-28 17:26:19
+ * @LastEditTime: 2022-03-29 20:09:41
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -177,7 +177,7 @@ function PayRequest(props) {
                 <div style={{ width: "50px", height: "50px" }}>
                   <DropZone
                     id={`file-${index}`}
-                    // accept="image/*"
+                    accept="image/*, application/pdf"
                     // type="image"
                     allowMultiple={false}
                     onDropAccepted={(files) => { console.dir(files[0]); invoiceChangeHandler(index, 'file', files[0]) }}

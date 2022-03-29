@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-03-28 17:47:39
+ * @LastEditTime: 2022-03-29 19:38:58
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -361,10 +361,11 @@ function DeliveryEdit(props) {
     for (const key in tree) {
       if (Object.hasOwnProperty.call(tree, key)) {
         const { provider: { business_name }, warehouse_name, } = tree[key];
+        const _v = treeQueryForm.searchVal.toUpperCase().trim();
         if( 
-          key.toUpperCase().indexOf( treeQueryForm.searchVal.toUpperCase() ) !== -1 ||
-          business_name.toUpperCase().indexOf( treeQueryForm.searchVal.toUpperCase() ) !== -1 ||
-          warehouse_name.toUpperCase().indexOf( treeQueryForm.searchVal.toUpperCase() ) !== -1
+          key.toUpperCase().indexOf( _v ) !== -1 ||
+          business_name.toUpperCase().indexOf( _v ) !== -1 ||
+          warehouse_name.toUpperCase().indexOf( _v ) !== -1
         ){
           rlt[ key ] = tree[key];
         }

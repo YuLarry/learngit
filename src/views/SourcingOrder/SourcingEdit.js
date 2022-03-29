@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-03-28 17:09:21
+ * @LastEditTime: 2022-03-29 20:35:28
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -156,53 +156,53 @@ function SourcingEdit(props) {
   /* ---- 表单校验 ---- */
   const [needValidation, setNeedValidation] = useState(false);
 
-  const errBrandCode = useMemo(() => ( !sourcingOrderForm.brand_code ? "该项为必选项" : null ), [sourcingOrderForm]);
-  const errSubjectCode = useMemo(() => ( !sourcingOrderForm.subject_code ? "该项为必选项" : null ), [sourcingOrderForm]);
-  const errWarehouse = useMemo(() => ( !sourcingOrderForm.warehouse_code ? "该项为必选项" : null ), [sourcingOrderForm]);
-  const errDivision = useMemo(() => ( !sourcingOrderForm.division ? "该项为必选项" : null ), [sourcingOrderForm]);
-  const errBusinessType = useMemo(() => ( !sourcingOrderForm.business_type ? "该项为必选项" : null ), [sourcingOrderForm]);
-  const errProviderId = useMemo(() => ( !selectProviderInfo ? "该项为必选项" : null ), [selectProviderInfo]);
-  const errAccount = useMemo(() => ( !accountInfo ? "该项为必选项" : null ), [accountInfo]);
-  
+  const errBrandCode = useMemo(() => (!sourcingOrderForm.brand_code ? "该项为必选项" : null), [sourcingOrderForm]);
+  const errSubjectCode = useMemo(() => (!sourcingOrderForm.subject_code ? "该项为必选项" : null), [sourcingOrderForm]);
+  const errWarehouse = useMemo(() => (!sourcingOrderForm.warehouse_code ? "该项为必选项" : null), [sourcingOrderForm]);
+  const errDivision = useMemo(() => (!sourcingOrderForm.division ? "该项为必选项" : null), [sourcingOrderForm]);
+  const errBusinessType = useMemo(() => (!sourcingOrderForm.business_type ? "该项为必选项" : null), [sourcingOrderForm]);
+  const errProviderId = useMemo(() => (!selectProviderInfo ? "该项为必选项" : null), [selectProviderInfo]);
+  const errAccount = useMemo(() => (!accountInfo ? "该项为必选项" : null), [accountInfo]);
+
   // 采购单验证信息
-  const formInvalid = useMemo(()=>{
+  const formInvalid = useMemo(() => {
     const _map = new Map();
-    errBrandCode ? _map.set( "errBrandCode", false ) : _map.delete( "errBrandCode" );
-    errSubjectCode ? _map.set( "errSubjectCode", false ) : _map.delete( "errSubjectCode" );
-    errWarehouse ? _map.set( "errWarehouse", false ) : _map.delete( "errWarehouse" );
-    errDivision ? _map.set( "errDivision", false ) : _map.delete( "errDivision" );
-    errBusinessType ? _map.set( "errBusinessType", false ) : _map.delete( "errBusinessType" );
-    errProviderId ? _map.set( "errProviderId", false ) : _map.delete( "errProviderId" );
-    errAccount ? _map.set( "errAccount", false ) : _map.delete( "errAccount" );
+    errBrandCode ? _map.set("errBrandCode", false) : _map.delete("errBrandCode");
+    errSubjectCode ? _map.set("errSubjectCode", false) : _map.delete("errSubjectCode");
+    errWarehouse ? _map.set("errWarehouse", false) : _map.delete("errWarehouse");
+    errDivision ? _map.set("errDivision", false) : _map.delete("errDivision");
+    errBusinessType ? _map.set("errBusinessType", false) : _map.delete("errBusinessType");
+    errProviderId ? _map.set("errProviderId", false) : _map.delete("errProviderId");
+    errAccount ? _map.set("errAccount", false) : _map.delete("errAccount");
     return _map;
   }
-  ,[errAccount, errBrandCode, errBusinessType, errDivision, errProviderId, errSubjectCode, errWarehouse])
+    , [errAccount, errBrandCode, errBusinessType, errDivision, errProviderId, errSubjectCode, errWarehouse])
 
-  const goodsValidation = useMemo(()=>{
+  const goodsValidation = useMemo(() => {
     const _map = new Map();
-    if( selectedGoods.length <= 0 ) {
-      _map.set( "empty", "采购商品不能为空" );
+    if (selectedGoods.length <= 0) {
+      _map.set("empty", "采购商品不能为空");
     }
-    selectedGoods.forEach((item)=>{
+    selectedGoods.forEach((item) => {
       const { purchase_num = 0, price = 0, purchase_price = 0 } = item;
-      if( Number(purchase_num) <= 0 ){
-        _map.set( "num", "请检查商品采购数量")
+      if (Number(purchase_num) <= 0) {
+        _map.set("num", "请检查商品采购数量")
       }
-      if( Number(price) <= 0 && Number( purchase_price ) <= 0  ){
-        _map.set( "price", "请检查采购单价" )
+      if (Number(price) <= 0 && Number(purchase_price) <= 0) {
+        _map.set("price", "请检查采购单价")
       }
     })
     return _map;
   },
-  [selectedGoods])
+    [selectedGoods])
 
   const invalidations = useMemo(() => {
     const errors = [];
-    if( formInvalid.size > 0 ){
-      errors.push( "采购单信息 验证不通过" )
+    if (formInvalid.size > 0) {
+      errors.push("采购单信息 验证不通过")
     }
-    if( goodsValidation.size > 0 ){
-      errors.push( [...goodsValidation.values()].join("，") )
+    if (goodsValidation.size > 0) {
+      errors.push([...goodsValidation.values()].join("，"))
     }
     return errors;
   }
@@ -215,7 +215,7 @@ function SourcingEdit(props) {
   const saveOrder = useCallback(
     () => {
       setNeedValidation(true);
-      if( invalidations.length > 0 ){
+      if (invalidations.length > 0) {
         return false;
       }
       const selectedGoodsFormat = selectedGoods.map(goods => ({
@@ -559,6 +559,7 @@ function SourcingEdit(props) {
                 value={price || purchase_price}
                 prefix={accountInfo && CURRENCY_TYPE[accountInfo.currency]}
                 onChange={(v) => { goodsFormChangeHandler(symb, v, "price") }}
+                onBlur={ () => { goodsFormChangeHandler(symb, Number(price || purchase_price).toFixed(4), "price") } }
               />
             </IndexTable.Cell>
             <IndexTable.Cell>
@@ -586,14 +587,14 @@ function SourcingEdit(props) {
   /* modal tree indextable start */
   const { selectedResources: treeSelectedResources, allResourcesSelected: treeAllResourcesSelected, handleSelectionChange: treeHandleSelectionChange } = useIndexResourceState(tree, { resourceIDResolver: (goods) => goods.id });
 
+  const _query = useMemo(() => treeQueryForm.query.trim(), [treeQueryForm]);
+
   const treeMarkup = useMemo(() => {
     return tree.map((row, idx) => {
       const { id, sku, currency, price, store } = row;
       const { name } = store || {};
 
-      const { query } = treeQueryForm;
-
-      if (!(sku.indexOf(query) > -1 || store && store.name.toUpperCase().indexOf(query.toUpperCase()) > -1)) return null;
+      if (_query && !(sku.indexOf(_query) > -1 || store && store.name.toUpperCase().indexOf(_query.toUpperCase()) > -1)) return null;
 
       return (
         <IndexTable.Row
@@ -619,7 +620,7 @@ function SourcingEdit(props) {
 
     })
 
-  }, [tree, treeQueryForm, treeSelectedResources]);
+  }, [_query, tree, treeSelectedResources]);
 
   /* modal tree indextable start */
   useEffect(() => {
@@ -631,7 +632,7 @@ function SourcingEdit(props) {
 
   const treeQueryFormChangeHandler = useCallback(
     (val, id) => {
-      setTreeQueryForm({ ...treeQueryForm, [id]: val.trim() })
+      setTreeQueryForm({ ...treeQueryForm, [id]: val })
     },
     [treeQueryForm],
   );
@@ -709,7 +710,10 @@ function SourcingEdit(props) {
   const [excelResolveResult, setExcelResolveResult] = useState(null);
 
   useEffect(() => {
-    if (files.length === 0) { setExcelResolveResult(null); return; };
+    if (files.length === 0) {
+      setExcelResolveResult(null);
+      return;
+    };
     readXlsxFile(files[0]).then((rows) => {
       const rlt = fstlnTool.sortAndValidateExcel(
         rows,
@@ -730,8 +734,24 @@ function SourcingEdit(props) {
           },
         }
       )
+      if (rlt === -1) {
+        toastContext.toast({
+          active: true,
+          message: "excel解析出错，请检查文件数据",
+          duration: 1000,
+        })
+        return;
+      }
       setExcelResolveResult(rlt)
+      if (rlt.data.length === 0) {
+        toastContext.toast({
+          active: true,
+          message: "Excel数据解析为空",
+          duration: 1000,
+        })
+      }
     })
+
   }, [accountInfo, files, selectProviderInfo]);
 
   const importModalSecondaryActions = useMemo(() => {
@@ -757,6 +777,7 @@ function SourcingEdit(props) {
         <DropZone
           onDrop={handleDropZoneDrop}
           variableHeight
+          accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         >
           <DropZone.FileUpload actionHint="Accepts excel file" />
         </DropZone>
@@ -792,7 +813,7 @@ function SourcingEdit(props) {
   const modalImportTable = useMemo(() => {
     if (!excelResolveResult || !excelResolveResult.success) { return null };
     const { data } = excelResolveResult;
-    console.log(data);
+    // console.log(data);
     const rows = data.map((item, idx) => {
       const { sku, price, store_code, currency } = item;
 
@@ -832,7 +853,8 @@ function SourcingEdit(props) {
       if (!excelResolveResult || !excelResolveResult.success) return null;
       const arr = [];
       excelResolveResult.data.forEach((goods) => {
-        arr.push([Symbol(goods.sku), { ...goods }])
+        console.log(goods.price);
+        arr.push([Symbol(goods.sku), { ...goods, price: Number(goods.price).toFixed(4) }])
       })
       setGoodsTableDataMap(new Map([...goodsTableDataMap, ...arr]))
       setFiles([]);
@@ -861,7 +883,7 @@ function SourcingEdit(props) {
 
       <Layout>
         {
-           needValidation && invalidations.length > 0 &&
+          needValidation && invalidations.length > 0 &&
           <Layout.Section>
             <Banner
               title="请检查表单数据，再进行提交:"
@@ -869,8 +891,8 @@ function SourcingEdit(props) {
             >
               <List>
                 {
-                  invalidations.map((desc,idx) => (
-                    <List.Item key={ idx }>
+                  invalidations.map((desc, idx) => (
+                    <List.Item key={idx}>
                       {desc}
                     </List.Item>
                   ))
@@ -892,7 +914,7 @@ function SourcingEdit(props) {
                     id="brand_code"
                     onChange={formChangeHandler}
                     placeholder=" "
-                    error={  needValidation && errBrandCode}
+                    error={needValidation && errBrandCode}
 
                   />
                   <Select
@@ -902,7 +924,7 @@ function SourcingEdit(props) {
                     id="subject_code"
                     onChange={formChangeHandler}
                     placeholder=" "
-                    error={  needValidation && errSubjectCode}
+                    error={needValidation && errSubjectCode}
                   />
                 </FormLayout.Group>
                 <FormLayout.Group>
@@ -916,7 +938,7 @@ function SourcingEdit(props) {
                       setGoodsTableDataMap(new Map())
                     }}
                     placeholder=" "
-                    error={  needValidation && errProviderId}
+                    error={needValidation && errProviderId}
 
                   />
                   <Select
@@ -926,7 +948,7 @@ function SourcingEdit(props) {
                     id="account_id"
                     onChange={accountHandler}
                     placeholder=" "
-                    error={  needValidation && errAccount}
+                    error={needValidation && errAccount}
                   />
                 </FormLayout.Group>
                 <FormLayout.Group>
@@ -937,7 +959,7 @@ function SourcingEdit(props) {
                     id="warehouse_code"
                     onChange={formChangeHandler}
                     placeholder=" "
-                    error={  needValidation && errWarehouse}
+                    error={needValidation && errWarehouse}
 
                   />
                   <Select
@@ -947,7 +969,7 @@ function SourcingEdit(props) {
                     id="division"
                     onChange={formChangeHandler}
                     placeholder=" "
-                    error={  needValidation && errDivision}
+                    error={needValidation && errDivision}
 
                   />
                 </FormLayout.Group>
@@ -959,7 +981,7 @@ function SourcingEdit(props) {
                     id="business_type"
                     onChange={formChangeHandler}
                     placeholder=" "
-                    error={  needValidation && errBusinessType}
+                    error={needValidation && errBusinessType}
 
                   />
                   <Select
