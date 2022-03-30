@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-03-28 18:51:52
+ * @LastEditTime: 2022-03-30 18:47:20
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -512,7 +512,7 @@ function RepositoryList(props) {
 
         <div className="f-list-footer">
           <Pagination
-            // label="This is Results"
+            label={`${pageIndex}/${total_pages} 每页${pageSize}条`}
             hasPrevious={pageStatus.hasPrevious}
             onPrevious={() => {
               setPageIndex(pageIndex - 1)

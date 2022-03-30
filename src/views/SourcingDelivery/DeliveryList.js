@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-10 17:15:23
- * @LastEditTime: 2022-03-22 14:15:56
+ * @LastEditTime: 2022-03-30 18:46:56
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -401,7 +401,7 @@ function DeliveryList(props) {
 
         <div className="f-list-footer">
           <Pagination
-            // label="This is Results"
+            label={`${pageIndex}/${total_pages} 每页${pageSize}条`}
             hasPrevious={pageStatus.hasPrevious}
             onPrevious={() => {
               setPageIndex(pageIndex - 1)
