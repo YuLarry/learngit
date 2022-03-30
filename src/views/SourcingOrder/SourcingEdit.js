@@ -1,7 +1,7 @@
 /*
  * @Author: lijunwei
  * @Date: 2022-01-18 16:10:20
- * @LastEditTime: 2022-03-29 20:35:28
+ * @LastEditTime: 2022-03-30 16:56:23
  * @LastEditors: lijunwei
  * @Description: 
  */
@@ -1024,7 +1024,7 @@ function SourcingEdit(props) {
                 { title: '采购单价' },
                 { title: '' },
               ]}
-              emptyState={<TextStyle variation="subdued">{`请先选择「供应商」与「采购单信息」然后才能添加商品`}</TextStyle>}
+              emptyState={<TextStyle variation="subdued">{`请先选择「供应商」与「收款账户」然后才能添加商品`}</TextStyle>}
               selectable={false}
             >
               {rowMarkup}
